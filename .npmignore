@@ -1,0 +1,10 @@
+/build/*
+/build/Release/*
+!/build/Release/actionify.node
+/docs/media/
+/node_modules/
+/src/
+/index.ts
+/package-lock.json
+/TODO.md
+/tsconfig.json

@@ -1,0 +1,416 @@
+export const KeyToVirtualKeyCodeMap = {
+  "backspace": 0x08,
+  "\b": 0x08,
+  "bspace": 0x08,
+  "bs": 0x08,
+
+  "tab": 0x09,
+  "\t": 0x09,
+
+  "enter": 0x0D,
+  "\r": 0x0D,
+  "\n": 0x0D,
+  "\r\n": 0x0D,
+
+  "shift": 0x10,
+
+  "ctrl": 0x11,
+  "control": 0x11,
+
+  "alt": 0x12,
+
+  "pause": 0x13,
+
+  "caps_lock": 0x14,
+  "capsLock": 0x14,
+
+  "esc": 0x1B,
+  "escape": 0x1B,
+
+  "space": 0x20,
+  " ": 0x20,
+
+  "page_up": 0x21,
+  "pageup": 0x21,
+  "pgup": 0x21,
+  "pg_up": 0x21,
+
+  "page_down": 0x22,
+  "pagedown": 0x22,
+  "pgdown": 0x22,
+  "pg_down": 0x22,
+
+  "end": 0x23,
+
+  "home": 0x24,
+
+  "arrow_left": 0x25,
+  "larrow": 0x25,
+
+  "arrow_up": 0x26,
+  "uarrow": 0x26,
+
+  "arrow_right": 0x27,
+  "rarrow": 0x27,
+
+  "arrow_down": 0x28,
+  "darrow": 0x28,
+
+  "select": 0x29,
+
+  "print": 0x2A,
+
+  "execute": 0x2B,
+
+  "print_screen": 0x2C,
+  "printscreen": 0x2C,
+  "screen": 0x2C,
+  "screenshot": 0x2C,
+  "screen_shot": 0x2C,
+
+  "insert": 0x2D,
+  "ins": 0x2D,
+  "inser": 0x2D,
+
+  "delete": 0x2E,
+  "del": 0x2E,
+
+  "help": 0x2F,
+
+  // Numbers 0-9 (above QWERTY)
+
+  "numrow_0": 0x30,
+  "numrow0": 0x30,
+
+  "numrow_1": 0x31,
+  "numrow1": 0x31,
+
+  "numrow_2": 0x32,
+  "numrow2": 0x32,
+
+  "numrow_3": 0x33,
+  "numrow3": 0x33,
+
+  "numrow_4": 0x34,
+  "numrow4": 0x34,
+
+  "numrow_5": 0x35,
+  "numrow5": 0x35,
+
+  "numrow_6": 0x36,
+  "numrow6": 0x36,
+
+  "numrow_7": 0x37,
+  "numrow7": 0x37,
+
+  "numrow_8": 0x38,
+  "numrow8": 0x38,
+
+  "numrow_9": 0x39,
+  "numrow9": 0x39,
+
+  // Letters a-z
+
+  "a": 0x41,
+
+  "b": 0x42,
+
+  "c": 0x43,
+
+  "d": 0x44,
+
+  "e": 0x45,
+
+  "f": 0x46,
+
+  "g": 0x47,
+
+  "h": 0x48,
+
+  "i": 0x49,
+
+  "j": 0x4A,
+
+  "k": 0x4B,
+
+  "l": 0x4C,
+
+  "m": 0x4D,
+
+  "n": 0x4E,
+
+  "o": 0x4F,
+
+  "p": 0x50,
+
+  "q": 0x51,
+
+  "r": 0x52,
+
+  "s": 0x53,
+
+  "t": 0x54,
+
+  "u": 0x55,
+
+  "v": 0x56,
+
+  "w": 0x57,
+
+  "x": 0x58,
+
+  "y": 0x59,
+
+  "z": 0x5A,
+
+  // Function keys F1-F12
+
+  "f1": 0x70,
+
+  "f2": 0x71,
+
+  "f3": 0x72,
+
+  "f4": 0x73,
+
+  "f5": 0x74,
+
+  "f6": 0x75,
+
+  "f7": 0x76,
+
+  "f8": 0x77,
+
+  "f9": 0x78,
+
+  "f10": 0x79,
+
+  "f11": 0x7A,
+
+  "f12": 0x7B,
+
+  // Numpad keys
+
+  "numpad_0": 0x60,
+  "0": 0x60,
+  "numpad0": 0x60,
+
+  "numpad_1": 0x61,
+  "1": 0x61,
+  "numpad1": 0x61,
+
+  "numpad_2": 0x62,
+  "2": 0x62,
+  "numpad2": 0x62,
+
+  "numpad_3": 0x63,
+  "3": 0x63,
+  "numpad3": 0x63,
+
+  "numpad_4": 0x64,
+  "4": 0x64,
+  "numpad4": 0x64,
+
+  "numpad_5": 0x65,
+  "5": 0x65,
+  "numpad5": 0x65,
+
+  "numpad_6": 0x66,
+  "6": 0x66,
+  "numpad6": 0x66,
+
+  "numpad_7": 0x67,
+  "7": 0x67,
+  "numpad7": 0x67,
+
+  "numpad_8": 0x68,
+  "8": 0x68,
+  "numpad8": 0x68,
+
+  "numpad_9": 0x69,
+  "9": 0x69,
+  "numpad9": 0x69,
+
+  "multiply": 0x6A,
+  "*": 0x6A,
+
+  "add": 0x6B,
+  "+": 0x6B,
+
+  "separator": 0x6C,
+
+  "subtract": 0x6D,
+  "-": 0x6D,
+
+  "decimal": 0x6E,
+  ".": 0x6E,
+
+  "divide": 0x6F,
+  "/": 0x6F,
+
+  // Extended function keys (F13-F24)
+
+  "f13": 0x7C,
+
+  "f14": 0x7D,
+
+  "f15": 0x7E,
+
+  "f16": 0x7F,
+
+  "f17": 0x80,
+
+  "f18": 0x81,
+
+  "f19": 0x82,
+
+  "f20": 0x83,
+
+  "f21": 0x84,
+
+  "f22": 0x85,
+
+  "f23": 0x86,
+
+  "f24": 0x87,
+
+  // Lock keys
+
+  "num_lock": 0x90,
+
+  "scroll_lock": 0x91,
+
+  // Modifier keys
+
+  "left_shift": 0xA0,
+  "lshift": 0xA0,
+
+  "right_shift": 0xA1,
+  "rshift": 0xA1,
+
+  "left_control": 0xA2,
+  "lcontrol": 0xA2,
+  "left_ctrl": 0xA2,
+  "lctrl": 0xA2,
+
+  "right_control": 0xA3,
+  "rcontrol": 0xA3,
+  "right_ctrl": 0xA3,
+  "rctrl": 0xA3,
+
+  "left_alt": 0xA4,
+  "lalt": 0xA4,
+
+  "right_alt": 0xA5,
+  "ralt": 0xA5,
+
+  // Browser keys
+
+  "browser_back": 0xA6,
+
+  "browser_forward": 0xA7,
+
+  "browser_refresh": 0xA8,
+
+  "browser_stop": 0xA9,
+
+  "browser_search": 0xAA,
+
+  "browser_favorites": 0xAB,
+
+  "browser_start": 0xAC,
+
+  // Media keys
+
+  "volume_mute": 0xAD,
+
+  "volume_down": 0xAE,
+
+  "volume_up": 0xAF,
+
+  "media_next": 0xB0,
+
+  "media_previous": 0xB1,
+
+  "media_stop": 0xB2,
+
+  "media_play_pause": 0xB3,
+
+  // Launch application keys
+
+  "launch_mail": 0xB4,
+
+  "launch_media_select": 0xB5,
+
+  "launch_app1": 0xB6,
+
+  "launch_app2": 0xB7,
+
+  // OEM (special) keys
+
+  "oem_1": 0xBA,
+  "oem1": 0xBA,
+  ";": 0xBA,
+  "semicolon": 0xBA,
+
+  "oem_plus": 0xBB,
+  "=": 0xBB,
+  "equal": 0xBB,
+
+  "oem_comma": 0xBC,
+  ",": 0xBC,
+  "comma": 0xBC,
+
+  "oem_minus": 0xBD,
+
+  "oem_period": 0xBE,
+
+  "oem_2": 0xBF,
+  "oem2": 0xBF,
+
+  "oem_3": 0xC0,
+  "oem3": 0xC0,
+  "`": 0xC0,
+  "backtick": 0xC0,
+  "backquote": 0xC0,
+
+  "oem_4": 0xDB,
+  "oem4": 0xDB,
+  "[": 0xDB,
+  "left_bracket": 0xDB,
+  "lbracket": 0xDB,
+
+  "oem_5": 0xDC,
+  "oem5": 0xDC,
+  "\\": 0xDC,
+  "backslash": 0xDC,
+
+  "oem_6": 0xDD,
+  "oem6": 0xDD,
+  "]": 0xDD,
+  "right_bracket": 0xDD,
+  "rbracket": 0xDD,
+
+  "oem_7": 0xDE,
+  "oem7": 0xDE,
+  "'": 0xDE,
+  "quote": 0xDE,
+  "single_quote": 0xDE,
+  "apostrophe": 0xDE,
+
+  "oem_102": 0xE2,
+  "<": 0xE2,
+  "open_angle_bracket": 0xE2,
+
+  // Extended keys
+
+  "left_win": 0x5B,
+  "win": 0x5B,
+  "windows": 0x5B,
+
+  "right_win": 0x5C,
+  "rwin": 0x5C,
+  "right_windows": 0x5C,
+
+  "apps": 0x5D,
+} as const;

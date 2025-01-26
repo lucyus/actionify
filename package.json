@@ -1,0 +1,57 @@
+{
+  "name": "@lucyus/actionify",
+  "version": "0.0.0",
+  "description": "A lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, and windows, with additional features like OCR and more.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf lib && node-gyp clean",
+    "build": "npm run clean && node-gyp configure && node-gyp rebuild && tsc -p .",
+    "build:prod": "npm run clean && node-gyp configure --release && node-gyp rebuild --release && tsc -p . --sourceMap false --declarationMap false",
+    "publish": "npm run build:prod && npm publish --access public",
+    "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [`lib/${(process.argv[1] || '').replace('.ts', '.js')}`], { stdio: 'inherit', shell: true });\"",
+    "build:execute": "npm run build && npm run execute",
+    "fastbuild:execute": "tsc -p . && npm run execute",
+    "install": "exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucyus/actionify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lucyus/actionify/issues"
+  },
+  "author": "Lucyus",
+  "license": "Apache-2.0",
+  "keywords": [
+    "automation",
+    "macro",
+    "hotkey",
+    "mouse",
+    "keyboard",
+    "input",
+    "record",
+    "replay",
+    "resize",
+    "screenshot",
+    "clipboard",
+    "pixel",
+    "ocr",
+    "image",
+    "color",
+    "recognition",
+    "windows",
+    "actionify",
+    "lucyus"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1",
+    "node-gyp": "^11.0.0",
+    "node-addon-api": "^8.3.0"
+  },
+  "dependencies": {
+  }
+}
