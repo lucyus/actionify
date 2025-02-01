@@ -125,7 +125,12 @@ You're ready to go! 🚀
     * [2.2. Check if a file is readable](./docs/FILESYSTEM.md#22-check-if-a-file-is-readable)
     * [2.3. Check if a file is writable](./docs/FILESYSTEM.md#23-check-if-a-file-is-writable)
     * [2.4 Check if a file is executable](./docs/FILESYSTEM.md#24-check-if-a-file-is-executable)
-
+* [**X. Lifecycle**](./docs/LIFECYCLE.md)
+  * [1. Execution Flow](./docs/LIFECYCLE.md#1-execution-flow)
+    * [1.1. Loop](./docs/LIFECYCLE.md#11-loop)
+  * [2. Program Control](./docs/LIFECYCLE.md#2-program-control)
+    * [2.1. Exit](./docs/LIFECYCLE.md#21-exit)
+    * [2.2. Restart](./docs/LIFECYCLE.md#22-restart)
 
 ## Compatibility
 
