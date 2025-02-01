@@ -3266,6 +3266,51 @@ export function restart() {
   process.exit(0);
 }
 
+/**
+ * @description Execute the given function a specified number of times.
+ *
+ * @param callback The callback function to execute.
+ * @param iterations The number of times to execute the callback. If unset, the callback will be executed indefinitely.
+ * @returns A promise that resolves when the callback has been executed the specified number of times.
+ *
+ * ---
+ * @example
+ * // Execute the callback 10 times
+ * await loop((index) => console.log(`Hello ${index + 1} times!`), 10);
+ *
+ * // Execute the callback indefinitely
+ * await loop(() => console.log("Hello world!"));
+ */
+export const loop = async (callback: (index: number) => Promise<void> | void, iterations: number = Infinity) => {
+  const iterationsCount = Math.max(0, Math.floor(iterations));
+  if (iterationsCount === 0) {
+    return;
+  }
+  return new Promise<void>((resolve, reject) => {
+    let iteration = 0;
+    const next = async (iteration: number) => {
+      if (iteration < iterationsCount) {
+        try {
+          const result = callback(iteration);
+          if (result instanceof Promise) {
+            await result;
+          }
+          iteration++;
+          // setImmediate is much faster but can impact system performance
+          setTimeout(next.bind(null, iteration), 0);
+        }
+        catch (error) {
+          reject(error);
+        }
+      }
+      else {
+        resolve();
+      }
+    };
+    next(iteration);
+  });
+};
+
 export default {
   input,
   mouse,
@@ -3277,5 +3322,6 @@ export default {
   ai,
   filesystem,
   exit,
-  restart
+  restart,
+  loop
 };
