@@ -1,6 +1,6 @@
 {
   "name": "@lucyus/actionify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, and windows, with additional features like OCR and more.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
