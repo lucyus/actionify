@@ -36,6 +36,7 @@ const {
   unsuppressInputEvents,
   performOcrOnImage,
 } = require('../../build/Release/actionify.node') as typeof import("@napi/actionify");
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -66,6 +67,7 @@ import { Input } from './types/event/input/input/input.type';
 import { InputListener } from './types/event/input/input-listener/input-listener.type';
 import { InputRecorderScope } from './types/event/input/input/input-recorder-scope/input-recorder-scope.type';
 import { Color } from './types/color/color.type';
+
 
 /**
  * @description Clean up C++ resources before exiting.
@@ -3234,4 +3236,46 @@ export const input = {
   }
 };
 
-export default { input, mouse, keyboard, screen, window, clipboard, time, ai, filesystem };
+/**
+ * @description Exit the process with the specified exit code.
+ *
+ * @param exitCode The exit code to exit with.
+ *
+ * ---
+ * @example
+ * // Exit the process with success code 0
+ * exit();
+ *
+ * // Exit the process with error code 1
+ * exit(1);
+ */
+export function exit(exitCode: number = 0) {
+  process.exit(exitCode);
+}
+/**
+ * @description Restart the process in a new detached process.
+ *
+ * ---
+ * @example
+ * // Restart the process
+ * restart();
+ */
+export function restart() {
+  const child = spawn(process.argv[0], process.argv.slice(1), { stdio: "inherit", detached: true });
+  child.unref();
+  process.exit(0);
+}
+
+export default {
+  input,
+  mouse,
+  keyboard,
+  screen,
+  window,
+  clipboard,
+  time,
+  ai,
+  filesystem,
+  exit,
+  restart
+};
