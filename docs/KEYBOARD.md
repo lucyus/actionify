@@ -11,20 +11,37 @@
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Press [A] key
+// Press [A] key immediately
 Actionify.keyboard.down("a");
-// Press [A] key using its virtual key code
+// Press [A] key in 1 second
+await Actionify.keyboard.down("a", { delay: 1000 });
+
+// Press [A] key immediately using its virtual key code
 Actionify.keyboard.down(0x41);
+// Press [A] key in 1 second using its virtual key code
+await Actionify.keyboard.down(0x41, { delay: 1000 });
 
-// Release [A] key
+
+// Release [A] key immediately
 Actionify.keyboard.up("a");
-// Release [A] key using its virtual key code
-Actionify.keyboard.up(0x41);
+// Release [A] key in 1 second
+await Actionify.keyboard.up("a", { delay: 1000 });
 
-// Tap [A] key
+// Release [A] key immediately using its virtual key code
+Actionify.keyboard.up(0x41);
+// Release [A] key in 1 second using its virtual key code
+await Actionify.keyboard.up(0x41, { delay: 1000 });
+
+
+// Tap [A] key immediately
 Actionify.keyboard.tap("a");
-// Tap [A] key using its virtual key code
+// Tap [A] key in 1 second
+await Actionify.keyboard.tap("a", { delay: 1000 });
+
+// Tap [A] key immediately using its virtual key code
 Actionify.keyboard.tap(0x41);
+// Tap [A] key in 1 second using its virtual key code
+await Actionify.keyboard.tap(0x41, { delay: 1000 });
 ```
 
 > See also: [Key](../src/data/key-to-virtual-key-code.map.ts), [Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
@@ -34,11 +51,19 @@ Actionify.keyboard.tap(0x41);
 ```js
 const Actionify = require("@lucyus/actionify");
 
+// Type a multi-line text with unicode characters immediately
 Actionify.keyboard.type(`
 Hello,
 world!
 👋
 `);
+
+// Type a multi-line text with unicode characters over 1 second
+await Actionify.keyboard.type(`
+Hello,
+world!
+👋
+`, { delay: 1000 });
 ```
 
 > See also: [List of Unicode Characters](https://en.wikipedia.org/wiki/List_of_Unicode_characters)
