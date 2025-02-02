@@ -108,14 +108,20 @@ await Actionify.mouse.move(100, 100, {
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Press [Left Mouse Button]
+// Press [Left Mouse Button] immediately
 Actionify.mouse.left.down();
+// Press [Left Mouse Button] in 1 second
+await Actionify.mouse.left.down({ delay: 1000 });
 
-// Release [Left Mouse Button]
+// Release [Left Mouse Button] immediately
 Actionify.mouse.left.up();
+// Release [Left Mouse Button] in 1 second
+await Actionify.mouse.left.up({ delay: 1000 });
 
-// Click [Left Mouse Button]
+// Click [Left Mouse Button] immediately
 Actionify.mouse.left.click();
+// Click [Left Mouse Button] in 1 second
+await Actionify.mouse.left.click({ delay: 1000 });
 ```
 
 ### 1.3. Simulate mouse middle button events
@@ -123,14 +129,20 @@ Actionify.mouse.left.click();
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Press [Middle Mouse Button]
+// Press [Middle Mouse Button] immediately
 Actionify.mouse.middle.down();
+// Press [Middle Mouse Button] in 1 second
+await Actionify.mouse.middle.down({ delay: 1000 });
 
-// Release [Middle Mouse Button]
+// Release [Middle Mouse Button] immediately
 Actionify.mouse.middle.up();
+// Release [Middle Mouse Button] in 1 second
+await Actionify.mouse.middle.up({ delay: 1000 });
 
-// Click [Middle Mouse Button]
+// Click [Middle Mouse Button] immediately
 Actionify.mouse.middle.click();
+// Click [Middle Mouse Button] in 1 second
+await Actionify.mouse.middle.click({ delay: 1000 });
 ```
 
 ### 1.4. Simulate mouse right button events
@@ -138,30 +150,56 @@ Actionify.mouse.middle.click();
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Press [Right Mouse Button]
+// Press [Right Mouse Button] immediately
 Actionify.mouse.right.down();
+// Press [Right Mouse Button] in 1 second
+await Actionify.mouse.right.down({ delay: 1000 });
 
-// Release [Right Mouse Button]
+// Release [Right Mouse Button] immediately
 Actionify.mouse.right.up();
+// Release [Right Mouse Button] in 1 second
+await Actionify.mouse.right.up({ delay: 1000 });
 
-// Click [Right Mouse Button]
+// Click [Right Mouse Button] immediately
 Actionify.mouse.right.click();
+// Click [Right Mouse Button] in 1 second
+await Actionify.mouse.right.click({ delay: 1000 });
 ```
 
 ### 1.5. Simulate mouse scroll events
 
+#### 1.5.1. Simulate mouse scroll down events
+
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Scroll down with system default's wheel deltas (commonly 120)
+// Scroll down immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
 Actionify.mouse.scroll.down();
-// Scroll down 240 wheel deltas (commonly 2 scrolls)
-Actionify.mouse.scroll.down(240);
+// Scroll down in 1 second with system default's wheel deltas (commonly 120)
+await Actionify.mouse.scroll.down(undefined, { delay: 1000 });
 
-// Scroll up with system default's wheel deltas (commonly 120)
+// Scroll down immediately 240 wheel deltas (commonly 2 scrolls)
+Actionify.mouse.scroll.down(240);
+// Scroll down in 1 second 240 wheel deltas (commonly 2 scrolls)
+await Actionify.mouse.scroll.down(240, { delay: 1000 });
+```
+
+> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
+
+#### 1.5.2. Simulate mouse scroll up events
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Scroll up immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
 Actionify.mouse.scroll.up();
-// Scroll up 240 wheel deltas (commonly 2 scrolls)
+// Scroll up in 1 second with system default's wheel deltas (commonly 120)
+await Actionify.mouse.scroll.up(undefined, { delay: 1000 });
+
+// Scroll up immediately 240 wheel deltas (commonly 2 scrolls)
 Actionify.mouse.scroll.up(240);
+// Scroll up in 1 second 240 wheel deltas (commonly 2 scrolls)
+await Actionify.mouse.scroll.up(240, { delay: 1000 });
 ```
 
 > See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
