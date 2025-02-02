@@ -815,7 +815,7 @@ export const mouse = {
     const initialY = mouse.y;
     const newX = x ?? initialX;
     const newY = y ?? initialY;
-    if (steps === 0) {
+    if (steps === 0 || delay === 0) {
       return time.waitAsync(delay, () => setCursorPos(newX, newY));
     }
     //Calculate the line from start to end (the shortest diagonal)
