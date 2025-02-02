@@ -1650,19 +1650,17 @@ export const mouse = {
      *
      * ---
      * @example
-     * // Record all mouse events
-     * const mouseRecordController = mouse.track
-     *   .record()
-     *   .into("/path/to/mouse-record.act")
-     *   .start();
-     * // Stop the mouse recorder
-     * mouseRecordController.stop();
-     *
      * // Replay all mouse events
      * await mouse.track.replay("/path/to/mouse-record.act");
+     *
+     * // Replace all mouse events twice faster
+     * await mouse.track.replay("/path/to/mouse-record.act", { speed: 2 });
+     *
+     * // Replace all mouse events twice slower
+     * await mouse.track.replay("/path/to/mouse-record.act", { speed: 0.5 });
      */
-    async replay(filepath: string) {
-      await input.track.replay(filepath);
+    async replay(filepath: string, options?: { speed?: number }) {
+      await input.track.replay(filepath, options);
     }
   },
 };
@@ -2287,19 +2285,17 @@ export const keyboard = {
      *
      * ---
      * @example
-     * // Record all keyboard events
-     * const keyboardRecordController = keyboard.track
-     *   .record()
-     *   .into("/path/to/keyboard-record.act")
-     *   .start();
-     * // Stop the keyboard recorder
-     * keyboardRecordController.stop();
-     *
      * // Replay all keyboard events
      * await keyboard.track.replay("/path/to/keyboard-record.act");
+     *
+     * // Replay all keyboard events twice faster
+     * await keyboard.track.replay("/path/to/keyboard-record.act", { speed: 2 });
+     *
+     * // Replay all keyboard events twice slower
+     * await keyboard.track.replay("/path/to/keyboard-record.act", { speed: 0.5 });
      */
-    async replay(filepath: string) {
-      await input.track.replay(filepath);
+    async replay(filepath: string, options?: { speed?: number }) {
+      await input.track.replay(filepath, options);
     }
   },
 };
@@ -3228,15 +3224,16 @@ export const input = {
      *
      * ---
      * @example
-     * // Record all keyboard and mouse events
-     * const inputRecordController = input.track
-     *   .record()
-     *   .into("/path/to/input-record.act")
-     *   .start();
      * // Replay all keyboard and mouse events
      * await input.track.replay("/path/to/input-record.act");
+     *
+     * // Replay all keyboard and mouse events twice faster
+     * await input.track.replay("/path/to/input-record.act", { speed: 2 });
+     *
+     * // Replay all keyboard and mouse events twice slower
+     * await input.track.replay("/path/to/input-record.act", { speed: 0.5 });
      */
-    async replay(filepath: string) {
+    async replay(filepath: string, options?: { speed?: number}) {
       if (!filesystem.exists(filepath)) {
         throw new Error(`File does not exist: ${filepath}`);
       }
@@ -3244,6 +3241,7 @@ export const input = {
       let previousIncompleteLine = "";
       let previousTimestamp = Infinity;
       let accumulatedDelay = 0;
+      const speed = Math.max(1e-32, options?.speed ?? 1);
       const promises: Promise<void>[] = [];
       readStream.on("data", (chunk) => {
         const lines = `${previousIncompleteLine}${chunk.toString()}`.split("\n");
@@ -3257,7 +3255,7 @@ export const input = {
           if (isValidLine) {
             const type = lineType === 0 ? "mouse" : "keyboard";
             const timestamp = parseInt(lineColumns[1]);
-            const delay = previousTimestamp < timestamp ? timestamp - previousTimestamp : 0;
+            const delay = previousTimestamp < timestamp ? (Math.round(timestamp / speed) - Math.round(previousTimestamp / speed)) : 0;
             previousTimestamp = timestamp;
             const promise = time.waitAsync(delay + accumulatedDelay, () => {
               if (type === "mouse") {
