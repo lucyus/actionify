@@ -81,6 +81,7 @@ HHOOK mouseHook = nullptr;
 HHOOK keyboardHook = nullptr;
 std::mutex hooksMutex;
 std::atomic<bool> running(false);
+std::condition_variable hooksCondition;
 Napi::ThreadSafeFunction threadSafeJsFunction;
 
 // Queue to store events
@@ -329,6 +330,7 @@ void EventProcessingThread(const Napi::Env& env) {
   }
 
   running = true;
+  hooksCondition.notify_all();
   std::thread nestedThread([env]() {
     while (running) {
       std::unique_lock<std::mutex> lock(queueMutex);
@@ -384,7 +386,10 @@ Napi::Value StartEventListener(const Napi::CallbackInfo& info) {
 
   // Start event processing thread
   std::thread(EventProcessingThread, env).detach();
-
+  {
+    std::unique_lock<std::mutex> lock(hooksMutex);
+    hooksCondition.wait(lock, [] { return running.load(); });
+  }
   return Napi::Boolean::New(env, true);
 }
 
