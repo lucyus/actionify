@@ -280,9 +280,14 @@ keyboardRecorderControl.stop();
 ```js
 const Actionify = require("@lucyus/actionify");
 
-// Replay all input events from an Actionify Track (.act) file.
+// Replay all input events from an Actionify Track (.act) file
 await Actionify.keyboard.track.replay("/path/to/keyboard-record.act");
-// Once the promise is resolved, all recorded inputs have been replayed.
+
+// Replay all input events from an Actionify Track (.act) file twice faster
+await Actionify.keyboard.track.replay("/path/to/keyboard-record.act", { speed: 2 });
+
+// Replay all input events from an Actionify Track (.act) file twice slower
+await Actionify.keyboard.track.replay("/path/to/keyboard-record.act", { speed: 0.5 });
 ```
 
 ---
