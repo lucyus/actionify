@@ -934,35 +934,57 @@ export const mouse = {
     /**
      * @description Simulate mouse left button press.
      *
-     * @returns Synchronously after the mouse left button is pressed.
+     * @returns A promise which resolves after the mouse left button is pressed.
      *
      * ---
      * @example
+     *
+     * // Press [Left Mouse Button] immediately
      * mouse.left.down();
+     *
+     * // Press [Left Mouse Button] in 1 second
+     * await mouse.left.down({ delay: 1000 });
      */
-    down: leftClickDown,
+    async down(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, leftClickDown);
+    },
     /**
      * @description Simulate mouse left button release.
      *
-     * @returns Synchronously after the mouse left button is released.
+     * @returns A promise which resolves after the mouse left button is released.
      *
      * ---
      * @example
+     *
+     * // Release [Left Mouse Button] immediately
      * mouse.left.up();
+     *
+     * // Release [Left Mouse Button] in 1 second
+     * await mouse.left.up({ delay: 1000 });
      */
-    up: leftClickUp,
+    async up(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, leftClickUp);
+    },
     /**
      * @description Simulate mouse left button click (press then release).
      *
-     * @returns Synchronously after the mouse left button is clicked.
+     * @returns A promise which resolves after the mouse left button is clicked.
      *
      * ---
      * @example
+     *
+     * // Click [Left Mouse Button] immediately
      * mouse.left.click();
+     *
+     * // Click [Left Mouse Button] in 1 second
+     * await mouse.left.click({ delay: 1000 });
      */
-    click() {
-      this.down();
-      this.up();
+    async click(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / 2;
+      await this.down({ delay });
+      await this.up({ delay });
     }
   },
   /**
@@ -972,35 +994,57 @@ export const mouse = {
     /**
      * @description Simulate mouse middle button press.
      *
-     * @returns Synchronously after the mouse middle button is pressed.
+     * @returns A promise which resolves after the mouse middle button is pressed.
      *
      * ---
      * @example
+     *
+     * // Press [Middle Mouse Button] immediately
      * mouse.middle.down();
+     *
+     * // Press [Middle Mouse Button] in 1 second
+     * await mouse.middle.down({ delay: 1000 });
      */
-    down: mouseWheelPressDown,
+    async down(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, mouseWheelPressDown);
+    },
     /**
      * @description Simulate mouse middle button release.
      *
-     * @returns Synchronously after the mouse middle button is released.
+     * @returns A promise which resolves after the mouse middle button is released.
      *
      * ---
      * @example
+     *
+     * // Release [Middle Mouse Button] immediately
      * mouse.middle.up();
+     *
+     * // Release [Middle Mouse Button] in 1 second
+     * await mouse.middle.up({ delay: 1000 });
      */
-    up: mouseWheelPressUp,
+    async up(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, mouseWheelPressUp);
+    },
     /**
      * @description Simulate mouse middle button click (press then release).
      *
-     * @returns Synchronously after the mouse middle button is clicked.
+     * @returns A promise which resolves after the mouse middle button is clicked.
      *
      * ---
      * @example
+     *
+     * // Click [Middle Mouse Button] immediately
      * mouse.middle.click();
+     *
+     * // Click [Middle Mouse Button] in 1 second
+     * await mouse.middle.click({ delay: 1000 });
      */
-    click() {
-      this.down();
-      this.up();
+    async click(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / 2;
+      await this.down({ delay });
+      await this.up({ delay });
     }
   },
   /**
@@ -1010,35 +1054,57 @@ export const mouse = {
     /**
      * @description Simulate mouse right button press.
      *
-     * @returns Synchronously after the mouse right button is pressed.
+     * @returns A promise which resolves after the mouse right button is pressed.
      *
      * ---
      * @example
+     *
+     * // Press [Right Mouse Button] immediately
      * mouse.right.down();
+     *
+     * // Press [Right Mouse Button] in 1 second
+     * await mouse.right.down({ delay: 1000 });
      */
-    down: rightClickDown,
+    async down(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, rightClickDown);
+    },
     /**
      * @description Simulate mouse right button release.
      *
-     * @returns Synchronously after the mouse right button is released.
+     * @returns A promise which resolves after the mouse right button is released.
      *
      * ---
      * @example
+     *
+     * // Release [Right Mouse Button] immediately
      * mouse.right.up();
+     *
+     * // Release [Right Mouse Button] in 1 second
+     * await mouse.right.up({ delay: 1000 });
      */
-    up: rightClickUp,
+    async up(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, rightClickUp);
+    },
     /**
      * @description Simulate mouse right button click (press then release).
      *
-     * @returns Synchronously after the mouse right button is clicked.
+     * @returns A promise which resolves after the mouse right button is clicked.
      *
      * ---
      * @example
+     *
+     * // Click [Right Mouse Button] immediately
      * mouse.right.click();
+     *
+     * // Click [Right Mouse Button] in 1 second
+     * await mouse.right.click({ delay: 1000 });
      */
-    click() {
-      this.down();
-      this.up();
+    async click(options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / 2;
+      await this.down({ delay });
+      await this.up({ delay });
     }
   },
   /**
@@ -1049,24 +1115,52 @@ export const mouse = {
      * @description Simulate mouse wheel scroll down.
      *
      * @param scrollAmount Amount of wheel deltas to scroll down. If unset, the default mouse wheel scroll amount will be used.
-     * @returns Synchronously after the mouse wheel is scrolled down.
+     * @returns A promise which resolves after the mouse wheel is scrolled down.
      *
      * ---
      * @example
+     *
+     * // Scroll down 120 wheel deltas (commonly 1 scroll) immediately
      * mouse.scroll.down();
+     *
+     * // Scroll down 240 wheel deltas (commonly 2 scrolls) immediately
+     * mouse.scroll.down(240);
+     *
+     * // Scroll down 120 wheel deltas (commonly 1 scroll) in 1 second
+     * await mouse.scroll.down(undefined, { delay: 1000 });
+     *
+     * // Scroll down 240 wheel deltas (commonly 2 scrolls) in 1 second
+     * await mouse.scroll.down(240, { delay: 1000 });
      */
-    down: mouseWheelScrollDown,
+    async down(scrollAmount?: number, options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, () => mouseWheelScrollDown(scrollAmount));
+    },
     /**
      * @description Simulate mouse wheel scroll up.
      *
      * @param scrollAmount Amount of wheel deltas to scroll up. If unset, the default mouse wheel scroll amount will be used.
-     * @returns Synchronously after the mouse wheel is scrolled up.
+     * @returns A promise which resolves after the mouse wheel is scrolled up.
      *
      * ---
      * @example
+     *
+     * // Scroll up 120 wheel deltas (commonly 1 scroll) immediately
      * mouse.scroll.up();
+     *
+     * // Scroll up 240 wheel deltas (commonly 2 scrolls) immediately
+     * mouse.scroll.up(240);
+     *
+     * // Scroll up 120 wheel deltas (commonly 1 scroll) in 1 second
+     * await mouse.scroll.up(undefined, { delay: 1000 });
+     *
+     * // Scroll up 240 wheel deltas (commonly 2 scrolls) in 1 second
+     * await mouse.scroll.up(240, { delay: 1000 });
      */
-    up: mouseWheelScrollUp
+    async up(scrollAmount?: number, options?: { delay?: number }) {
+      const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+      return time.waitAsync(delay, () => mouseWheelScrollUp(scrollAmount));
+    }
   },
   /**
    * @description Mouse events listening manager.
@@ -1581,86 +1675,128 @@ export const keyboard = {
    * @description Press a single keyboard key.
    *
    * @param keyCodeOrKey The keyboard {@link https://learn.microsoft.com/fr-fr/windows/win32/inputdev/virtual-key-codes virtual key code} or key name to press.
-   * @returns Synchronously after the key is pressed.
+   * @returns A promise which resolves after the key is pressed.
    *
    * ---
    * @example
-   * // Press the "A" key using its key name
+   * // Press the "A" key immediately using its key name
    * keyboard.down("a");
-   * // Press the "A" key using its virtual key code
+   *
+   * // Press the "A" key in 1 second using its key name
+   * await keyboard.down("a", { delay: 1000 });
+   *
+   * // Press the "A" key immediately using its virtual key code
    * keyboard.down(0x41);
+   *
+   * // Press the "A" key in 1 second using its virtual key code
+   * await keyboard.down(0x41, { delay: 1000 });
    */
-  down<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>) {
+  async down<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>, options?: { delay?: number }) {
+    const delay = Math.max(0, Math.floor(options?.delay ?? 0));
     if (typeof keyCodeOrKey === 'number') {
       const keyCode = keyCodeOrKey;
-      return keyPressDown(keyCode);
+      return time.waitAsync(delay, () => keyPressDown(keyCode));
     }
     const key = keyCodeOrKey;
     const keyCode = KeyMapper.toKeyCode(key);
-    return keyPressDown(keyCode);
+    return time.waitAsync(delay, () => keyPressDown(keyCode));
   },
   /**
    * @description Release a single keyboard key.
    *
    * @param keyCodeOrKey The keyboard {@link https://learn.microsoft.com/fr-fr/windows/win32/inputdev/virtual-key-codes virtual key code} or key name to release.
-   * @returns Synchronously after the key is released.
+   * @returns A promise which resolves after the key is released.
    *
    * ---
    * @example
-   * // Release the "A" key using its key name
+   * // Release the "A" key immediately using its key name
    * keyboard.up("a");
-   * // Release the "A" key using its virtual key code
+   *
+   * // Release the "A" key in 1 second using its key name
+   * await keyboard.up("a", { delay: 1000 });
+   *
+   * // Release the "A" key immediately using its virtual key code
    * keyboard.up(0x41);
+   *
+   * // Release the "A" key in 1 second using its virtual key code
+   * await keyboard.up(0x41, { delay: 1000 });
    */
-  up<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>) {
+  async up<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>, options?: { delay?: number }) {
+    const delay = Math.max(0, Math.floor(options?.delay ?? 0));
     if (typeof keyCodeOrKey === 'number') {
       const keyCode = keyCodeOrKey;
-      return keyPressUp(keyCode);
+      return time.waitAsync(delay, () => keyPressUp(keyCode));
     }
     const key = keyCodeOrKey;
     const keyCode = KeyMapper.toKeyCode(key);
-    return keyPressUp(keyCode);
+    return time.waitAsync(delay, () => keyPressUp(keyCode));
   },
   /**
    * @description Tap (press then release) a single keyboard key.
    *
    * @param keyCodeOrKey The keyboard {@link https://learn.microsoft.com/fr-fr/windows/win32/inputdev/virtual-key-codes virtual key code} or key name to tap.
-   * @returns Synchronously after the key is tapped.
+   * @returns A promise which resolves after the key is tapped.
    *
    * ---
    * @example
-   * // Tap the "A" key using its key name
+   * // Tap the "A" key immediately using its key name
    * keyboard.tap("a");
-   * // Tap the "A" key using its virtual key code
+   *
+   * // Tap the "A" key in 1 second using its key name
+   * await keyboard.tap("a", { delay: 1000 });
+   *
+   * // Tap the "A" key immediately using its virtual key code
    * keyboard.tap(0x41);
+   *
+   * // Tap the "A" key in 1 second using its virtual key code
+   * await keyboard.tap(0x41, { delay: 1000 });
    */
-  tap<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>) {
-    this.down(keyCodeOrKey);
-    this.up(keyCodeOrKey);
+  async tap<T extends string>(keyCodeOrKey: number | CaseInsensitiveKey<T>, options?: { delay?: number }) {
+    const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / 2;
+    await this.down(keyCodeOrKey, { delay });
+    await this.up(keyCodeOrKey, { delay });
   },
   /**
    * @description Type the given text.
    *
    * @param text The text to type.
-   * @returns Synchronously after the text has been typed.
+   * @returns A promise which resolves after the text has been typed.
    *
    * ---
    * @example
-   * // Type "Hello, world!"
+   * // Type "Hello, world!" immediately
    * keyboard.type("Hello, world!");
-   * // Type a multi-line text with unicode characters
+   *
+   * // Type a multi-line text with unicode characters immediately
    * keyboard.type(`
    * Hello,
    * world!
    * 👋
    * `);
+   *
+   * // Type "Hello, world!" over 1 second
+   * await keyboard.type("Hello, world!", { delay: 1000 });
+   *
+   * // Type a multi-line text with unicode characters over 1 second
+   * await keyboard.type(`
+   * Hello,
+   * world!
+   * 👋
+   * `, { delay: 1000 });
    */
-  type(text: string) {
+  async type(text: string, options?: { delay?: number }) {
     const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" }); // requires ES2022 support
     const characters = Array.from(segmenter.segment(text)).map((segmentData) => segmentData.segment);
+    const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / characters.length;
+    let accumulatedDelay = 0;
+    const promises = [];
     for (const character of characters) {
-      typeUnicodeCharacter(character);
+      accumulatedDelay += delay;
+      promises.push(
+        time.waitAsync(accumulatedDelay, () => typeUnicodeCharacter(character))
+      );
     }
+    await Promise.all(promises);
   },
   /**
    * @description Keyboard events listening manager.
