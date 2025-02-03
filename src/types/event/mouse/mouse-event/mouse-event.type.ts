@@ -8,4 +8,5 @@ export type MouseEvent = {
   input: MouseInput;
   state: MouseState;
   position: Position;
+  isSuppressed: boolean;
 };

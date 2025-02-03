@@ -6,4 +6,5 @@ export type KeyboardEvent = {
   timestamp: number;
   input: KeyInput;
   state: KeyState;
+  isSuppressed: boolean;
 };
