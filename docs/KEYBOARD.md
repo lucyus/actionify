@@ -80,12 +80,12 @@ world!
 const Actionify = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
-  .all((keyboardEvent) => {
+  .all((keyboardEvent, listenerController) => {
     // A keyboard event occurred, do something here...
   });
 ```
 
-> See also: [KeyboardListener](../src/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts)
+> See also: [KeyboardListener](../src/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [KeyboardListenerController](../src/types/event/keyboard/keyboard-listener-controller/keyboard-listener-controller.type.ts)
 
 ##### 2.1.1.2. Start listening to specific keyboard events
 
@@ -95,7 +95,7 @@ const Actionify = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
   .on("a", "b")
-  .listen((keyboardEvent) => {
+  .listen((keyboardEvent, listenerController) => {
     // A keyboard event occurred among [A] or [B], do something here...
   });
 ```
@@ -106,12 +106,12 @@ const Actionify = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
   .on("lctrl down", "a down")
-  .listen((keyboardEvent) => {
+  .listen((keyboardEvent, listenerController) => {
     // Both [Left Control] and [A] are pressed, do something here...
   });
 ```
 
-> See also: [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts)
+> See also: [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [KeyboardListenerController](../src/types/event/keyboard/keyboard-listener-controller/keyboard-listener-controller.type.ts)
 
 #### 2.1.2. Pause a keyboard listener
 

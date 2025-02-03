@@ -240,12 +240,12 @@ Actionify.mouse.y = 100;
 const Actionify = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
-  .all((mouseEvent) => {
+  .all((mouseEvent, listenerController) => {
     // A mouse event occurred, do something here...
   });
 ```
 
-> See also: [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts)
+> See also: [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [MouseListenerController](../src/types/event/mouse/mouse-listener-controller/mouse-listener-controller.type.ts)
 
 ##### 3.1.1.2. Start listening to specific mouse events
 
@@ -255,7 +255,7 @@ const Actionify = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
   .on("left", "right")
-  .listen((mouseEvent) => {
+  .listen((mouseEvent, listenerController) => {
     // A mouse event occurred among [Left Mouse Button] or [Right Mouse Button], do something here...
   });
 ```
@@ -266,12 +266,12 @@ const Actionify = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
   .on("left down", "right down")
-  .listen((mouseEvent) => {
+  .listen((mouseEvent, listenerController) => {
     // Both [Left Mouse Button] and [Right Mouse Button] are pressed, do something here...
   });
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts)
+> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [MouseListenerController](../src/types/event/mouse/mouse-listener-controller/mouse-listener-controller.type.ts)
 
 #### 3.1.2. Pause a mouse listener
 

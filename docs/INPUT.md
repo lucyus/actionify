@@ -16,12 +16,12 @@
 const Actionify = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
-  .all((event) => {
+  .all((event, listenerController) => {
     // An input event occurred, do something here...
   });
 ```
 
-> See also: [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts)
+> See also: [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [InputListenerController](../src/types/event/input/input-listener-controller/input-listener-controller.type.ts)
 
 ##### 1.1.1.2. Start listening to specific mouse/keyboard events
 
@@ -31,7 +31,7 @@ const Actionify = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
   .on("a", "b", "left", "right")
-  .listen((event) => {
+  .listen((event, listenerController) => {
     // An input event occurred among [A], [B], [Left Mouse Button] or [Right Mouse Button], do something here...
   });
 ```
@@ -42,12 +42,12 @@ const Actionify = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
   .on("lctrl down", "left down")
-  .listen((event) => {
+  .listen((event, listenerController) => {
     // Both [Left Control] and [Left Mouse Button] are pressed, do something here...
   });
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts)
+> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [InputListenerController](../src/types/event/input/input-listener-controller/input-listener-controller.type.ts)
 
 #### 1.1.2. Pause an input listener
 
