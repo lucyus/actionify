@@ -70,6 +70,7 @@ struct RawEvent {
   int y;
   int keyCode;
   uint64_t timestamp;
+  bool isSuppressed;
 };
 
 // =============================================================================
@@ -212,16 +213,16 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
       }
 
       if (!input.empty()) {
-        {
-          RawEvent event = { "mouse", input, state, mouseStruct->pt.x, mouseStruct->pt.y, 0, Now() };
-          std::lock_guard<std::mutex> lock(queueMutex);
-          eventQueue.push(event);
-          queueCondition.notify_all();
-        }
         bool isInputSuppressed = false;
         {
           std::lock_guard<std::mutex> lock(suppressedKeysMutex);
           isInputSuppressed = suppressedMouseKeys.find(mappedInput) != suppressedMouseKeys.end() && suppressedMouseKeys[mappedInput].find(mappedState) != suppressedMouseKeys[mappedInput].end();
+        }
+        {
+          RawEvent event = { "mouse", input, state, mouseStruct->pt.x, mouseStruct->pt.y, 0, Now(), isInputSuppressed };
+          std::lock_guard<std::mutex> lock(queueMutex);
+          eventQueue.push(event);
+          queueCondition.notify_all();
         }
         if (isInputSuppressed) {
           return 1;
@@ -254,16 +255,16 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
       if (!state.empty()) {
         int vkCode = static_cast<int>(kbStruct->vkCode);
-        {
-          RawEvent event = { "keyboard", "", state, 0, 0, vkCode, Now() };
-          std::lock_guard<std::mutex> lock(queueMutex);
-          eventQueue.push(event);
-          queueCondition.notify_all();
-        }
         bool isInputSuppressed = false;
         {
           std::lock_guard<std::mutex> lock(suppressedKeysMutex);
           isInputSuppressed = suppressedKeyboardKeys.find(vkCode) != suppressedKeyboardKeys.end() && suppressedKeyboardKeys[vkCode].find(mappedState) != suppressedKeyboardKeys[vkCode].end();
+        }
+        {
+          RawEvent event = { "keyboard", "", state, 0, 0, vkCode, Now(), isInputSuppressed };
+          std::lock_guard<std::mutex> lock(queueMutex);
+          eventQueue.push(event);
+          queueCondition.notify_all();
         }
         if (isInputSuppressed) {
           return 1;
@@ -290,6 +291,7 @@ Napi::Object BuildEventObject(const Napi::Env& env, const RawEvent& event) {
     eventObj.Set(Napi::String::New(env, "input"), Napi::Number::New(env, event.keyCode));
     eventObj.Set(Napi::String::New(env, "state"), Napi::String::New(env, event.state));
   }
+  eventObj.Set(Napi::String::New(env, "isSuppressed"), Napi::Boolean::New(env, event.isSuppressed));
   return eventObj;
 }
 
