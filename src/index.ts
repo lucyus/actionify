@@ -239,7 +239,7 @@ const mainListener = async (currentEvent: InputEvent) => {
       // Run eligible mouse listeners
       for (const mouseListener of mouseListenersToRun) {
         mouseListener.isRunning = true;
-        const result = mouseListener.listener(currentMouseEvent);
+        const result = mouseListener.listener(currentMouseEvent, mouseListener.controller);
         if (result instanceof Promise) {
           result
             .catch((error) => { console.error(error) })
@@ -253,7 +253,7 @@ const mainListener = async (currentEvent: InputEvent) => {
       // Run eligible input listeners
       for (const inputListener of inputListenersToRun) {
         inputListener.isRunning = true;
-        const result = inputListener.listener(currentMouseEvent);
+        const result = inputListener.listener(currentMouseEvent, inputListener.controller);
         if (result instanceof Promise) {
           result
             .catch((error) => { console.error(error) })
@@ -452,7 +452,7 @@ const mainListener = async (currentEvent: InputEvent) => {
       // Run eligible keyboard listeners
       for (const keyboardListener of keyboardListenersToRun) {
         keyboardListener.isRunning = true;
-        const result = keyboardListener.listener(currentKeyboardEvent)
+        const result = keyboardListener.listener(currentKeyboardEvent, keyboardListener.controller);
         if (result instanceof Promise) {
           result
             .catch((error) => { console.error(error); })
@@ -466,7 +466,7 @@ const mainListener = async (currentEvent: InputEvent) => {
       // Run eligible input listeners
       for (const inputListener of inputListenersToRun) {
         inputListener.isRunning = true;
-        const result = inputListener.listener(currentKeyboardEvent)
+        const result = inputListener.listener(currentKeyboardEvent, inputListener.controller);
         if (result instanceof Promise) {
           result
             .catch((error) => { console.error(error); })
@@ -1175,13 +1175,13 @@ export const mouse = {
      * ---
      * @example
      * // Listen to all mouse left and right button events
-     * mouse.events.on("left", "right").listen((mouseEvent) => console.log(mouseEvent));
+     * mouse.events.on("left", "right").listen((mouseEvent, listenerController) => console.log(mouseEvent));
      *
      * // Listen to all mouse left button press events
-     * mouse.events.on("left down").listen((mouseEvent) => console.log(mouseEvent));
+     * mouse.events.on("left down").listen((mouseEvent, listenerController) => console.log(mouseEvent));
      *
      * // Listen to all mouse movement events
-     * mouse.events.on("move").listen((mouseEvent) => console.log(mouseEvent));
+     * mouse.events.on("move").listen((mouseEvent, listenerController) => console.log(mouseEvent));
      */
     on(...actions: Array<`${MouseInput}` | `${MouseInput} ${MouseState}`>) {
       const mouseActions: MouseAction[] = actions.map((action) => {
@@ -1200,18 +1200,37 @@ export const mouse = {
          * ---
          * @example
          * // Start listening to all mouse left and right button events
-         * mouse.events.on("left", "right").listen((mouseEvent) => console.log(mouseEvent));
+         * mouse.events.on("left", "right").listen((mouseEvent, listenerController) => console.log(mouseEvent));
          *
          * // Start listening to all mouse left button press events
-         * mouse.events.on("left down").listen((mouseEvent) => console.log(mouseEvent));
+         * mouse.events.on("left down").listen((mouseEvent, listenerController) => console.log(mouseEvent));
          *
          * // Start listening to all mouse movement events
-         * mouse.events.on("move").listen((mouseEvent) => console.log(mouseEvent));
+         * mouse.events.on("move").listen((mouseEvent, listenerController) => console.log(mouseEvent));
          */
         listen(mouseListener: MouseListener) {
           const mouseListenerScope: MouseListenerScope = {
             type: "mouse",
             listener: mouseListener,
+            controller: {
+              pause() {
+                mouseListenerScope.isPaused = true;
+                return this;
+              },
+              resume() {
+                mouseListenerScope.isPaused = false;
+                return this;
+              },
+              off() {
+                const listenerIndex = mouseListeners.findIndex((mouseListener) => mouseListener.listener === mouseListenerScope.listener);
+                if (listenerIndex !== -1) {
+                  mouseListeners.splice(listenerIndex, 1);
+                }
+                if (shouldStopMainListener()) {
+                  stopEventListener();
+                }
+              }
+            },
             when: mouseActions,
             isPaused: false,
             isRunning: false
@@ -1220,70 +1239,7 @@ export const mouse = {
           if (shouldStartMainListener()) {
             startEventListener(mainListener);
           }
-          return {
-            /**
-             * @description Pause the active mouse listener.
-             *
-             * @returns The mouse listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all mouse movement events
-             * const mouseListenerController = mouse.events
-             *   .on("move")
-             *   .listen((mouseEvent) => console.log(mouseEvent));
-             * // Pause the mouse movement listener
-             * mouseListenerController.pause();
-             */
-            pause() {
-              mouseListenerScope.isPaused = true;
-              return this;
-            },
-            /**
-             * @description Resume the paused mouse listener.
-             *
-             * @returns The mouse listener controller.
-             *
-             * ---
-             * @example
-             * // Resume the mouse movement listener
-             * const mouseListenerController = mouse.events
-             *   .on("move")
-             *   .listen((mouseEvent) => console.log(mouseEvent));
-             * // Pause the mouse movement listener
-             * mouseListenerController.pause();
-             * // Resume the mouse movement listener
-             * mouseListenerController.resume();
-             */
-            resume() {
-              mouseListenerScope.isPaused = false;
-              return this;
-            },
-            /**
-             * @description Stop and detach the mouse listener.
-             *
-             * @returns The mouse listener controller.
-             *
-             * ---
-             * @example
-             * // Stop and detach the mouse movement listener
-             * const mouseListenerController = mouse.events
-             *   .on("move")
-             *   .listen((mouseEvent) => console.log(mouseEvent));
-             * // Stop and detach the mouse movement listener
-             * mouseListenerController.off();
-             */
-            off() {
-              const listenerIndex = mouseListeners.findIndex((mouseListener) => mouseListener.listener === mouseListenerScope.listener);
-              if (listenerIndex !== -1) {
-                mouseListeners.splice(listenerIndex, 1);
-              }
-              if (shouldStopMainListener()) {
-                stopEventListener();
-              }
-              return this;
-            }
-          };
+          return mouseListenerScope.controller;
         }
       };
     },
@@ -1295,7 +1251,7 @@ export const mouse = {
      *
      * ---
      * @example
-     * mouse.events.all((mouseEvent) => console.log(mouseEvent));
+     * mouse.events.all((mouseEvent, listenerController) => console.log(mouseEvent));
      */
     all(mouseListener: MouseListener) {
       return this.on().listen(mouseListener);
@@ -1308,7 +1264,7 @@ export const mouse = {
      * ---
      * @example
      * // Listen to all mouse left and right button events
-     * const mouseListener = (mouseEvent) => console.log(mouseEvent);
+     * const mouseListener = (mouseEvent, listenerController) => console.log(mouseEvent);
      * const mouseListenerController = mouse.events
      *   .on("left", "right")
      *   .listen(mouseListener);
@@ -1331,7 +1287,7 @@ export const mouse = {
      * ---
      * @example
      * // Listen to all mouse left and right button events
-     * const mouseListener = (mouseEvent) => console.log(mouseEvent);
+     * const mouseListener = (mouseEvent, listenerController) => console.log(mouseEvent);
      * const mouseListenerController = mouse.events
      *   .on("left", "right")
      *   .listen(mouseListener);
@@ -1352,7 +1308,7 @@ export const mouse = {
      * ---
      * @example
      * // Listen to all mouse left and right button events
-     * const mouseListener = (mouseEvent) => console.log(mouseEvent);
+     * const mouseListener = (mouseEvent, listenerController) => console.log(mouseEvent);
      * const mouseListenerController = mouse.events
      *   .on("left", "right")
      *   .listen(mouseListener);
@@ -1809,10 +1765,10 @@ export const keyboard = {
      * ---
      * @example
      * // Listen to all keyboard "A" and "B" key events
-     * keyboard.events.on("a", "b").listen((keyboardEvent) => console.log(keyboardEvent));
+     * keyboard.events.on("a", "b").listen((keyboardEvent, listenerController) => console.log(keyboardEvent));
      *
      * // Listen to all keyboard "A" key down events
-     * keyboard.events.on("a down").listen((keyboardEvent) => console.log(keyboardEvent));
+     * keyboard.events.on("a down").listen((keyboardEvent, listenerController) => console.log(keyboardEvent));
      */
     on(...actions: Array<`${CaseInsensitiveKey<any>}` | `${CaseInsensitiveKey<any>} ${KeyState}`>) {
       const keyboardActions: KeyAction[] = actions.map((action) => {
@@ -1831,15 +1787,34 @@ export const keyboard = {
          * ---
          * @example
          * // Listen to all keyboard "A" and "B" key events
-         * keyboard.events.on("a", "b").listen((keyboardEvent) => console.log(keyboardEvent));
+         * keyboard.events.on("a", "b").listen((keyboardEvent, listenerController) => console.log(keyboardEvent));
          *
          * // Listen to all keyboard "A" key down events
-         * keyboard.events.on("a down").listen((keyboardEvent) => console.log(keyboardEvent));
+         * keyboard.events.on("a down").listen((keyboardEvent, listenerController) => console.log(keyboardEvent));
          */
         listen(keyboardListener: KeyboardListener) {
           const keyboardListenerScope: KeyboardListenerScope = {
             type: "keyboard",
             listener: keyboardListener,
+            controller: {
+              pause() {
+                keyboardListenerScope.isPaused = true;
+                return this;
+              },
+              resume() {
+                keyboardListenerScope.isPaused = false;
+                return this;
+              },
+              off() {
+                const listenerIndex = keyboardListeners.findIndex((keyboardListener) => keyboardListener.listener === keyboardListenerScope.listener);
+                if (listenerIndex !== -1) {
+                  keyboardListeners.splice(listenerIndex, 1);
+                }
+                if (shouldStopMainListener()) {
+                  stopEventListener();
+                }
+              }
+            },
             when: keyboardActions,
             isPaused: false,
             isRunning: false
@@ -1848,92 +1823,7 @@ export const keyboard = {
           if (shouldStartMainListener()) {
             startEventListener(mainListener);
           }
-          return {
-            /**
-             *
-             * @returns The keyboard listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard "A" and "B" key events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a", "b")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Pause the keyboard listener
-             * keyboardListenerController.pause();
-             *
-             * // Listen to all keyboard "A" key down events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a down")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Pause the keyboard listener
-             * keyboardListenerController.pause();
-             */
-            pause() {
-              keyboardListenerScope.isPaused = true;
-              return this;
-            },
-            /**
-             * @description Resume the paused keyboard listener.
-             *
-             * @returns The keyboard listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard "A" and "B" key events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a", "b")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Pause the keyboard listener
-             * keyboardListenerController.pause();
-             * // Resume the keyboard listener
-             * keyboardListenerController.resume();
-             *
-             * // Listen to all keyboard "A" key down events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a down")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Pause the keyboard listener
-             * keyboardListenerController.pause();
-             * // Resume the keyboard listener
-             * keyboardListenerController.resume();
-             */
-            resume() {
-              keyboardListenerScope.isPaused = false;
-              return this;
-            },
-            /**
-             * @description Stop and detach the keyboard listener.
-             *
-             * @returns The keyboard listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard "A" and "B" key events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a", "b")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Stop the keyboard listener
-             * keyboardListenerController.off();
-             *
-             * // Listen to all keyboard "A" key down events
-             * const keyboardListenerController = keyboard.events
-             *   .on("a down")
-             *   .listen((keyboardEvent) => console.log(keyboardEvent));
-             * // Stop the keyboard listener
-             * keyboardListenerController.off();
-             */
-            off() {
-              const listenerIndex = keyboardListeners.findIndex((keyboardListener) => keyboardListener.listener === keyboardListenerScope.listener);
-              if (listenerIndex !== -1) {
-                keyboardListeners.splice(listenerIndex, 1);
-              }
-              if (shouldStopMainListener()) {
-                stopEventListener();
-              }
-              return this;
-            }
-          };
+          return keyboardListenerScope.controller;
         }
       };
     },
@@ -1945,10 +1835,10 @@ export const keyboard = {
      *
      * ---
      * @example
-     * keyboard.events.all((keyboardEvent) => console.log(keyboardEvent));
+     * keyboard.events.all((keyboardEvent, listenerController) => console.log(keyboardEvent));
      */
     all(keyboardListener: KeyboardListener) {
-      this.on().listen(keyboardListener);
+      return this.on().listen(keyboardListener);
     },
     /**
      * @description Resume the given paused keyboard listener.
@@ -1958,7 +1848,7 @@ export const keyboard = {
      * ---
      * @example
      * // Listen to all keyboard "A" and "B" key events
-     * const keyboardListener = (keyboardEvent) => console.log(keyboardEvent);
+     * const keyboardListener = (keyboardEvent, listenerController) => console.log(keyboardEvent);
      * const keyboardListenerController = keyboard.events
      *   .on("a", "b")
      *   .listen(keyboardListener);
@@ -1981,7 +1871,7 @@ export const keyboard = {
      * ---
      * @example
      * // Listen to all keyboard "A" and "B" key events
-     * const keyboardListener = (keyboardEvent) => console.log(keyboardEvent);
+     * const keyboardListener = (keyboardEvent, listenerController) => console.log(keyboardEvent);
      * const keyboardListenerController = keyboard.events
      *   .on("a", "b")
      *   .listen(keyboardListener);
@@ -2002,7 +1892,7 @@ export const keyboard = {
      * ---
      * @example
      * // Listen to all keyboard "A" and "B" key events
-     * const keyboardListener = (keyboardEvent) => console.log(keyboardEvent);
+     * const keyboardListener = (keyboardEvent, listenerController) => console.log(keyboardEvent);
      * const keyboardListenerController = keyboard.events
      *   .on("a", "b")
      *   .listen(keyboardListener);
@@ -2670,10 +2560,10 @@ export const input = {
      * ---
      * @example
      * // Listen to all keyboard and mouse events
-     * input.events.on().listen((inputEvent) => console.log(inputEvent));
+     * input.events.all((inputEvent, listenerController) => console.log(inputEvent));
      *
      * // Listen to all keyboard "A" key and mouse "left" button events
-     * input.events.on("a", "left").listen((inputEvent) => console.log(inputEvent));
+     * input.events.on("a", "left").listen((inputEvent, listenerController) => console.log(inputEvent));
      */
     on(...actions: Array<`${MouseInput}` | `${MouseInput} ${MouseState}` | `${CaseInsensitiveKey<any>}` | `${CaseInsensitiveKey<any>} ${KeyState}`>) {
       const inputActions: InputAction[] = actions.map((action) => {
@@ -2700,14 +2590,33 @@ export const input = {
          * ---
          * @example
          * // Listen to all keyboard and mouse events
-         * input.events.on().listen((inputEvent) => console.log(inputEvent));
+         * input.events.all((inputEvent, listenerController) => console.log(inputEvent));
          *
          * // Listen to all keyboard "A" key and mouse "left" button events
-         * input.events.on("a", "left").listen((inputEvent) => console.log(inputEvent));
+         * input.events.on("a", "left").listen((inputEvent, listenerController) => console.log(inputEvent));
          */
         listen(inputListener: InputListener) {
           const inputListenerScope: InputListenerScope = {
             listener: inputListener,
+            controller: {
+              pause() {
+                inputListenerScope.isPaused = true;
+                return this;
+              },
+              resume() {
+                inputListenerScope.isPaused = false;
+                return this;
+              },
+              off() {
+                const listenerIndex = inputListeners.findIndex((inputListener) => inputListener.listener === inputListenerScope.listener);
+                if (listenerIndex !== -1) {
+                  inputListeners.splice(listenerIndex, 1);
+                }
+                if (shouldStopMainListener()) {
+                  stopEventListener();
+                }
+              }
+            },
             when: inputActions,
             isPaused: false,
             isRunning: false
@@ -2716,93 +2625,7 @@ export const input = {
           if (shouldStartMainListener()) {
             startEventListener(mainListener);
           }
-          return {
-            /**
-             * @description Pause the active input listener.
-             *
-             * @returns The input listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard and mouse events
-             * const inputListenerController = input.events
-             *   .on()
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Pause the input listener
-             * inputListenerController.pause();
-             *
-             * // Listen to all keyboard "A" key and mouse "left" button events
-             * const inputListenerController = input.events
-             *   .on("a", "left")
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Pause the input listener
-             * inputListenerController.pause();
-             */
-            pause() {
-              inputListenerScope.isPaused = true;
-              return this;
-            },
-            /**
-             * @description Resume the paused input listener.
-             *
-             * @returns The input listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard and mouse events
-             * const inputListenerController = input.events
-             *   .on()
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Pause the input listener
-             * inputListenerController.pause();
-             * // Resume the input listener
-             * inputListenerController.resume();
-             *
-             * // Listen to all keyboard "A" key and mouse "left" button events
-             * const inputListenerController = input.events
-             *   .on("a", "left")
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Pause the input listener
-             * inputListenerController.pause();
-             * // Resume the input listener
-             * inputListenerController.resume();
-             */
-            resume() {
-              inputListenerScope.isPaused = false;
-              return this;
-            },
-            /**
-             * @description Stop and detach the input listener.
-             *
-             * @returns The input listener controller.
-             *
-             * ---
-             * @example
-             * // Listen to all keyboard and mouse events
-             * const inputListenerController = input.events
-             *   .on()
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Stop and detach the input listener
-             * inputListenerController.off();
-             *
-             * // Listen to all keyboard "A" key and mouse "left" button events
-             * const inputListenerController = input.events
-             *   .on("a", "left")
-             *   .listen((inputEvent) => console.log(inputEvent));
-             * // Stop and detach the input listener
-             * inputListenerController.off();
-             */
-            off() {
-              const listenerIndex = inputListeners.findIndex((inputListener) => inputListener.listener === inputListenerScope.listener);
-              if (listenerIndex !== -1) {
-                inputListeners.splice(listenerIndex, 1);
-              }
-              if (shouldStopMainListener()) {
-                stopEventListener();
-              }
-              return this;
-            }
-          };
+          return inputListenerScope.controller;
         }
       };
     },
@@ -2814,10 +2637,10 @@ export const input = {
      *
      * ---
      * @example
-     * input.events.all((inputEvent) => console.log(inputEvent));
+     * input.events.all((inputEvent, listenerController) => console.log(inputEvent));
      */
     all(inputListener: InputListener) {
-      this.on().listen(inputListener);
+      return this.on().listen(inputListener);
     },
     /**
      * @description Resume the given paused input listener.
@@ -2827,10 +2650,9 @@ export const input = {
      * ---
      * @example
      * // Listen to all keyboard and mouse events
-     * const inputListener = (inputEvent) => console.log(inputEvent);
+     * const inputListener = (inputEvent, listenerController) => console.log(inputEvent);
      * const inputListenerController = input.events
-     *   .on()
-     *   .listen(inputListener);
+     *   .all(inputListener);
      * // Pause the input listener
      * input.events.pause(inputListener);
      * // Resume the input listener
@@ -2850,10 +2672,9 @@ export const input = {
      * ---
      * @example
      * // Listen to all keyboard and mouse events
-     * const inputListener = (inputEvent) => console.log(inputEvent);
+     * const inputListener = (inputEvent, listenerController) => console.log(inputEvent);
      * const inputListenerController = input.events
-     *   .on()
-     *   .listen(inputListener);
+     *   .all(inputListener);
      * // Pause the input listener
      * input.events.pause(inputListener);
      */
@@ -2871,10 +2692,9 @@ export const input = {
      * ---
      * @example
      * // Listen to all keyboard and mouse events
-     * const inputListener = (inputEvent) => console.log(inputEvent);
+     * const inputListener = (inputEvent, listenerController) => console.log(inputEvent);
      * const inputListenerController = input.events
-     *   .on()
-     *   .listen(inputListener);
+     *   .all(inputListener);
      * // Stop and detach the input listener
      * input.events.off(inputListener);
      */
