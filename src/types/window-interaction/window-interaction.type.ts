@@ -79,10 +79,23 @@ export type WindowInteraction = {
    * @example
    * // Get running windows
    * const windows = window.list();
-   * // Move the first window to a specific position
+   *
+   * // Instant movement of the first window
    * windows[0].move(100, 100);
+   *
+   * // Delayed movement (in milliseconds) of the first window
+   * await windows[0].move(100, 100, { delay: 1000 });
+   *
+   * // Linear motion over time of the first window
+   * await windows[0].move(100, 100, { motion: "linear", delay: 1000, steps: "auto" });
+   *
+   * // Arc motion over time of the first window
+   * await windows[0].move(100, 100, { motion: "arc", delay: 1000, steps: "auto" });
+   *
+   * // Wave motion over time of the first window
+   * await windows[0].move(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  move: (x?: number, y?: number) => boolean;
+  move: (x?: number, y?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<void> | Promise<void[]>;
   /**
    * @description Resize the window dimensions to a given size.
    *
