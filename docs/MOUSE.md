@@ -55,7 +55,7 @@ await Actionify.mouse.move(100, 100, {
 });
 ```
 
-* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay`, whichever is smallest.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
@@ -74,7 +74,7 @@ await Actionify.mouse.move(100, 100, {
 });
 ```
 
-* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay`, whichever is smallest.
 * `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
 * `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
 
@@ -96,7 +96,7 @@ await Actionify.mouse.move(100, 100, {
 });
 ```
 
-* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay`, whichever is smallest.
 * `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
 * `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
 * `frequency` is positive number that controls the wave frequency. If unset or set to `"auto"`, `frequency` default to the maximum value between `2` and the closest even number below `steps / 60`.
