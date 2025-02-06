@@ -1811,7 +1811,11 @@ Napi::Value CloseWindowWrapper(const Napi::CallbackInfo& info) {
 
 // Function to change the position of a window
 bool SetWindowPosition(HWND hwnd, int x, int y) {
-  return SetWindowPos(hwnd, nullptr, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE) != 0;
+  RECT windowBorder = { 0, 0, 0, 0 };
+  AdjustWindowRectEx(&windowBorder, GetWindowLong(hwnd, GWL_STYLE), FALSE, GetWindowLong(hwnd, GWL_EXSTYLE));
+  int adjustedX = x + windowBorder.left;
+  int adjustedY = y;
+  return SetWindowPos(hwnd, nullptr, adjustedX, adjustedY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE) != 0;
 }
 
 // N-API wrapper function to change the position of a window
