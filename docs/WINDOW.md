@@ -40,6 +40,8 @@ const window = Actionify.window.get("myapp.exe");
 
 ### 2.1. Move a window
 
+#### 2.1.1. Instantaneous window movements
+
 ```js
 const Actionify = require("@lucyus/actionify");
 
@@ -58,6 +60,100 @@ windows[0].move(undefined, 100);
 // Move the first window to its current position
 windows[0].move();
 ```
+
+> If the window is minimized, it is restored before being moved.
+
+> See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
+
+#### 2.1.2. Delayed window movements
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Move the first window to (100, 100) in 1 second
+await windows[0].move(100, 100, {
+  delay: 1000
+});
+```
+
+> If the window is minimized, it is restored before being moved.
+
+> See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
+
+#### 2.1.3. Delayed linear motion window movements
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Move the first window to (100, 100) in a linear motion over 1 second
+await windows[0].move(100, 100, {
+  motion: "linear",
+  delay: 1000,
+  steps: "auto"
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+
+> If the window is minimized, it is restored before being moved.
+
+> See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
+
+#### 2.1.4. Delayed arc motion window movements
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Move the first window to (100, 100) in an arc motion over 1 second
+await windows[0].move(100, 100, {
+  motion: "arc",
+  delay: 1000,
+  steps: "auto",
+  curvinessFactor: 0.25,
+  mirror: false
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+* `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
+* `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
+
+> If the window is minimized, it is restored before being moved.
+
+> See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
+
+#### 2.1.5. Delayed wave motion window movements
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Move the first window to (100, 100) in an arc motion over 1 second
+await windows[0].move(100, 100, {
+  motion: "wave",
+  delay: 1000,
+  steps: "auto",
+  curvinessFactor: 0.25,
+  mirror: false,
+  frequency: "auto"
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions.
+* `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
+* `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
+* `frequency` is positive number that controls the wave frequency. If unset or set to `"auto"`, `frequency` default to the maximum value between `2` and the closest even number below `steps / 60`.
 
 > If the window is minimized, it is restored before being moved.
 
