@@ -2320,8 +2320,9 @@ export const window = {
           const curvinessFactor = options?.curvinessFactor !== undefined ? Math.max(0, Math.min(1, options.curvinessFactor)) : 0.1618;
           const mirror = options?.mirror ?? false;
           const motion = options?.motion ?? "linear";
-          const initialX = this.position.x;
-          const initialY = this.position.y;
+          const thisWindow = window.get(this.id);
+          const initialX = thisWindow ? thisWindow.position.x : this.position.x;
+          const initialY = thisWindow ? thisWindow.position.y : this.position.y;
           const newX = x ?? initialX;
           const newY = y ?? initialY;
           if (steps === 0 || delay === 0) {
