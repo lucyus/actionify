@@ -823,7 +823,7 @@ export const mouse = {
     const dy = newY - initialY;
     // Chebyshev distance
     const intermediatePositions = Math.max(0, Math.max(Math.abs(dx), Math.abs(dy)) - 1);
-    const possibleSteps = Math.min(steps, intermediatePositions);
+    const possibleSteps = Math.min(delay, steps, intermediatePositions);
     const preciseDelayPerPosition = delay / (possibleSteps + 1);
     const delayPerPosition = Math.floor(preciseDelayPerPosition);
     let accumulatedDelay = 0;
@@ -2332,7 +2332,7 @@ export const window = {
           const dy = newY - initialY;
           // Chebyshev distance
           const intermediatePositions = Math.max(0, Math.max(Math.abs(dx), Math.abs(dy)) - 1);
-          const possibleSteps = Math.min(steps, intermediatePositions);
+          const possibleSteps = Math.min(delay, steps, intermediatePositions);
           const preciseDelayPerPosition = delay / (possibleSteps + 1);
           const delayPerPosition = Math.floor(preciseDelayPerPosition);
           let accumulatedDelay = 0;
