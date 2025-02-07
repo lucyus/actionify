@@ -17,9 +17,14 @@ Actionify.loop((index) => {
 });
 
 // Finite loop (100 iterations in this example)
-Actionify.loop((index) => {
+await Actionify.loop((index) => {
     // Perform any repetitive task without blocking the rest of the program
 }, 100);
+
+// Finite loop with custom condition (90% chance to continue in this example)
+await Actionify.loop((index) => {
+    // Perform any repetitive task without blocking the rest of the program
+}, (index) => Math.random() < 0.9);
 ```
 
 ## 2. Program Control
