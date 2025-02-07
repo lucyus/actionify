@@ -161,6 +161,8 @@ await windows[0].move(100, 100, {
 
 ### 2.2. Resize a window
 
+#### 2.2.1. Instantaneous window resizing
+
 ```js
 const Actionify = require("@lucyus/actionify");
 
@@ -180,7 +182,93 @@ windows[0].resize(undefined, 200);
 windows[0].resize();
 ```
 
-> If the window is minimized, it is restored before being resized.
+> If the window is minimized or maximized, it is restored before being resized.
+
+#### 2.2.2. Delayed window resizing
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Resize the first window with Width = 400 pixels and Height = 200 pixels in 1 second
+await windows[0].resize(400, 200, {
+  delay: 1000
+});
+```
+
+> If the window is minimized or maximized, it is restored before being resized.
+
+#### 2.2.3. Delayed linear motion window resizing
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Resize the first window with Width = 400 pixels and Height = 200 pixels in a linear motion over 1 second
+await windows[0].resize(400, 200, {
+  motion: "linear",
+  delay: 1000,
+  steps: "auto"
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay / 16.6`, whichever is smallest. `16.6` resizes per second (60Hz) prevent system overload from excessive window repaints.
+
+> If the window is minimized or maximized, it is restored before being resized.
+
+#### 2.2.4. Delayed arc motion window resizing
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Resize the first window with Width = 400 pixels and Height = 200 pixels in an arc motion over 1 second
+await windows[0].resize(400, 200, {
+  motion: "arc",
+  delay: 1000,
+  steps: "auto",
+  curvinessFactor: 0.25,
+  mirror: false
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay / 16.6`, whichever is smallest. `16.6` resizes per second (60Hz) prevent system overload from excessive window repaints.
+* `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
+* `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
+
+> If the window is minimized or maximized, it is restored before being resized.
+
+#### 2.2.5. Delayed wave motion window resizing
+
+```js
+const Actionify = require("@lucyus/actionify");
+
+// Get running windows
+const windows = Actionify.window.list();
+
+// Resize the first window with Width = 400 pixels and Height = 200 pixels in a wave motion over 1 second
+await windows[0].resize(400, 200, {
+  motion: "wave",
+  delay: 1000,
+  steps: "auto",
+  curvinessFactor: 0.25,
+  mirror: false,
+  frequency: "auto"
+});
+```
+
+* `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay / 16.6`, whichever is smallest. `16.6` resizes per second (60Hz) prevent system overload from excessive window repaints.
+* `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
+* `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
+* `frequency` is positive number that controls the wave frequency. If unset or set to `"auto"`, `frequency` default to the maximum value between `2` and the closest even number below `steps / 60`.
+
+> If the window is minimized or maximized, it is restored before being resized.
 
 ### 2.3. Minimize a window
 
