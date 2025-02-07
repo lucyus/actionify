@@ -857,8 +857,8 @@ export const mouse = {
           const controlY = midpointY + curvinessFactor * distance * perpendicularY * direction;
           for (let offset = 1; offset < possibleSteps + 1; offset++) {
             const t = offset / (possibleSteps + 1);
-            let intermediateX = Math.round((1 - t) * (1 - t) * initialX + 2 * (1 - t) * t * controlX + t * t * newX);
-            let intermediateY = Math.round((1 - t) * (1 - t) * initialY + 2 * (1 - t) * t * controlY + t * t * newY);
+            const intermediateX = Math.round((1 - t) * (1 - t) * initialX + 2 * (1 - t) * t * controlX + t * t * newX);
+            const intermediateY = Math.round((1 - t) * (1 - t) * initialY + 2 * (1 - t) * t * controlY + t * t * newY);
             const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
             promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setCursorPos(intermediateX, intermediateY)));
             accumulatedDelay += correctedDelayPerPosition;
@@ -2367,8 +2367,8 @@ export const window = {
                 const controlY = midpointY + curvinessFactor * distance * perpendicularY * direction;
                 for (let offset = 1; offset < possibleSteps + 1; offset++) {
                   const t = offset / (possibleSteps + 1);
-                  let intermediateX = Math.round((1 - t) * (1 - t) * initialX + 2 * (1 - t) * t * controlX + t * t * newX);
-                  let intermediateY = Math.round((1 - t) * (1 - t) * initialY + 2 * (1 - t) * t * controlY + t * t * newY);
+                  const intermediateX = Math.round((1 - t) * (1 - t) * initialX + 2 * (1 - t) * t * controlX + t * t * newX);
+                  const intermediateY = Math.round((1 - t) * (1 - t) * initialY + 2 * (1 - t) * t * controlY + t * t * newY);
                   const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
                   promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowPosition(this.id, intermediateX, intermediateY)));
                   accumulatedDelay += correctedDelayPerPosition;
@@ -2495,8 +2495,8 @@ export const window = {
                 const controlY = averageHeight + curvinessFactor * distance * perpendicularY * direction;
                 for (let offset = 1; offset < possibleSteps + 1; offset++) {
                   const t = offset / (possibleSteps + 1);
-                  let intermediateWidth = Math.round((1 - t) * (1 - t) * initialWidth + 2 * (1 - t) * t * controlX + t * t * newWidth);
-                  let intermediateHeight = Math.round((1 - t) * (1 - t) * initialHeight + 2 * (1 - t) * t * controlY + t * t * newHeight);
+                  const intermediateWidth = Math.round((1 - t) * (1 - t) * initialWidth + 2 * (1 - t) * t * controlX + t * t * newWidth);
+                  const intermediateHeight = Math.round((1 - t) * (1 - t) * initialHeight + 2 * (1 - t) * t * controlY + t * t * newHeight);
                   const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
                   promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateWidth, intermediateHeight)));
                   accumulatedDelay += correctedDelayPerPosition;
