@@ -61,7 +61,7 @@ windows[0].move(undefined, 100);
 windows[0].move();
 ```
 
-> If the window is minimized, it is restored before being moved.
+> If the window is minimized or maximized, it is restored before being moved.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
@@ -79,7 +79,7 @@ await windows[0].move(100, 100, {
 });
 ```
 
-> If the window is minimized, it is restored before being moved.
+> If the window is minimized or maximized, it is restored before being moved.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
@@ -101,7 +101,7 @@ await windows[0].move(100, 100, {
 
 * `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay`, whichever is smallest.
 
-> If the window is minimized, it is restored before being moved.
+> If the window is minimized or maximized, it is restored before being moved.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
@@ -127,7 +127,7 @@ await windows[0].move(100, 100, {
 * `curvinessFactor` is a value between `0` and `1` that controls the curve's motion amplitude. `curvinessFactor` default to `0.1618`.
 * `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
 
-> If the window is minimized, it is restored before being moved.
+> If the window is minimized or maximized, it is restored before being moved.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
@@ -155,7 +155,7 @@ await windows[0].move(100, 100, {
 * `mirror` enables symmetrical motion relative to the start and end segment. `mirror` default to `false`.
 * `frequency` is positive number that controls the wave frequency. If unset or set to `"auto"`, `frequency` default to the maximum value between `2` and the closest even number below `steps / 60`.
 
-> If the window is minimized, it is restored before being moved.
+> If the window is minimized or maximized, it is restored before being moved.
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system)
 
