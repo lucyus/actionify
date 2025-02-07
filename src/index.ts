@@ -2438,7 +2438,7 @@ export const window = {
           return Promise.all(promises);
         },
         resize(width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
-          if (this.isMinimized) {
+          if (this.isMinimized || this.isMaximized) {
             this.restore();
           }
           const steps = options?.steps === "auto" ? Infinity : Math.max(0, Math.round(options?.steps ?? 0));
