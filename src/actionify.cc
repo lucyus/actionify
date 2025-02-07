@@ -1811,10 +1811,18 @@ Napi::Value CloseWindowWrapper(const Napi::CallbackInfo& info) {
 
 // Function to change the position of a window
 bool SetWindowPosition(HWND hwnd, int x, int y) {
-  RECT windowBorder = { 0, 0, 0, 0 };
-  AdjustWindowRectEx(&windowBorder, GetWindowLong(hwnd, GWL_STYLE), FALSE, GetWindowLong(hwnd, GWL_EXSTYLE));
-  int adjustedX = x + windowBorder.left;
-  int adjustedY = y;
+  RECT windowOuterRect;
+  GetWindowRect(hwnd, &windowOuterRect);
+  RECT windowInnerRect;
+  int offsetX = 0;
+  int offsetY = 0;
+  HRESULT hr = DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &windowInnerRect, sizeof(windowInnerRect));
+  if (SUCCEEDED(hr)) {
+    offsetX = windowOuterRect.left - windowInnerRect.left;
+    offsetY = windowOuterRect.top - windowInnerRect.top;
+  }
+  int adjustedX = x + offsetX;
+  int adjustedY = y + offsetY;
   return SetWindowPos(hwnd, nullptr, adjustedX, adjustedY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE) != 0;
 }
 
@@ -1842,7 +1850,19 @@ Napi::Value SetWindowPositionWrapper(const Napi::CallbackInfo& info) {
 
 // Function to change the dimensions of a window
 bool SetWindowDimensions(HWND hwnd, int width, int height) {
-  return SetWindowPos(hwnd, nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE) != 0;
+  RECT windowOuterRect;
+  GetWindowRect(hwnd, &windowOuterRect);
+  RECT windowInnerRect;
+  int offsetX = 0;
+  int offsetY = 0;
+  HRESULT hr = DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &windowInnerRect, sizeof(windowInnerRect));
+  if (SUCCEEDED(hr)) {
+    offsetX = std::abs(windowOuterRect.left - windowInnerRect.left) + std::abs(windowOuterRect.right - windowInnerRect.right);
+    offsetY =  std::abs(windowOuterRect.top - windowInnerRect.top) + std::abs(windowOuterRect.bottom - windowInnerRect.bottom);
+  }
+  int adjustedWidth = width + offsetX;
+  int adjustedHeight = height + offsetY;
+  return SetWindowPos(hwnd, nullptr, 0, 0, adjustedWidth, adjustedHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE) != 0;
 }
 
 // N-API wrapper function to change the dimensions of a window
