@@ -139,7 +139,7 @@ const Actionify = require("@lucyus/actionify");
 // Get running windows
 const windows = Actionify.window.list();
 
-// Move the first window to (100, 100) in an arc motion over 1 second
+// Move the first window to (100, 100) in a wave motion over 1 second
 await windows[0].move(100, 100, {
   motion: "wave",
   delay: 1000,
