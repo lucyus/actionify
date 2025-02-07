@@ -107,10 +107,23 @@ export type WindowInteraction = {
    * @example
    * // Get running windows
    * const windows = window.list();
-   * // Resize the first window to a specific size
-   * windows[0].resize(400, 200);
+   *
+   * // Instant resize of the first window
+   * windows[0].resize(100, 100);
+   *
+   * // Delayed resize (in milliseconds) of the first window
+   * await windows[0].resize(100, 100, { delay: 1000 });
+   *
+   * // Linear resize motion over time of the first window
+   * await windows[0].resize(100, 100, { motion: "linear", delay: 1000, steps: "auto" });
+   *
+   * // Arc resize motion over time of the first window
+   * await windows[0].resize(100, 100, { motion: "arc", delay: 1000, steps: "auto" });
+   *
+   * // Wave resize motion over time of the first window
+   * await windows[0].resize(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  resize: (width?: number, height?: number) => boolean;
+  resize: (width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<void> | Promise<void[]>;
   /**
    * @description Move the window to the foreground.
    * If the window is initially minimized, it will be restored first.

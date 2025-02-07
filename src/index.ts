@@ -2437,11 +2437,133 @@ export const window = {
           promises.push(time.waitAsync(delay, () => setWindowPosition(this.id, newX, newY)));
           return Promise.all(promises);
         },
-        resize(width?: number, height?: number) {
+        resize(width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
           if (this.isMinimized) {
             this.restore();
           }
-          return setWindowDimensions(this.id, width ?? this.dimensions.width, height ?? this.dimensions.height);
+          const steps = options?.steps === "auto" ? Infinity : Math.max(0, Math.round(options?.steps ?? 0));
+          const delay = Math.max(0, Math.floor(options?.delay ?? 0));
+          const curvinessFactor = options?.curvinessFactor !== undefined ? Math.max(0, Math.min(1, options.curvinessFactor)) : 0.1618;
+          const mirror = options?.mirror ?? false;
+          const motion = options?.motion ?? "linear";
+          const thisWindow = window.get(this.id);
+          const initialWidth = thisWindow ? thisWindow.dimensions.width : this.dimensions.width;
+          const initialHeight = thisWindow ? thisWindow.dimensions.height : this.dimensions.height;
+          const newWidth = width ?? initialWidth;
+          const newHeight = height ?? initialHeight;
+          if (steps === 0 || delay === 0) {
+            return time.waitAsync(delay, () => setWindowDimensions(this.id, newWidth, newHeight));
+          }
+          //Calculate the line from start to end (the shortest diagonal)
+          const dx = newWidth - initialWidth;
+          const dy = newHeight - initialHeight;
+          // Chebyshev distance
+          const intermediatePositions = Math.max(0, Math.max(Math.abs(dx), Math.abs(dy)) - 1);
+          const possibleSteps = Math.min(Math.floor(delay / 16.6), steps, intermediatePositions);
+          console.log(possibleSteps);
+          const preciseDelayPerPosition = delay / (possibleSteps + 1);
+          const delayPerPosition = Math.floor(preciseDelayPerPosition);
+          let accumulatedDelay = 0;
+          const promises: Promise<void>[] = [];
+          if (possibleSteps > 0) {
+            const correctionDelayOccurrence = preciseDelayPerPosition !== delayPerPosition ? Math.ceil(1 / (preciseDelayPerPosition - delayPerPosition)) : Infinity;
+            const directionX = Math.sign(dx);
+            const directionY = Math.sign(dy);
+            const stepX = dx / (possibleSteps + 1);
+            const stepY = dy / (possibleSteps + 1);
+            switch (motion) {
+              case "linear": {
+                for (let offset = 1; offset < possibleSteps + 1; offset++) {
+                  const intermediateWidth = directionX !== 0 ? Math.round(initialWidth + offset * stepX) : newWidth;
+                  const intermediateHeight = directionY !== 0 ? Math.round(initialHeight + offset * stepY) : newHeight;
+                  const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+                  promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateWidth, intermediateHeight)));
+                  accumulatedDelay += correctedDelayPerPosition;
+                  console.log(offset, accumulatedDelay);
+                }
+                break;
+              }
+              case "arc": {
+                // Bézier curve
+                const averageWidth = (initialWidth + newWidth) / 2;
+                const averageHeight = (initialHeight + newHeight) / 2;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const perpendicularX = -dy / distance;
+                const perpendicularY = dx / distance;
+                const direction = mirror ? -1 : 1;
+                const controlX = averageWidth + curvinessFactor * distance * perpendicularX * direction;
+                const controlY = averageHeight + curvinessFactor * distance * perpendicularY * direction;
+                for (let offset = 1; offset < possibleSteps + 1; offset++) {
+                  const t = offset / (possibleSteps + 1);
+                  let intermediateWidth = Math.round((1 - t) * (1 - t) * initialWidth + 2 * (1 - t) * t * controlX + t * t * newWidth);
+                  let intermediateHeight = Math.round((1 - t) * (1 - t) * initialHeight + 2 * (1 - t) * t * controlY + t * t * newHeight);
+                  const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+                  promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateWidth, intermediateHeight)));
+                  accumulatedDelay += correctedDelayPerPosition;
+                }
+                break;
+              }
+              case "wave": {
+                const rawMaxFrequency = Math.floor((possibleSteps + 1) / 30 / 2);
+                const maxFrequency = rawMaxFrequency % 2 === 0 ? rawMaxFrequency : rawMaxFrequency - 1;
+                const frequency = options?.frequency !== undefined ? Math.max(2, Math.min(maxFrequency, options.frequency === "auto" ? maxFrequency : Math.round(options.frequency * 2))) : 2;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const halfDistance = distance / 2;
+                const amplitude = curvinessFactor * halfDistance;
+                const mirrorDirection = mirror ? -1 : 1;
+                const directionX = dx / distance;
+                const directionY = dy / distance;
+                for (let offset = 1; offset < possibleSteps + 1; offset++) {
+                  const t = offset / (possibleSteps + 1);
+                  const sineWaveOffset = Math.sin(t * Math.PI * frequency) * amplitude * mirrorDirection;
+                  const intermediateWidth = Math.round(initialWidth + t * dx + directionY * sineWaveOffset);
+                  const intermediateHeight = Math.round(initialHeight + t * dy - directionX * sineWaveOffset);
+                  const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+                  promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateWidth, intermediateHeight)));
+                  accumulatedDelay += correctedDelayPerPosition;
+                }
+                break;
+              }
+              /* case "circle": {
+                // Determine radius using Euclidean distance
+                const diameter = Math.sqrt(dx * dx + dy * dy);
+                const radius = Math.round(diameter / 2);
+
+                // Determine midwidth
+                const averageWidth = (initialWidth + newWidth) / 2;
+                const averageHeight = (initialHeight + newHeight) / 2;
+
+                // Calculate the angle increment for each step
+                const startAngle = Math.atan2(initialHeight - averageHeight, initialWidth - averageWidth); // Angle of initial point
+                const endAngle = Math.atan2(newHeight - averageHeight, newWidth - averageWidth); // Angle of final point
+
+                const direction = mirror ? -1 : 1;
+
+                // Half-circle movement implies that the arc is in a 180-degree range
+                const angleDifference = (endAngle - startAngle) * direction;
+
+                // Ensure the angle difference is between -π and π (normalize angle range)
+                const angleStep = angleDifference / (possibleSteps + 1);
+
+                for (let offset = 1; offset < possibleSteps + 1; offset++) {
+                  const angle = startAngle + offset * angleStep;
+                  // Calculate intermediate point on the arc
+                  const intermediateX = Math.round(averageWidth + radius * Math.cos(angle));
+                  const intermediateY = Math.round(averageHeight + radius * Math.sin(angle));
+
+                  // Set the cursor position at computed position and at given delay
+                  const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+                  promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateX, intermediateY)));
+                  accumulatedDelay += correctedDelayPerPosition;
+                }
+                break;
+              } */
+              default:
+                break;
+            }
+          }
+          promises.push(time.waitAsync(delay, () => setWindowDimensions(this.id, newWidth, newHeight)));
+          return Promise.all(promises);
         },
         bottom() {
           if (this.isMinimized) {
