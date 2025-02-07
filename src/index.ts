@@ -3552,44 +3552,46 @@ export function restart() {
  * @description Execute the given function a specified number of times.
  *
  * @param callback The callback function to execute.
- * @param iterations The number of times to execute the callback. If unset, the callback will be executed indefinitely.
- * @returns A promise that resolves when the callback has been executed the specified number of times.
+ * @param iterationsOrPredicate The number of times to execute the callback or a predicate function that returns `false` to stop, `true` otherwise. If unset, the callback will be executed indefinitely.
+ * @returns A promise that resolves when the callback has been executed until the end of the loop, rejects otherwise.
  *
  * ---
  * @example
- * // Execute the callback 10 times
- * await loop((index) => console.log(`Hello ${index + 1} times!`), 10);
+ * // Execute a function indefinitely
+ * await loop((index) => {
+ *   console.log("Hello world!");
+ * });
  *
- * // Execute the callback indefinitely
- * await loop(() => console.log("Hello world!"));
+ * // Execute a function 10 times
+ * await loop((index) => {
+ *   console.log(`Hello ${index + 1} times!`);
+ * }, 10);
+ *
+ * // Execute a function until a custom condition is met
+ * await loop((index) => {
+ *   console.log("Hello, you had 90% chance to see this!");
+ * }, (index) => Math.random() < 0.9);
  */
-export const loop = async (callback: (index: number) => Promise<void> | void, iterations: number = Infinity) => {
-  const iterationsCount = Math.max(0, Math.floor(iterations));
-  if (iterationsCount === 0) {
-    return;
-  }
+export const loop = async (callback: (index: number) => Promise<void> | void, iterationsOrPredicate: number | ((index: number) => boolean | Promise<boolean>) = (() => true)) => {
+  const continuePredicate = typeof iterationsOrPredicate === "number" ? ((index: number) => index < iterationsOrPredicate) : iterationsOrPredicate;
   return new Promise<void>((resolve, reject) => {
-    let iteration = 0;
     const next = async (iteration: number) => {
-      if (iteration < iterationsCount) {
-        try {
-          const result = callback(iteration);
-          if (result instanceof Promise) {
-            await result;
+      try {
+        const shouldContinue = await continuePredicate(iteration);
+        if (shouldContinue) {
+            await callback(iteration);
+            // setImmediate is much faster but can impact system performance
+            setTimeout(next.bind(null, iteration + 1), 0);
           }
-          iteration++;
-          // setImmediate is much faster but can impact system performance
-          setTimeout(next.bind(null, iteration), 0);
-        }
-        catch (error) {
-          reject(error);
+        else {
+          resolve();
         }
       }
-      else {
-        resolve();
+      catch (error) {
+        reject(error);
       }
     };
-    next(iteration);
+    next(0);
   });
 };
 
