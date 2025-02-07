@@ -1131,10 +1131,53 @@ export const mouse = {
      *
      * // Scroll down 240 wheel deltas (commonly 2 scrolls) in 1 second
      * await mouse.scroll.down(240, { delay: 1000 });
+     *
+     * // Scroll down 120 wheel deltas (commonly 1 scroll) linearly over 1 second
+     * await mouse.scroll.down(undefined, { motion: "linear", delay: 1000, steps: "auto" });
+     *
+     * // Scroll down 240 wheel deltas (commonly 2 scrolls) linearly over 1 second
+     * await mouse.scroll.down(240, { motion: "linear", delay: 1000, steps: "auto" });
      */
-    async down(scrollAmount?: number, options?: { delay?: number }) {
+    async down(scrollAmount?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" }) {
+      const steps = options?.steps === "auto" ? Infinity : Math.max(0, Math.round(options?.steps ?? 0));
       const delay = Math.max(0, Math.floor(options?.delay ?? 0));
-      return time.waitAsync(delay, () => mouseWheelScrollDown(scrollAmount));
+      const motion = options?.motion ?? "linear";
+      const initialScrollAmount = 0;
+      const finalScrollAmount = scrollAmount ?? 120;
+      if (steps === 0 || delay === 0) {
+        return time.waitAsync(delay, () => mouseWheelScrollDown(scrollAmount));
+      }
+      //Calculate the line from start to end (the shortest diagonal)
+      const deltaScroll = finalScrollAmount - initialScrollAmount;
+      // Chebyshev distance
+      const intermediateScrolls = Math.max(0, Math.abs(deltaScroll) - 1);
+      const possibleSteps = Math.min(Math.floor(delay / 16.6), steps, intermediateScrolls);
+      const preciseDelayPerScroll = delay / (possibleSteps + 1);
+      const delayPerScroll = Math.floor(preciseDelayPerScroll);
+      let accumulatedDelay = 0;
+      let accumulatedScroll = 0;
+      const promises: Promise<void>[] = [];
+      if (possibleSteps > 0) {
+        const correctionDelayOccurrence = preciseDelayPerScroll !== delayPerScroll ? Math.ceil(1 / (preciseDelayPerScroll - delayPerScroll)) : Infinity;
+        const directionScroll = Math.sign(deltaScroll);
+        const stepScroll = deltaScroll / (possibleSteps + 1);
+        switch (motion) {
+          case "linear": {
+            const intermediateScrollAmount = directionScroll !== 0 ? Math.round(stepScroll) : 0;
+            for (let offset = 1; offset < possibleSteps + 1; offset++) {
+              const correctedDelayPerPosition = delayPerScroll + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+              promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => mouseWheelScrollDown(intermediateScrollAmount)));
+              accumulatedDelay += correctedDelayPerPosition;
+              accumulatedScroll += intermediateScrollAmount;
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      promises.push(time.waitAsync(delay, () => mouseWheelScrollDown(finalScrollAmount - accumulatedScroll)));
+      return Promise.all(promises);
     },
     /**
      * @description Simulate mouse wheel scroll up.
@@ -1156,10 +1199,53 @@ export const mouse = {
      *
      * // Scroll up 240 wheel deltas (commonly 2 scrolls) in 1 second
      * await mouse.scroll.up(240, { delay: 1000 });
+     *
+     * // Scroll up 120 wheel deltas (commonly 1 scroll) linearly over 1 second
+     * await mouse.scroll.up(undefined, { motion: "linear", delay: 1000, steps: "auto" });
+     *
+     * // Scroll up 240 wheel deltas (commonly 2 scrolls) linearly over 1 second
+     * await mouse.scroll.up(240, { motion: "linear", delay: 1000, steps: "auto" });
      */
-    async up(scrollAmount?: number, options?: { delay?: number }) {
+    async up(scrollAmount?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" }) {
+      const steps = options?.steps === "auto" ? Infinity : Math.max(0, Math.round(options?.steps ?? 0));
       const delay = Math.max(0, Math.floor(options?.delay ?? 0));
-      return time.waitAsync(delay, () => mouseWheelScrollUp(scrollAmount));
+      const motion = options?.motion ?? "linear";
+      const initialScrollAmount = 0;
+      const finalScrollAmount = scrollAmount ?? 120;
+      if (steps === 0 || delay === 0) {
+        return time.waitAsync(delay, () => mouseWheelScrollUp(scrollAmount));
+      }
+      //Calculate the line from start to end (the shortest diagonal)
+      const deltaScroll = finalScrollAmount - initialScrollAmount;
+      // Chebyshev distance
+      const intermediateScrolls = Math.max(0, Math.abs(deltaScroll) - 1);
+      const possibleSteps = Math.min(Math.floor(delay / 16.6), steps, intermediateScrolls);
+      const preciseDelayPerScroll = delay / (possibleSteps + 1);
+      const delayPerScroll = Math.floor(preciseDelayPerScroll);
+      let accumulatedDelay = 0;
+      let accumulatedScroll = 0;
+      const promises: Promise<void>[] = [];
+      if (possibleSteps > 0) {
+        const correctionDelayOccurrence = preciseDelayPerScroll !== delayPerScroll ? Math.ceil(1 / (preciseDelayPerScroll - delayPerScroll)) : Infinity;
+        const directionScroll = Math.sign(deltaScroll);
+        const stepScroll = deltaScroll / (possibleSteps + 1);
+        switch (motion) {
+          case "linear": {
+            const intermediateScrollAmount = directionScroll !== 0 ? Math.round(stepScroll) : 0;
+            for (let offset = 1; offset < possibleSteps + 1; offset++) {
+              const correctedDelayPerPosition = delayPerScroll + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
+              promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => mouseWheelScrollUp(intermediateScrollAmount)));
+              accumulatedDelay += correctedDelayPerPosition;
+              accumulatedScroll += intermediateScrollAmount;
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      promises.push(time.waitAsync(delay, () => mouseWheelScrollUp(finalScrollAmount - accumulatedScroll)));
+      return Promise.all(promises);
     }
   },
   /**
