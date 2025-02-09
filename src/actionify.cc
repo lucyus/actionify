@@ -59,6 +59,7 @@ struct Color {
   int red;
   int green;
   int blue;
+  int alpha;
 };
 
 // Event structure to hold raw event data
@@ -1379,7 +1380,7 @@ Napi::Value GetAvailableScreens(const Napi::CallbackInfo& info) {
 // Function to get the color of a pixel at (x, y) screen coordinates
 Color GetPixelColor(int x, int y) {
 
-  Color errorColor = {0, 0, 0};
+  Color errorColor = {0, 0, 0, 0};
   // Get the device context (DC) for the entire screen
   HDC hdcScreen = GetDC(NULL);
   if (hdcScreen == NULL) {
@@ -1392,7 +1393,7 @@ Color GetPixelColor(int x, int y) {
   // Release the device context
   ReleaseDC(NULL, hdcScreen);
 
-  Color resultColor = {GetRValue(color), GetGValue(color), GetBValue(color)};
+  Color resultColor = {GetRValue(color), GetGValue(color), GetBValue(color), 0};
 
   // Return the color
   return resultColor;
@@ -1414,6 +1415,7 @@ Napi::Value GetPixelColorWrapper(const Napi::CallbackInfo& info) {
   result.Set(Napi::String::New(env, "red"), Napi::Number::New(env, color.red));
   result.Set(Napi::String::New(env, "green"), Napi::Number::New(env, color.green));
   result.Set(Napi::String::New(env, "blue"), Napi::Number::New(env, color.blue));
+  result.Set(Napi::String::New(env, "alpha"), Napi::Number::New(env, color.alpha));
   return result;
 }
 
