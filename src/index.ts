@@ -194,6 +194,34 @@ const mainListener = async (currentEvent: InputEvent) => {
           }
         }
       }
+      // Run eligible mouse listeners
+      for (const mouseListener of mouseListenersToRun) {
+        mouseListener.isRunning = true;
+        const result = mouseListener.listener(currentMouseEvent, mouseListener.controller);
+        if (result instanceof Promise) {
+          result
+            .catch((error) => { console.error(error) })
+            .finally(() => { mouseListener.isRunning = false; })
+          ;
+        }
+        else {
+          mouseListener.isRunning = false;
+        }
+      }
+      // Run eligible input listeners
+      for (const inputListener of inputListenersToRun) {
+        inputListener.isRunning = true;
+        const result = inputListener.listener(currentMouseEvent, inputListener.controller);
+        if (result instanceof Promise) {
+          result
+            .catch((error) => { console.error(error) })
+            .finally(() => { inputListener.isRunning = false; })
+          ;
+        }
+        else {
+          inputListener.isRunning = false;
+        }
+      }
       // Find mouse recorders that are listening to the current mouse event
       const activeMouseRecorders = mouseRecorders.filter((mouseRecorder) => !mouseRecorder.isPaused);
       for (const mouseRecorder of activeMouseRecorders) {
@@ -234,34 +262,6 @@ const mainListener = async (currentEvent: InputEvent) => {
           if (countConditionsMet === inputRecorder.when.length) {
             inputRecordersToRun.push(inputRecorder);
           }
-        }
-      }
-      // Run eligible mouse listeners
-      for (const mouseListener of mouseListenersToRun) {
-        mouseListener.isRunning = true;
-        const result = mouseListener.listener(currentMouseEvent, mouseListener.controller);
-        if (result instanceof Promise) {
-          result
-            .catch((error) => { console.error(error) })
-            .finally(() => { mouseListener.isRunning = false; })
-          ;
-        }
-        else {
-          mouseListener.isRunning = false;
-        }
-      }
-      // Run eligible input listeners
-      for (const inputListener of inputListenersToRun) {
-        inputListener.isRunning = true;
-        const result = inputListener.listener(currentMouseEvent, inputListener.controller);
-        if (result instanceof Promise) {
-          result
-            .catch((error) => { console.error(error) })
-            .finally(() => { inputListener.isRunning = false; })
-          ;
-        }
-        else {
-          inputListener.isRunning = false;
         }
       }
       // Run eligible mouse recorders
@@ -407,6 +407,34 @@ const mainListener = async (currentEvent: InputEvent) => {
           }
         }
       }
+      // Run eligible keyboard listeners
+      for (const keyboardListener of keyboardListenersToRun) {
+        keyboardListener.isRunning = true;
+        const result = keyboardListener.listener(currentKeyboardEvent, keyboardListener.controller);
+        if (result instanceof Promise) {
+          result
+            .catch((error) => { console.error(error); })
+            .finally(() => { keyboardListener.isRunning = false; })
+          ;
+        }
+        else {
+          keyboardListener.isRunning = false;
+        }
+      }
+      // Run eligible input listeners
+      for (const inputListener of inputListenersToRun) {
+        inputListener.isRunning = true;
+        const result = inputListener.listener(currentKeyboardEvent, inputListener.controller);
+        if (result instanceof Promise) {
+          result
+            .catch((error) => { console.error(error); })
+            .finally(() => { inputListener.isRunning = false; })
+          ;
+        }
+        else {
+          inputListener.isRunning = false;
+        }
+      }
       // Find keyboard recorders that are listening to the current keyboard event
       const activeKeyboardRecorders = keyboardRecorders.filter((keyboardRecorder) => !keyboardRecorder.isPaused);
       for (const keyboardRecorder of activeKeyboardRecorders) {
@@ -447,34 +475,6 @@ const mainListener = async (currentEvent: InputEvent) => {
           if (countConditionsMet === inputRecorder.when.length) {
             inputRecordersToRun.push(inputRecorder);
           }
-        }
-      }
-      // Run eligible keyboard listeners
-      for (const keyboardListener of keyboardListenersToRun) {
-        keyboardListener.isRunning = true;
-        const result = keyboardListener.listener(currentKeyboardEvent, keyboardListener.controller);
-        if (result instanceof Promise) {
-          result
-            .catch((error) => { console.error(error); })
-            .finally(() => { keyboardListener.isRunning = false; })
-          ;
-        }
-        else {
-          keyboardListener.isRunning = false;
-        }
-      }
-      // Run eligible input listeners
-      for (const inputListener of inputListenersToRun) {
-        inputListener.isRunning = true;
-        const result = inputListener.listener(currentKeyboardEvent, inputListener.controller);
-        if (result instanceof Promise) {
-          result
-            .catch((error) => { console.error(error); })
-            .finally(() => { inputListener.isRunning = false; })
-          ;
-        }
-        else {
-          inputListener.isRunning = false;
         }
       }
       // Run eligible keyboard recorders
