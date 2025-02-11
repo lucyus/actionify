@@ -87,6 +87,8 @@ You're ready to go! 🚀
 * [**V. Artificial Intelligence Tools**](./docs/ARTIFICIAL-INTELLIGENCE.md)
   * [1. Optical Character Recognition (OCR)](./docs/ARTIFICIAL-INTELLIGENCE.md#1-optical-character-recognition-ocr)
     * [1.1. Extract text from an image](./docs/ARTIFICIAL-INTELLIGENCE.md#11-extract-text-from-an-image)
+  * [2. Image Detection](./docs/ARTIFICIAL-INTELLIGENCE.md#2-image-detection)
+    * [2.1. Locate a Sub-Image in a Larger Image](./docs/ARTIFICIAL-INTELLIGENCE.md#21-locate-a-sub-image-in-a-larger-image)
 * [**VI. Screen Manager**](./docs/SCREEN.md)
   * [1. Screen Information](./docs/SCREEN.md#1-screen-information)
     * [1.1. List all active screens](./docs/SCREEN.md#11-list-all-active-screens)
