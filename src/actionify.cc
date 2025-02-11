@@ -24,6 +24,7 @@
 #include <winrt/Windows.Media.Ocr.h>
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.Storage.h>
+#include <execution>
 
 
 // =============================================================================
@@ -60,6 +61,25 @@ struct Color {
   int green;
   int blue;
   int alpha;
+};
+
+// Structure to hold position
+struct Position {
+  int x;
+  int y;
+};
+
+// Structure to hold dimensions
+struct Dimension {
+  int width;
+  int height;
+};
+
+// Structure to hold a matched region
+struct MatchRegion {
+  Position position;
+  Dimension dimensions;
+  double similarity;
 };
 
 // Event structure to hold raw event data
@@ -676,6 +696,264 @@ Napi::Value PerformOcrOnImageWrapper(const Napi::CallbackInfo& info) {
   }
   catch (const std::exception& ex) {
     Napi::Error::New(env, ex.what()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+}
+
+
+// =============================================================================
+// ============================== IMAGE PROCESSING =============================
+// =============================================================================
+
+std::vector<std::vector<Color>> GetPixelColorsFromPng(const std::wstring& filePath) {
+  Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+  ULONG_PTR gdiplusToken;
+  Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+
+  Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromFile(filePath.c_str());
+  if (!bitmap || bitmap->GetLastStatus() != Gdiplus::Ok) {
+    delete bitmap;
+    Gdiplus::GdiplusShutdown(gdiplusToken);
+    throw std::runtime_error("Failed to load PNG file.");
+  }
+
+  UINT width = bitmap->GetWidth();
+  UINT height = bitmap->GetHeight();
+  std::vector<std::vector<Color>> pixels(height, std::vector<Color>(width));
+
+  // Lock the bitmap for direct access to pixels
+  Gdiplus::BitmapData bitmapData;
+  Gdiplus::Rect rect(0, 0, width, height);
+  bitmap->LockBits(&rect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmapData);
+
+  // Get pointers to the first row of pixel data
+  int* pixelData = (int*)bitmapData.Scan0;
+
+  for (UINT y = 0; y < height; y++) {
+    for (UINT x = 0; x < width; x++) {
+      int pixelIndex = y * width + x;
+      int colorValue = pixelData[pixelIndex];
+      Color pixelColor;
+      pixelColor.red = (colorValue >> 16) & 0xFF;
+      pixelColor.green = (colorValue >> 8) & 0xFF;
+      pixelColor.blue = colorValue & 0xFF;
+      pixelColor.alpha = (colorValue >> 24) & 0xFF;
+      pixels[y][x] = pixelColor;
+    }
+  }
+
+  // Unlock the bitmap after processing
+  bitmap->UnlockBits(&bitmapData);
+
+  delete bitmap;
+  Gdiplus::GdiplusShutdown(gdiplusToken);
+  return pixels;
+}
+
+Napi::Value GetPixelColorsFromPngWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 1) {
+    Napi::TypeError::New(env, "Expected a string argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  if (!info[0].IsString()) {
+    Napi::TypeError::New(env, "Expected a string as the first argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Translate JS input to C++ input
+  std::u16string u16filePath = info[0].As<Napi::String>().Utf16Value();
+  std::wstring filePath = std::wstring(u16filePath.begin(), u16filePath.end());
+
+  try {
+    // Get pixel colors
+    std::vector<std::vector<Color>> pixels = GetPixelColorsFromPng(filePath);
+    size_t height = pixels.size();
+    size_t width = pixels[0].size();
+
+    // Construct JS output (as ArrayBuffer for best performance)
+    size_t bufferSize = height * width * 6; // 6 bytes per pixel (x + y + RGBA)
+    Napi::ArrayBuffer buffer = Napi::ArrayBuffer::New(env, bufferSize);
+    uint8_t* data = static_cast<uint8_t*>(buffer.Data());
+
+    size_t index = 0;
+    for (size_t y = 0; y < height; y++) {
+      for (size_t x = 0; x < width; x++) {
+        const Color& pixel = pixels[y][x];
+        data[index++] = x;
+        data[index++] = y;
+        data[index++] = pixel.red;
+        data[index++] = pixel.green;
+        data[index++] = pixel.blue;
+        data[index++] = pixel.alpha;
+      }
+    }
+    return Napi::Uint8Array::New(env, bufferSize, buffer, 0);
+  }
+  catch (const std::exception& ex) {
+    Napi::Error::New(env, ex.what()).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+}
+
+// Computes similarity score (between 0 and 1) via image template matching
+void computeSimilarityChunk(
+  const std::vector<std::vector<Color>>& image,
+  const std::vector<std::vector<Color>>& subImage,
+  std::vector<MatchRegion>& matchingRegions,
+  int startY,
+  int endY,
+  int commonWidth,
+  int commonHeight,
+  int subImageWidth,
+  int subImageHeight,
+  int perfectSimilarity,
+  const double& minSimilarityThresholdFactor
+) {
+  const unsigned int maxSimilarity = 3 * 255;
+  const double similarityThreshold = maxSimilarity * minSimilarityThresholdFactor;
+  for (int y = startY; y < endY; ++y) {
+    const unsigned int yOffset = y * commonWidth;
+    for (int x = 0; x < commonWidth; ++x) {
+      double similaritySum = 0;
+      bool shouldStopEarly = false;
+      for (int subY = 0; subY < subImageHeight; ++subY) {
+        const unsigned int yIndex = y + subY;
+        for (int subX = 0; subX < subImageWidth; ++subX) {
+          const Color& imagePixel = image[yIndex][x + subX];
+          const Color& subImagePixel = subImage[subY][subX];
+          double normalizedMeanOpacity = (imagePixel.alpha + subImagePixel.alpha) / 2.0;
+          int redDifference = std::abs(imagePixel.red - subImagePixel.red);
+          int greenDifference = std::abs(imagePixel.green - subImagePixel.green);
+          int blueDifference = std::abs(imagePixel.blue - subImagePixel.blue);
+          int difference = redDifference + greenDifference + blueDifference;
+          double adjustedDifference = difference * normalizedMeanOpacity / 255.0;
+          double similarity = maxSimilarity - adjustedDifference;
+          similaritySum += similarity;
+          if (similarityThreshold > 0 && similarity < similarityThreshold) {
+            shouldStopEarly = true;
+            break;
+          }
+        }
+        if (shouldStopEarly) {
+          break;
+        }
+      }
+      double normalizedSimilarity = similaritySum / perfectSimilarity;
+      matchingRegions[yOffset + x] = {{x, y}, {subImageWidth, subImageHeight}, normalizedSimilarity};
+    }
+  }
+}
+
+// Multi-threading image template matching
+std::vector<MatchRegion> findMatchingRegions(
+  const std::vector<std::vector<Color>>& image,
+  const std::vector<std::vector<Color>>& subImage,
+  const double& minSimilarityThresholdFactor
+) {
+
+  int imageWidth = image[0].size();
+  int imageHeight = image.size();
+  int subImageWidth = subImage[0].size();
+  int subImageHeight = subImage.size();
+
+  if (imageHeight < subImageHeight || imageWidth < subImageWidth) {
+    return {};
+  }
+
+  int commonWidth = imageWidth - subImageWidth + 1;
+  int commonHeight = imageHeight - subImageHeight + 1;
+  int matchablePixels = subImageWidth * subImageHeight;
+  int perfectSimilarity = (3 * 255) * matchablePixels;
+
+  std::vector<MatchRegion> matchingRegions(commonWidth * commonHeight);
+  int numThreads = std::thread::hardware_concurrency();
+  std::vector<std::thread> threads;
+  std::atomic<int> nextRow(0);
+
+  for (int i = 0; i < numThreads; ++i) {
+    threads.emplace_back([&] {
+      int y;
+      while ((y = nextRow.fetch_add(1)) < commonHeight) {
+        computeSimilarityChunk(image, subImage, matchingRegions, y, y + 1, commonWidth, commonHeight, subImageWidth, subImageHeight, perfectSimilarity, minSimilarityThresholdFactor);
+      }
+    });
+  }
+
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  std::sort(std::execution::par_unseq, matchingRegions.begin(), matchingRegions.end(), [](const MatchRegion& a, const MatchRegion& b) {
+    return a.similarity > b.similarity;
+  });
+
+  return matchingRegions;
+}
+
+// JS wrapper for image template matching
+Napi::Value findImageTemplateMatches(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 3) {
+    Napi::TypeError::New(env, "Expected two string and one number arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  if (!info[0].IsString()) {
+    Napi::TypeError::New(env, "Expected a string as the first argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  if (!info[1].IsString()) {
+    Napi::TypeError::New(env, "Expected a string as the second argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  if (!info[2].IsNumber()) {
+    Napi::TypeError::New(env, "Expected a number as the third argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Translate JS input to C++ input
+  std::u16string u16imagePath = info[0].As<Napi::String>().Utf16Value();
+  std::wstring imagePath = std::wstring(u16imagePath.begin(), u16imagePath.end());
+  std::u16string u16subImagePath = info[1].As<Napi::String>().Utf16Value();
+  std::wstring subImagePath = std::wstring(u16subImagePath.begin(), u16subImagePath.end());
+  float minSimilarityThresholdFactor = info[2].As<Napi::Number>().FloatValue();
+
+  try {
+    // Get pixel colors
+    std::vector<std::vector<Color>> image = GetPixelColorsFromPng(imagePath);
+    std::vector<std::vector<Color>> subImage = GetPixelColorsFromPng(subImagePath);
+
+    // Find matching regions
+    std::vector<MatchRegion> matchingRegions = findMatchingRegions(image, subImage, minSimilarityThresholdFactor);
+
+    // Construct JS output (using ArrayBuffer for best performance)
+    size_t numRegions = matchingRegions.size();
+    size_t bufferSize = numRegions * 5; // Each region: x, y, width, height, similarity
+
+    // Create a Napi::ArrayBuffer
+    Napi::ArrayBuffer buffer = Napi::ArrayBuffer::New(env, bufferSize * sizeof(double));
+    double* data = static_cast<double*>(buffer.Data());
+
+    // Fill buffer with data
+    for (size_t i = 0; i < numRegions; i++) {
+      const MatchRegion& region = matchingRegions[i];
+      data[i * 5 + 0] = region.position.x;
+      data[i * 5 + 1] = region.position.y;
+      data[i * 5 + 2] = region.dimensions.width;
+      data[i * 5 + 3] = region.dimensions.height;
+      data[i * 5 + 4] = region.similarity;
+    }
+
+    // Wrap buffer as a Float64Array
+    Napi::TypedArrayOf<double> result = Napi::TypedArrayOf<double>::New(env, bufferSize, buffer, 0, napi_float64_array);
+    return result;
+  }
+  catch (const std::exception& e) {
+    Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
     return env.Null();
   }
 }
@@ -2024,6 +2302,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "suppressInputEvents"), Napi::Function::New(env, SuppressInputEventsWrapper));
   exports.Set(Napi::String::New(env, "unsuppressInputEvents"), Napi::Function::New(env, UnsuppressInputEventsWrapper));
   exports.Set(Napi::String::New(env, "performOcrOnImage"), Napi::Function::New(env, PerformOcrOnImageWrapper));
+  exports.Set(Napi::String::New(env, "getPixelColorsFromImage"), Napi::Function::New(env, GetPixelColorsFromPngWrapper));
+  exports.Set(Napi::String::New(env, "findImageTemplateMatches"), Napi::Function::New(env, findImageTemplateMatches));
   return exports;
 }
 
