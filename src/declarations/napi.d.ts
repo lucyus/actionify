@@ -4,6 +4,7 @@ declare module "@napi/actionify" {
   import type { ScreenInfo } from "../types/screen-info/screen-info.type";
   import type { WindowInfo } from "../types/window-info/window-info.type";
   import type { Color } from "../types/color/color.type";
+  import type { MatchRegion } from "../types/match-region/match-region.type";
   const value: {
     getCursorPos: Position;
     setCursorPos: (x: number, y: number) => void;
@@ -41,6 +42,8 @@ declare module "@napi/actionify" {
     suppressInputEvents: (type: number, inputStateMap: Array<[number, Array<number>]>) => void;
     unsuppressInputEvents: (type: number, inputStateMap: Array<[number, Array<number>]>) => void;
     performOcrOnImage: (imagePath: string, language?: string) => string;
+    getPixelColorsFromImage: (imagePath: string) => Array<Array<Color>>;
+    findImageTemplateMatches: (imagePath: string, subImagePath: string, minSimilarity: number) => Array<MatchRegion>;
   };
   export = value;
 }
