@@ -35,6 +35,8 @@ const {
   suppressInputEvents,
   unsuppressInputEvents,
   performOcrOnImage,
+  getPixelColorsFromImage,
+  findImageTemplateMatches,
 } = require('../../build/Release/actionify.node') as typeof import("@napi/actionify");
 import { spawn } from 'child_process';
 import fs from 'fs';
@@ -67,6 +69,7 @@ import { Input } from './types/event/input/input/input.type';
 import { InputListener } from './types/event/input/input-listener/input-listener.type';
 import { InputRecorderScope } from './types/event/input/input/input-recorder-scope/input-recorder-scope.type';
 import { Color } from './types/color/color.type';
+import { MatchRegion } from './types/match-region/match-region.type';
 
 
 /**
@@ -2822,11 +2825,15 @@ export const ai = {
    * @example
    * // Perform OCR on an image
    * const text = ai.image("/path/to/image.png").text();
+   *
+   * // Locate a sub-image using Image Template Matching
+   * const matches = ai.image("/path/to/image.png").find("/path/to/sub-image.png");
    */
   image(filepath: string) {
     if (!filesystem.exists(filepath)) {
       throw new Error(`File does not exist: ${filepath}`);
     }
+    const absoluteFilePath = path.resolve(filepath);
     return {
       /**
        * @description Perform OCR (Optical Character Recognition) on an image to extract text from it.
@@ -2864,9 +2871,56 @@ export const ai = {
        * const text = ai.image("/path/to/image.png").text("ar");
        */
       text(language?: string) {
-        const absoluteFilePath = path.resolve(filepath);
         return performOcrOnImage(absoluteFilePath, language);
-      }
+      },
+      /**
+       * @description Finds all occurrences of the given sub-image in the given image.
+       *
+       * @param filepath The path to the sub-image file to find inside the previously given image.
+       * @returns {MatchRegion[]} A sorted array of regions from most to less likely containing the given sub-image.
+       *
+       * ---
+       * @example
+       *
+       * // Find regions in the image, ranked from most to least likely to match the given sub-image
+       * const matches = ai.image("/path/to/image.png").find("/path/to/sub-image.png");
+       *
+       * // Find regions in the image that exactly match the given sub-image
+       * const perfectMatches = ai.image("/path/to/image.png").find("/path/to/sub-image.png", { minSimilarity: 1 });
+       *
+       * // Find all regions in the image, ordered from most to least likely to contain the given sub-image
+       * const allMatches = ai.image("/path/to/image.png").find("/path/to/sub-image.png", { minSimilarity: 0 });
+       */
+      find(filepath: string, options?: { minSimilarity?: number }): MatchRegion[] {
+        if (!filesystem.exists(filepath)) {
+          throw new Error(`File does not exist: ${filepath}`);
+        }
+        // Initialize variables
+        const minSimilarity = Math.max(0, Math.min(1, options?.minSimilarity ?? 0.5));
+        const absoluteSubFilePath = path.resolve(filepath);
+        // Find matches
+        const rawResults = findImageTemplateMatches(absoluteFilePath, absoluteSubFilePath, minSimilarity);
+        // Map results
+        const result = [];
+        for (let rawIndex = 0; rawIndex < rawResults.length; rawIndex += 5) {
+          const similarity = rawResults[rawIndex + 4];
+          if (minSimilarity > 0 && similarity < minSimilarity) {
+            break;
+          }
+          result.push({
+            position: {
+              x: rawResults[rawIndex],
+              y: rawResults[rawIndex + 1],
+            },
+            dimensions: {
+              width: rawResults[rawIndex + 2],
+              height: rawResults[rawIndex + 3],
+            },
+            similarity: similarity,
+          });
+        }
+        return result;
+      },
     };
   }
 };
