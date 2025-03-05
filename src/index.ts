@@ -2426,7 +2426,7 @@ export const window = {
           const preciseDelayPerPosition = delay / (possibleSteps + 1);
           const delayPerPosition = Math.floor(preciseDelayPerPosition);
           let accumulatedDelay = 0;
-          const promises: Promise<void>[] = [];
+          const promises: Promise<boolean>[] = [];
           if (possibleSteps > 0) {
             const correctionDelayOccurrence = preciseDelayPerPosition !== delayPerPosition ? Math.ceil(1 / (preciseDelayPerPosition - delayPerPosition)) : Infinity;
             const directionX = Math.sign(dx);
@@ -2553,7 +2553,7 @@ export const window = {
           const preciseDelayPerPosition = delay / (possibleSteps + 1);
           const delayPerPosition = Math.floor(preciseDelayPerPosition);
           let accumulatedDelay = 0;
-          const promises: Promise<void>[] = [];
+          const promises: Promise<boolean>[] = [];
           if (possibleSteps > 0) {
             const correctionDelayOccurrence = preciseDelayPerPosition !== delayPerPosition ? Math.ceil(1 / (preciseDelayPerPosition - delayPerPosition)) : Infinity;
             const directionX = Math.sign(dx);
@@ -2782,20 +2782,21 @@ export const time = {
    * // Wait asynchronously for 1 second and execute a callback function
    * await time.waitAsync(1000, () => console.log("At least 1 second has passed."));
    */
-  async waitAsync(milliseconds?: number, callback?: Function) {
+  async waitAsync<T = void>(milliseconds?: number, callback: () => T | Promise<T> = () => undefined as T): Promise<T> {
     if (milliseconds && milliseconds > 0) {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<T>((resolve, reject) => {
         setTimeout(async () => {
-          if (callback) {
-            await callback();
+          try {
+            const result = await callback();
+            resolve(result);
           }
-          resolve();
+          catch (error) {
+            reject(error);
+          }
         }, milliseconds);
       });
     }
-    if (callback) {
-      await callback();
-    }
+    return callback();
   },
   /**
    * @description Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC.

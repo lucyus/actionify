@@ -95,7 +95,7 @@ export type WindowInteraction = {
    * // Wave motion over time of the first window
    * await windows[0].move(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  move: (x?: number, y?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<void> | Promise<void[]>;
+  move: (x?: number, y?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<boolean> | Promise<boolean[]>;
   /**
    * @description Resize the window dimensions to a given size.
    *
@@ -123,7 +123,7 @@ export type WindowInteraction = {
    * // Wave resize motion over time of the first window
    * await windows[0].resize(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  resize: (width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<void> | Promise<void[]>;
+  resize: (width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) => Promise<boolean> | Promise<boolean[]>;
   /**
    * @description Move the window to the foreground.
    * If the window is initially minimized, it will be restored first.
