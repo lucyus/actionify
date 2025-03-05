@@ -1,6 +1,18 @@
-# Actionify
+<h1 align="center">Actionify</h1>
 
-**Actionify** is a lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, and windows, with additional features like OCR and more.
+<p align="center">
+  <img src="./docs/media/images/actionify_logo_circle.png" alt="Actionify logo" width="120px" height="120px" />
+  <br />
+  <em><strong>Actionify</strong> is a lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, windows and sound, with additional features like OCR and more.</em>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/@lucyus/actionify">
+    <img src="https://img.shields.io/npm/v/@lucyus/actionify.svg?logo=npm&logoColor=fff&label=latest&labelColor=grey&color=blue" alt="Actionify on npmjs.com" />
+  </a>
+</p>
+
+<hr />
 
 ## Install
 
