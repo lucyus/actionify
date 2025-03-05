@@ -2560,7 +2560,6 @@ export const window = {
           // Chebyshev distance
           const intermediatePositions = Math.max(0, Math.max(Math.abs(dx), Math.abs(dy)) - 1);
           const possibleSteps = Math.min(Math.floor(delay / 16.6), steps, intermediatePositions);
-          console.log(possibleSteps);
           const preciseDelayPerPosition = delay / (possibleSteps + 1);
           const delayPerPosition = Math.floor(preciseDelayPerPosition);
           let accumulatedDelay = 0;
@@ -2579,7 +2578,6 @@ export const window = {
                   const correctedDelayPerPosition = delayPerPosition + (offset % correctionDelayOccurrence === 0 ? 1 : 0);
                   promises.push(time.waitAsync(correctedDelayPerPosition + accumulatedDelay, () => setWindowDimensions(this.id, intermediateWidth, intermediateHeight)));
                   accumulatedDelay += correctedDelayPerPosition;
-                  console.log(offset, accumulatedDelay);
                 }
                 break;
               }
