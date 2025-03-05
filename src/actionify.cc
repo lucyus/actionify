@@ -25,6 +25,8 @@
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.Storage.h>
 #include <execution>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 
 // =============================================================================
@@ -94,6 +96,11 @@ struct RawEvent {
   bool isSuppressed;
 };
 
+struct SoundInfo {
+  std::string id;
+  unsigned int duration;
+};
+
 // =============================================================================
 // ============================== GLOBAL VARIABLES =============================
 // =============================================================================
@@ -115,6 +122,46 @@ std::condition_variable queueCondition;
 std::map<int, std::set<int>> suppressedMouseKeys;
 std::map<int, std::set<int>> suppressedKeyboardKeys;
 std::mutex suppressedKeysMutex;
+
+
+// =============================================================================
+// ============================== UTILITY CLASSES ==============================
+// =============================================================================
+
+class PromiseWorker : public Napi::AsyncWorker {
+  public:
+
+    PromiseWorker(
+      Napi::Env env,
+      Napi::Promise::Deferred deferred,
+      std::function<void()> executeCallback
+    ) : Napi::AsyncWorker(env), deferred(deferred), executeCallback(executeCallback) { }
+
+    ~PromiseWorker() override { }
+
+    void Execute() override {
+      try {
+        executeCallback();
+      } catch (const std::exception& e) {
+        SetError(e.what());
+      } catch (...) {
+        SetError("Unknown error occurred");
+      }
+    }
+
+    void OnOK() override {
+      deferred.Resolve(Env().Undefined());
+    }
+
+    void OnError(const Napi::Error& error) override {
+      deferred.Reject(error.Value());
+    }
+
+  private:
+    Napi::Promise::Deferred deferred;
+    std::function<void()> executeCallback;
+};
+
 
 // =============================================================================
 // ============================= UTILITY FUNCTIONS =============================
@@ -2261,6 +2308,356 @@ Napi::Value SetWindowToAlwaysOnTopWrapper(const Napi::CallbackInfo& info) {
 
 
 // =============================================================================
+// ============================= SOUND FUNCTIONS ==============================
+// =============================================================================
+
+void StopSound(const std::string& soundId) {
+  std::string command = "stop " + soundId;
+  mciSendString(command.c_str(), NULL, 0, NULL);
+  command = "close " + soundId;
+  mciSendString(command.c_str(), NULL, 0, NULL);
+}
+
+Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Stop the sound
+  StopSound(soundId);
+
+  return env.Undefined();
+}
+
+void PauseSound(const std::string& soundId) {
+  std::string command = "pause " + soundId;
+  mciSendString(command.c_str(), NULL, 0, NULL);
+}
+
+Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Pause the sound
+  PauseSound(soundId);
+
+  return env.Undefined();
+}
+
+void ResumeSound(const std::string& soundId) {
+  std::string command = "resume " + soundId;
+  mciSendString(command.c_str(), NULL, 0, NULL);
+}
+
+Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Resume the sound
+  ResumeSound(soundId);
+
+  return env.Undefined();
+}
+
+std::string GetSoundStatus(const std::string& soundId) {
+  std::string command = "status " + soundId + " mode";
+  char status[256];
+  mciSendString(command.c_str(), status, sizeof(status), NULL);
+  return status;
+}
+
+Napi::Value GetSoundStatusWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Get the status of the sound
+  std::string status = GetSoundStatus(soundId);
+
+  return Napi::String::New(env, status);
+}
+
+int GetSoundTrackTime(const std::string& soundId) {
+  std::string command = "status " + soundId + " position";
+  char time[256];
+  mciSendString(command.c_str(), time, sizeof(time), NULL);
+  return atoi(time);
+}
+
+Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Get the track time of the sound
+  int trackTime = GetSoundTrackTime(soundId);
+
+  return Napi::Number::New(env, trackTime);
+}
+
+void setSoundTrackTime(const std::string& soundId, int trackTime) {
+  std::string previousStatus = GetSoundStatus(soundId);
+  std::string command = "seek " + soundId + " to " + std::to_string(trackTime);
+  mciSendString(command.c_str(), NULL, 0, NULL);
+  command = "play " + soundId;
+  mciSendString(command.c_str(), NULL, 0, NULL);
+  if (previousStatus == "paused") {
+    PauseSound(soundId);
+  }
+}
+
+Napi::Value SetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Ensure the second argument is a number
+  if (info.Length() < 2 || !info[1].IsNumber()) {
+    Napi::TypeError::New(env, "Second argument must be a number (track time)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  int trackTime = info[1].As<Napi::Number>().Int32Value();
+
+  // Set the track time of the sound
+  setSoundTrackTime(soundId, trackTime);
+
+  return env.Undefined();
+}
+
+float getSoundVolume() {
+  // Get the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
+  DWORD volume;
+  waveOutGetVolume(0, &volume);
+
+  // Extract left and right channel volume (0xFFFF max)
+  float leftVolume = (volume & 0xFFFF) / 65535.0f;
+  float rightVolume = ((volume >> 16) & 0xFFFF) / 65535.0f;
+  if (rightVolume == 0.0f) return leftVolume;
+  if (leftVolume == 0.0f) return rightVolume;
+  return (leftVolume + rightVolume) / 2.0f;
+}
+
+Napi::Value GetSoundVolumeWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Get the volume of the sound
+  float volume = getSoundVolume();
+
+  return Napi::Number::New(env, volume);
+}
+
+void setSoundVolume(float volume) {
+  // Clamp volume between 0.0 and 1.0
+  if (volume < 0.0f) volume = 0.0f;
+  if (volume > 1.0f) volume = 1.0f;
+
+  // Set the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
+  DWORD dwVolume = static_cast<DWORD>(volume * 0xFFFF);
+  dwVolume = (dwVolume & 0xFFFF) | (dwVolume << 16); // Set both left and right channels
+  waveOutSetVolume(0, dwVolume);
+}
+
+Napi::Value SetSoundVolumeWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a number
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "First argument must be a number (volume between 0.0 and 1.0)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  float volume = info[0].As<Napi::Number>().FloatValue();
+
+  // Set the volume of the sound
+  setSoundVolume(volume);
+
+  return env.Undefined();
+}
+
+float GetSoundSpeed(const std::string& soundId) {
+  // Get the speed of the sound
+  char buffer[128];
+  std::string command = "status " + soundId + " speed";
+  mciSendString(command.c_str(), buffer, sizeof(buffer), NULL);
+  return atoi(buffer) / 1000.0f;
+}
+
+Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+
+  // Get the speed of the sound
+  float speed = GetSoundSpeed(soundId);
+
+  return Napi::Number::New(env, speed);
+}
+
+void SetSoundSpeed(const std::string& soundId, float speed) {
+  // Set the speed of the sound
+  std::string command = "set " + soundId + " speed " + std::to_string(static_cast<int>(std::round(speed * 1000)));
+  mciSendString(command.c_str(), NULL, 0, NULL);
+}
+
+Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 2 || !info[0].IsString() || !info[1].IsNumber()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id) and second argument must be a number (speed greater than or equal to 0.0)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  float speed = info[1].As<Napi::Number>().FloatValue();
+
+  // Set the speed of the sound
+  SetSoundSpeed(soundId, speed);
+
+  return env.Undefined();
+}
+
+SoundInfo PlaySound(const std::string& filePath, float volume = 1.0f, float speed = 1.0f, int startTime = -1, int endTime = -1) {
+  // Clamp volume between 0.0 and 1.0
+  if (volume < 0.0f) volume = 0.0f;
+  if (volume > 1.0f) volume = 1.0f;
+
+  // Clamp speed between 0.0 and 4.0
+  if (speed < 0.0f) speed = 0.0f;
+  if (speed > 4.0f) speed = 4.0f;
+
+  // Generate a time-based unique ID for the sound instance
+  std::string soundId = "sound_" + std::to_string(Now());
+
+
+  // Open the audio file
+  std::string command = "open \"" + filePath + "\" alias " + soundId;
+  if (mciSendString(command.c_str(), NULL, 0, NULL) != 0) {
+    return {};
+  }
+
+  // Get the total length of the audio
+  char buffer[128];
+  command = "status " + soundId + " length";
+  mciSendString(command.c_str(), buffer, sizeof(buffer), NULL);
+  int duration = std::stoi(buffer);
+
+  // Clamp start and end times
+  if (endTime < 0 || endTime > duration) endTime = duration;
+  if (startTime < 0) startTime = 0;
+  if (startTime > endTime) startTime = endTime;
+
+  // Set the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
+  DWORD dwVolume = static_cast<DWORD>(volume * 0xFFFF);
+  dwVolume = (dwVolume & 0xFFFF) | (dwVolume << 16); // Set both left and right channels
+  waveOutSetVolume(0, dwVolume);
+
+  // Set the playback speed
+  SetSoundSpeed(soundId, speed);
+
+  // Play the sound asynchronously
+  command = "play " + soundId + " from " + std::to_string(startTime) + " to " + std::to_string(endTime);
+  if (mciSendString(command.c_str(), NULL, 0, NULL) != 0) {
+    command = "close " + soundId;
+    mciSendString(command.c_str(), NULL, 0, NULL);
+    return {};
+  }
+
+  SoundInfo soundInfo = {soundId, static_cast<unsigned int>(endTime - startTime)};
+  return soundInfo;
+}
+
+Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (path to sound file)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  // Ensure the second argument is a number or undefined (volume)
+  if (info.Length() >= 2 && !info[1].IsNumber() && !info[1].IsUndefined()) {
+    Napi::TypeError::New(env, "Second argument must be a number or undefined (volume)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  // Ensure the third argument is a number or undefined (start time)
+  if (info.Length() >= 3 && !info[2].IsNumber() && !info[2].IsUndefined()) {
+    Napi::TypeError::New(env, "Third argument must be a number or undefined (speed)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  // Ensure the fourth argument is a number or undefined (end time)
+  if (info.Length() >= 4 && !info[3].IsNumber() && !info[3].IsUndefined()) {
+    Napi::TypeError::New(env, "Fourth argument must be a number or undefined (start time)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  // Ensure the fifth argument is a number or undefined (end time)
+  if (info.Length() >= 5 && !info[4].IsNumber() && !info[4].IsUndefined()) {
+    Napi::TypeError::New(env, "Fifth argument must be a number or undefined (end time)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Get the sound file path from the first argument
+  std::string filePath = info[0].As<Napi::String>().Utf8Value();
+  // Get the volume from the second argument
+  float volume = (info.Length() >= 2 && !info[1].IsUndefined()) ? info[1].As<Napi::Number>().FloatValue() : 1.0f;
+  // Get the speed from the third argument
+  float speed = (info.Length() >= 3 && !info[2].IsUndefined()) ? info[2].As<Napi::Number>().FloatValue() : 1.0f;
+  // Get the start time from the fourth argument
+  int startTime = (info.Length() >= 4 && !info[3].IsUndefined()) ? info[3].As<Napi::Number>().Int32Value() : -1;
+  // Get the end time from the fifth argument
+  int endTime = (info.Length() >= 5 && !info[4].IsUndefined()) ? info[4].As<Napi::Number>().Int32Value() : -1;
+
+  // Play the sound asynchronously
+  SoundInfo soundInfo = PlaySound(filePath, volume, speed, startTime, endTime);
+  if (soundInfo.id.empty()) {
+    Napi::TypeError::New(env, "Error playing sound: " + filePath).ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  Napi::Object result = Napi::Object::New(env);
+  result.Set("id", Napi::String::New(env, soundInfo.id));
+  result.Set("duration", Napi::Number::New(env, soundInfo.duration));
+  return result;
+}
+
+
+// =============================================================================
 // =========================== MODULE INITIALIZATION ===========================
 // =============================================================================
 
@@ -2304,6 +2701,17 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "performOcrOnImage"), Napi::Function::New(env, PerformOcrOnImageWrapper));
   exports.Set(Napi::String::New(env, "getPixelColorsFromImage"), Napi::Function::New(env, GetPixelColorsFromPngWrapper));
   exports.Set(Napi::String::New(env, "findImageTemplateMatches"), Napi::Function::New(env, findImageTemplateMatches));
+  exports.Set(Napi::String::New(env, "playSound"), Napi::Function::New(env, PlaySoundWrapper));
+  exports.Set(Napi::String::New(env, "pauseSound"), Napi::Function::New(env, PauseSoundWrapper));
+  exports.Set(Napi::String::New(env, "resumeSound"), Napi::Function::New(env, ResumeSoundWrapper));
+  exports.Set(Napi::String::New(env, "stopSound"), Napi::Function::New(env, StopSoundWrapper));
+  exports.Set(Napi::String::New(env, "getSoundStatus"), Napi::Function::New(env, GetSoundStatusWrapper));
+  exports.Set(Napi::String::New(env, "getSoundTrackTime"), Napi::Function::New(env, GetSoundTrackTimeWrapper));
+  exports.Set(Napi::String::New(env, "setSoundTrackTime"), Napi::Function::New(env, SetSoundTrackTimeWrapper));
+  exports.Set(Napi::String::New(env, "getSoundVolume"), Napi::Function::New(env, GetSoundVolumeWrapper));
+  exports.Set(Napi::String::New(env, "setSoundVolume"), Napi::Function::New(env, SetSoundVolumeWrapper));
+  exports.Set(Napi::String::New(env, "getSoundSpeed"), Napi::Function::New(env, GetSoundSpeedWrapper));
+  exports.Set(Napi::String::New(env, "setSoundSpeed"), Napi::Function::New(env, SetSoundSpeedWrapper));
   return exports;
 }
 
