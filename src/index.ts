@@ -37,6 +37,17 @@ const {
   performOcrOnImage,
   getPixelColorsFromImage,
   findImageTemplateMatches,
+  playSound,
+  pauseSound,
+  resumeSound,
+  stopSound,
+  getSoundStatus,
+  getSoundTrackTime,
+  setSoundTrackTime,
+  getSoundVolume,
+  setSoundVolume,
+  getSoundSpeed,
+  setSoundSpeed,
 } = require('../../build/Release/actionify.node') as typeof import("@napi/actionify");
 import { spawn } from 'child_process';
 import fs from 'fs';
@@ -2705,6 +2716,241 @@ export const window = {
 };
 
 /**
+ * @description Common sound operations.
+ */
+export const sound = {
+  /**
+   * @description Play an audio file.
+   *
+   * @param audioPath The path to the audio file to play.
+   * @param options The options for playing the audio file.
+   * @returns A promise that resolves when the audio file has finished playing.
+   *
+   * ---
+   * @example
+   * // Play an audio file
+   * sound.play("/path/to/audio.mp3");
+   *
+   * // Play an audio file with a custom volume (between 0 and 1)
+   * sound.play("/path/to/audio.mp3", { volume: 0.5 });
+   *
+   * // Play an audio file with a custom speed (between 0 and 4)
+   * sound.play("/path/to/audio.mp3", { speed: 2 });
+   *
+   * // Play an audio file with a custom start and end time (in milliseconds)
+   * sound.play("/path/to/audio.mp3", { time: { start: 5000, end: 10000 } });
+   */
+  play(audioPath: string, options?: { volume?: number, speed?: number, time?: { start?: number, end?: number } }) {
+    if (!filesystem.exists(audioPath)) {
+      throw new Error(`Audio file not found: ${audioPath}`);
+    }
+    const absoluteAudioPath = path.resolve(audioPath);
+    const volume = options?.volume ?? 1;
+    const speed = options?.speed ?? 1;
+    const startTime = options?.time?.start;
+    const endTime = options?.time?.end;
+    const sound = playSound(absoluteAudioPath, volume, speed, startTime, endTime);
+    const soundController = {
+      /**
+       * @description Pause the sound of the audio file.
+       *
+       * @returns The sound controller.
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Pause the sound of the audio file
+       * soundController.pause();
+       */
+      pause() {
+        pauseSound(sound.id);
+        return this;
+      },
+      /**
+       * @description Resume the sound of the audio file.
+       *
+       * @returns The sound controller.
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Pause the sound of the audio file
+       * soundController.pause();
+       * // Resume the sound of the audio file
+       * soundController.resume();
+       */
+      resume() {
+        resumeSound(sound.id);
+        return this;
+      },
+      /**
+       * @description Permanently stop the sound of the audio file.
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Permanently stop the sound of the audio file
+       * soundController.stop();
+       */
+      stop() {
+        stopSound(sound.id);
+      },
+      /**
+       * @description Get the duration (track length) of the audio file.
+       *
+       * @returns The duration of the audio file (in milliseconds).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Get the duration of the audio file
+       * const trackLength = soundController.duration;
+       */
+      get duration() {
+        return sound.duration;
+      },
+      /**
+       * @description Get the speed of the audio file.
+       *
+       * @returns The speed of the audio file (1 is normal speed).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Get the speed of the audio file
+       * const currentSpeed = soundController.speed;
+       */
+      get speed() {
+        return getSoundSpeed(sound.id);
+      },
+      /**
+       * @description Set the speed of the audio file.
+       *
+       * @param speed The speed of the audio file (1 is normal speed).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Set the speed of the audio file
+       * soundController.speed = 2;
+       */
+      set speed(speed: number) {
+        const clampedSpeed = Math.max(0, speed);
+        setSoundSpeed(sound.id, clampedSpeed);
+      },
+      /**
+       * @description Get the real-time status of the audio file.
+       *
+       * @returns The current status of the audio file.
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Get the current status of the audio file
+       * const currentStatus = soundController.status;
+       */
+      get status(): "playing" | "paused" | "stopped" | "closed" {
+        return getSoundStatus(sound.id) || "closed";
+      },
+      /**
+       * @description Get the volume of the audio file.
+       *
+       * @returns The volume of the audio file (between 0 and 1).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Get the volume of the audio file
+       * const volume = soundController.volume;
+       */
+      get volume(): number {
+        return getSoundVolume();
+      },
+      /**
+       * @description Set the volume of the audio file.
+       *
+       * @param volume The volume of the audio file (between 0 and 1).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Set the volume of the audio file
+       * soundController.volume = 0.5;
+       */
+      set volume(volume: number) {
+        setSoundVolume(volume);
+      },
+      /**
+       * @description Get the current position (track timestamp) of the audio file.
+       *
+       * @returns The current position of the audio file (in milliseconds).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Get the current position of the audio file
+       * const currentPosition = soundController.position;
+       */
+      get position(): number {
+        return getSoundTrackTime(sound.id);
+      },
+      /**
+       * @description Set the current position (track timestamp) of the audio file.
+       *
+       * @param position The position of the audio file (in milliseconds).
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Set the current position of the audio file
+       * soundController.position = 5000;
+       */
+      set position(position: number) {
+        const clampedPosition = Math.max(0, Math.min(sound.duration, position));
+        setSoundTrackTime(sound.id, clampedPosition);
+      },
+      /**
+       * @description Wait until the audio file has finished playing.
+       *
+       * @returns A promise that resolves when the audio file has finished playing.
+       *
+       * ---
+       * @example
+       * // Start playing an audio file
+       * const soundController = sound.play("/path/to/audio.mp3");
+       * // Wait until the audio file has finished playing
+       * await soundController.untilFinished;
+       */
+      untilFinished: new Promise<number>(async (resolve, reject) => {
+        await time.waitAsync(1);
+        const start = time.now();
+        while (
+          soundController.status === "playing" ||
+          soundController.status === "paused"
+        ) {
+          await time.waitAsync(100);
+        }
+        const end = time.now();
+        soundController.stop();
+        resolve(end - start);
+      }),
+    };
+    return soundController;
+  },
+};
+
+/**
  * @description Common clipboard operations.
  */
 export const clipboard = {
@@ -3656,6 +3902,7 @@ export default {
   keyboard,
   screen,
   window,
+  sound,
   clipboard,
   time,
   ai,

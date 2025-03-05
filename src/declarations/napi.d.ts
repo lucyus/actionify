@@ -44,6 +44,17 @@ declare module "@napi/actionify" {
     performOcrOnImage: (imagePath: string, language?: string) => string;
     getPixelColorsFromImage: (imagePath: string) => Array<Array<Color>>;
     findImageTemplateMatches: (imagePath: string, subImagePath: string, minSimilarity: number) => Array<MatchRegion>;
+    playSound: (audioPath: string, volume?: number, speed?: number, startTime?: number, endTime?: number) => { id: string, duration: number };
+    pauseSound: (soundId: string) => void;
+    resumeSound: (soundId: string) => void;
+    stopSound: (soundId: string) => void;
+    getSoundStatus: (soundId: string) => "playing" | "paused" | "stopped";
+    getSoundTrackTime: (soundId: string) => number;
+    setSoundTrackTime: (soundId: string, timestamp: number) => void;
+    getSoundVolume: () => number;
+    setSoundVolume: (volume: number) => void;
+    getSoundSpeed: (soundId: string) => number;
+    setSoundSpeed: (soundId: string, speed: number) => void;
   };
   export = value;
 }
