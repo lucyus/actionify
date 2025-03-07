@@ -48,6 +48,10 @@ const {
   setSoundVolume,
   getSoundSpeed,
   setSoundSpeed,
+  createTrayIcon,
+  removeTrayIcon,
+  updateTrayIcon,
+  updateTrayIconTooltip,
 } = require('../../build/Release/actionify.node') as typeof import("@napi/actionify");
 import { spawn } from 'child_process';
 import fs from 'fs';
@@ -3894,12 +3898,124 @@ export const loop = async (callback: (index: number) => Promise<void> | void, it
   });
 };
 
+/**
+ * @description Create a tray icon.
+ *
+ * ---
+ * @example
+ * // Create a default tray icon
+ * const trayIconController = trayIcon.create();
+ *
+ * // Create a custom tray icon
+ * const trayIconController = trayIcon.create({
+ *   tooltip: "Your tooltip text",
+ *   icon: "/path/to/icon.ico" // You can also use presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
+ * });
+ */
+export const trayIcon = {
+  /**
+   * @description Create a tray icon.
+   *
+   * @param options The options for creating the tray icon.
+   * @returns The tray icon controller.
+   *
+   * ---
+   * @example
+   * // Create a default tray icon
+   * const trayIconController = trayIcon.create();
+   *
+   * // Create a custom tray icon
+   * const trayIconController = trayIcon.create({
+   *   tooltip: "Your tooltip text",
+   *   icon: "/path/to/icon.ico"
+   * });
+   *
+   * // Create a custom tray icon using a preset icon
+   * const trayIconController = trayIcon.create({
+   *   tooltip: "Your tooltip text",
+   *   icon: "success" // All presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
+   * });
+   */
+  create(options?: { tooltip?: string, icon?: "default" | "running" | "completed" | "paused" | "stopped" | "info" | "success" | "warn" | "error" | string }) {
+    const tooltip = options?.tooltip ?? "Actionify";
+    const icon = options?.icon ?? "default";
+    const absoluteIconPath = ["default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"].includes(icon) ? path.resolve(__dirname, `assets/images/icons/${icon}.ico`) : path.resolve(icon);
+    if (!filesystem.exists(absoluteIconPath)) {
+      throw new Error(`File does not exist: ${absoluteIconPath}`);
+    }
+    const onTrayMenuRestartClick = (() => { restart(); });
+    const onTrayMenuExitClick = (() => { exit(); });
+
+    const trayIconWindowId = createTrayIcon(tooltip, absoluteIconPath, onTrayMenuRestartClick, onTrayMenuExitClick);
+
+    const trayIconController = {
+      update: {
+        /**
+         * @description Update the tray icon.
+         *
+         * @param iconOrIconPath The icon path or one of the presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
+         * @returns The tray icon controller.
+         *
+         * ---
+         * @example
+         * // Create a tray icon
+         * const trayIconController = trayIcon.create();
+         * // Update the tray icon with a custom icon
+         * trayIconController.update.icon("/path/to/icon.ico");
+         * // Update the tray icon with a preset icon
+         * trayIconController.update.icon("success"); // All presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
+         */
+        icon(iconOrIconPath: "default" | "running" | "completed" | "paused" | "stopped" | "info" | "success" | "warn" | "error" | string = "default") {
+          const newAbsoluteIconPath = ["default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"].includes(iconOrIconPath) ? path.resolve(__dirname, `assets/images/icons/${iconOrIconPath}.ico`) : path.resolve(iconOrIconPath);
+          if (!filesystem.exists(newAbsoluteIconPath)) {
+            throw new Error(`File does not exist: ${newAbsoluteIconPath}`);
+          }
+          updateTrayIcon(trayIconWindowId, newAbsoluteIconPath);
+          return trayIconController;
+        },
+        /**
+         * @description Update the tray icon tooltip.
+         *
+         * @param tooltip The tooltip text.
+         * @returns The tray icon controller.
+         *
+         * ---
+         * @example
+         * // Create a tray icon
+         * const trayIconController = trayIcon.create();
+         * // Update the tray icon tooltip
+         * trayIconController.update.tooltip("Your new tooltip text");
+         */
+        tooltip(tooltip: string) {
+          updateTrayIconTooltip(trayIconWindowId, tooltip);
+          return trayIconController;
+        }
+      },
+      /**
+       * @description Remove the tray icon.
+       *
+       * ---
+       * @example
+       * // Create a tray icon
+       * const trayIconController = trayIcon.create();
+       * // Remove the tray icon
+       * trayIconController.remove();
+       */
+      remove() {
+        removeTrayIcon(trayIconWindowId);
+      }
+    };
+    return trayIconController;
+  },
+};
+
 export default {
   input,
   mouse,
   keyboard,
   screen,
   window,
+  trayIcon,
   sound,
   clipboard,
   time,
