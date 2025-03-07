@@ -27,6 +27,7 @@
 #include <execution>
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
+#include <shellapi.h>
 
 
 // =============================================================================
@@ -123,6 +124,17 @@ std::map<int, std::set<int>> suppressedMouseKeys;
 std::map<int, std::set<int>> suppressedKeyboardKeys;
 std::mutex suppressedKeysMutex;
 
+// Tray icon variables
+std::mutex trayIconMutex;
+std::condition_variable trayIconCondition;
+std::atomic<bool> trayIconRunning(false);
+HWND trayIconWindowHwnd;
+NOTIFYICONDATA nid = { 0 };
+HMENU hMenu;
+std::function<void()> restartCallback;
+Napi::ThreadSafeFunction jsRestartCallback;
+std::function<void()> quitCallback;
+Napi::ThreadSafeFunction jsQuitCallback;
 
 // =============================================================================
 // ============================== UTILITY CLASSES ==============================
@@ -182,9 +194,47 @@ uint64_t Now() {
 // ============================= RESOURCE CLEANUP ==============================
 // =============================================================================
 
+// Function to clean up tray icon resources, ONLY CALLABLE BY TRAY ICON THREAD
+void CleanupTrayIcon() {
+  std::lock_guard<std::mutex> lock(trayIconMutex);
+  // Remove the tray icon before closing the window
+  Shell_NotifyIcon(NIM_DELETE, &nid);
+
+  // Destroy the window associated with the tray icon
+  if (trayIconWindowHwnd) {
+    DestroyWindow(trayIconWindowHwnd);
+  }
+
+  // Unregister the window class (only if not reusing the class name elsewhere)
+  UnregisterClassW(L"TrayIconClass", GetModuleHandle(NULL));
+
+  // Clear JS callbacks
+  jsRestartCallback.Abort();
+  jsQuitCallback.Abort();
+
+  // Reset tray icon state
+  trayIconRunning = false;
+  trayIconCondition.notify_all();
+}
+
 void CleanAll() {
-  running = false;
-  queueCondition.notify_all();
+  if (running.load()) {
+    running = false;
+    queueCondition.notify_all();
+    {
+      std::unique_lock<std::mutex> lock(hooksMutex);
+      hooksCondition.wait(lock, [] { return mouseHook == nullptr && keyboardHook == nullptr; });
+    }
+  }
+  if (trayIconRunning.load()) {
+    // Notify the tray icon thread to close
+    PostMessage(trayIconWindowHwnd, WM_CLOSE, 0, 0);
+    {
+      // Wait for the tray icon thread to close
+      std::unique_lock<std::mutex> lock(trayIconMutex);
+      trayIconCondition.wait(lock, [] { return !trayIconRunning.load(); });
+    }
+  }
 }
 
 Napi::Value CleanupResources(const Napi::CallbackInfo& info) {
@@ -381,6 +431,7 @@ void ClearHooks() {
   // Clear callback
   threadSafeJsFunction.Abort();
 
+  hooksCondition.notify_all();
 }
 
 // Thread to process events and invoke the JavaScript callback
@@ -635,6 +686,238 @@ Napi::Value UnsuppressInputEventsWrapper(const Napi::CallbackInfo& info) {
   // Return undefined
   return env.Undefined();
 }
+
+// Window event callback
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  switch (uMsg) {
+    case WM_COMMAND: {
+      switch (LOWORD(wParam)) {
+        case 1: { // Restart
+          if (restartCallback) restartCallback();
+          break;
+        }
+        case 2: { // Quit
+          if (quitCallback) quitCallback();
+          PostQuitMessage(0);
+          break;
+        }
+      }
+      break;
+    }
+    case WM_USER + 1: {
+      if (lParam == WM_RBUTTONUP) {
+        POINT pt;
+        GetCursorPos(&pt);
+        SetForegroundWindow(hwnd);
+        TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hwnd, NULL);
+      }
+      break;
+    }
+    case WM_USER + 2: {
+      // Change tray icon
+      nid.hIcon = reinterpret_cast<HICON>(wParam);
+      Shell_NotifyIcon(NIM_MODIFY, &nid);
+      break;
+    }
+    case WM_USER + 3: {
+      // Change tray icon tooltip
+      std::wstring tooltip = reinterpret_cast<wchar_t*>(lParam);
+      strncpy_s(nid.szTip, ConvertToUTF8(tooltip).c_str(), _countof(nid.szTip) - 1);
+      Shell_NotifyIcon(NIM_MODIFY, &nid);
+      break;
+    }
+    case WM_DESTROY: {
+      PostQuitMessage(0);
+      break;
+    }
+    default: {
+      return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+  }
+  return 0;
+}
+
+// Create tray icon
+HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath, std::function<void()> onRestart, std::function<void()> onQuit) {
+  if (trayIconRunning) {
+    return trayIconWindowHwnd;
+  }
+  std::thread nestedThread([name, iconPath, onRestart, onQuit]() {
+    {
+      std::lock_guard<std::mutex> lock(trayIconMutex);
+      restartCallback = onRestart;
+      quitCallback = onQuit;
+
+      HINSTANCE hInstance = GetModuleHandle(NULL);
+      WNDCLASSW wc = { 0 };
+      wc.lpfnWndProc = WindowProc;
+      wc.hInstance = hInstance;
+      wc.lpszClassName = L"TrayIconClass";
+      RegisterClassW(&wc);
+
+      HWND hwnd = CreateWindowW(L"TrayIconClass", name.c_str(), 0, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
+      trayIconWindowHwnd = hwnd;
+
+      hMenu = CreatePopupMenu();
+      AppendMenuW(hMenu, MF_STRING, 1, L"Restart");
+      AppendMenuW(hMenu, MF_STRING, 2, L"Quit");
+
+      nid.cbSize = sizeof(NOTIFYICONDATA);
+      nid.hWnd = hwnd;
+      nid.uID = 1;
+      nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+      nid.uCallbackMessage = WM_USER + 1;
+      strncpy_s(nid.szTip, ConvertToUTF8(name).c_str(), _countof(nid.szTip) - 1);
+      nid.hIcon = static_cast<HICON>(LoadImageW(NULL, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
+
+      Shell_NotifyIcon(NIM_ADD, &nid);
+    }
+    trayIconRunning = true;
+    trayIconCondition.notify_all();
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    CleanupTrayIcon();
+  });
+  nestedThread.detach();
+
+  {
+    std::unique_lock<std::mutex> lock(trayIconMutex);
+    trayIconCondition.wait(lock, [] { return trayIconRunning.load(); });
+  }
+  return trayIconWindowHwnd;
+}
+
+Napi::Value CreateTrayIconWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsFunction() || !info[3].IsFunction()) {
+    Napi::TypeError::New(env, "Expected four arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  std::u16string u16Name = info[0].As<Napi::String>().Utf16Value();
+  std::wstring name = std::wstring(u16Name.begin(), u16Name.end());
+  std::u16string u16IconPath = info[1].As<Napi::String>().Utf16Value();
+  std::wstring iconPath = std::wstring(u16IconPath.begin(), u16IconPath.end());
+  Napi::Function onRestart = info[2].As<Napi::Function>();
+  Napi::Function onQuit = info[3].As<Napi::Function>();
+
+  jsRestartCallback = Napi::ThreadSafeFunction::New(
+    env, // the main NAPI environment
+    onRestart, // callback function that needs to be called in thread(s)
+    "Tray Icon Restart Callback", // JS string used to provide diagnostic information
+    0, // maximum queue size (0 for unlimited)
+    1, // initial number of threads which will be making use of this function
+    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
+    }
+  );
+
+  jsQuitCallback = Napi::ThreadSafeFunction::New(
+    env, // the main NAPI environment
+    onQuit, // callback function that needs to be called in thread(s)
+    "Tray Icon Quit Callback", // JS string used to provide diagnostic information
+    0, // maximum queue size (0 for unlimited)
+    1, // initial number of threads which will be making use of this function
+    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
+    }
+  );
+
+  // Create the tray icon
+  HWND trayIconId = CreateTrayIcon(name, iconPath, [&onRestart]() {
+    jsRestartCallback.BlockingCall([](const Napi::Env& env, const Napi::Function& jsCallback) {
+      if (!jsCallback.IsEmpty()) {
+        jsCallback.Call({ });
+      }
+    });
+  }, [&onQuit]() {
+    jsQuitCallback.BlockingCall([](const Napi::Env& env, const Napi::Function& jsCallback) {
+      if (!jsCallback.IsEmpty()) {
+        jsCallback.Call({ });
+      }
+    });
+  });
+
+  return Napi::Number::New(env, reinterpret_cast<uintptr_t>(trayIconId));
+}
+
+Napi::Value RemoveTrayIconWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Expected a number argument").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!trayIconRunning) {
+    return env.Undefined();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+
+  PostMessage(trayIconWindowId, WM_CLOSE, 0, 0);
+  {
+    std::unique_lock<std::mutex> lock(trayIconMutex);
+    trayIconCondition.wait(lock, [] { return !trayIconRunning.load(); });
+  }
+
+  return env.Undefined();
+}
+
+void UpdateTrayIcon(HWND hwnd, const std::wstring& newIconPath) {
+  HICON hNewIcon = static_cast<HICON>(LoadImageW(NULL, newIconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
+
+  if (hNewIcon) {
+    // Send message to the window to update the tray icon
+    PostMessage(hwnd, WM_USER + 2, reinterpret_cast<WPARAM>(hNewIcon), 0);
+  }
+}
+
+Napi::Value UpdateTrayIconWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsString()) {
+    Napi::TypeError::New(env, "Expected a number and string arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  std::u16string u16NewIconPath = info[1].As<Napi::String>().Utf16Value();
+  std::wstring newIconPath = std::wstring(u16NewIconPath.begin(), u16NewIconPath.end());
+
+  UpdateTrayIcon(trayIconWindowId, newIconPath);
+
+  return env.Undefined();
+}
+
+void UpdateTrayIconTooltip(HWND hwnd, const std::wstring& newTooltip) {
+  PostMessage(hwnd, WM_USER + 3, 0, reinterpret_cast<LPARAM>(newTooltip.c_str()));
+}
+
+Napi::Value UpdateTrayIconTooltipWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsString()) {
+    Napi::TypeError::New(env, "Expected a number and string arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  std::u16string u16NewTooltip = info[1].As<Napi::String>().Utf16Value();
+  std::wstring newTooltip = std::wstring(u16NewTooltip.begin(), u16NewTooltip.end());
+
+  UpdateTrayIconTooltip(trayIconWindowId, newTooltip);
+
+  return env.Undefined();
+}
+
 
 // =============================================================================
 // =============================== TIME FUNCTIONS ==============================
@@ -2712,6 +2995,10 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "setSoundVolume"), Napi::Function::New(env, SetSoundVolumeWrapper));
   exports.Set(Napi::String::New(env, "getSoundSpeed"), Napi::Function::New(env, GetSoundSpeedWrapper));
   exports.Set(Napi::String::New(env, "setSoundSpeed"), Napi::Function::New(env, SetSoundSpeedWrapper));
+  exports.Set(Napi::String::New(env, "createTrayIcon"), Napi::Function::New(env, CreateTrayIconWrapper));
+  exports.Set(Napi::String::New(env, "removeTrayIcon"), Napi::Function::New(env, RemoveTrayIconWrapper));
+  exports.Set(Napi::String::New(env, "updateTrayIcon"), Napi::Function::New(env, UpdateTrayIconWrapper));
+  exports.Set(Napi::String::New(env, "updateTrayIconTooltip"), Napi::Function::New(env, UpdateTrayIconTooltipWrapper));
   return exports;
 }
 
