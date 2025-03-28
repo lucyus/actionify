@@ -28,6 +28,8 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 #include <shellapi.h>
+#include <shellscalingapi.h>
+#pragma comment(lib, "Shcore.lib")
 
 
 // =============================================================================
@@ -1935,6 +1937,15 @@ Napi::Value CopyFileToClipboardWrapper(const Napi::CallbackInfo& info) {
 // ============================= SCREEN FUNCTIONS ==============================
 // =============================================================================
 
+/**
+ * Function to activate DPI awareness.
+ * It ensures coordinates don't get scaled based on monitor DPI.
+ * See: Windows Settings > Display > Monitor Scaling.
+ */
+void ActivateDpiAwareness() {
+  SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+}
+
 // Function to enumerate monitors and store their details
 BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
   std::vector<MonitorInfo>* monitors = reinterpret_cast<std::vector<MonitorInfo>*>(dwData);
@@ -2946,6 +2957,7 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
 
 // Initialize the module and export the function
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  ActivateDpiAwareness();
   exports.Set(Napi::String::New(env, "setCursorPos"), Napi::Function::New(env, SetCursorPosWrapper));
   exports.Set(Napi::String::New(env, "getCursorPos"), GetCursorPosWrapper(env));
   exports.Set(Napi::String::New(env, "leftClickDown"), Napi::Function::New(env, LeftClickDown));
