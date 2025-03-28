@@ -2382,9 +2382,39 @@ export const window = {
    */
   list(): Window[] {
     const windowsInfo = listWindows();
+    const getNewWindowInfoById: (id: number) => WindowInfo | undefined = (id: number) => {
+      return listWindows().find((windowInfo) => windowInfo.id === id);
+    };
     const windows = windowsInfo.map<Window>((windowInfo: WindowInfo) => {
       return {
-        ...windowInfo,
+        id: windowInfo.id,
+        pid: windowInfo.pid,
+        get title() {
+          return getNewWindowInfoById(this.id)?.title ?? windowInfo.title;
+        },
+        executableFile: windowInfo.executableFile,
+        className: windowInfo.className,
+        get position() {
+          return getNewWindowInfoById(this.id)?.position ?? windowInfo.position;
+        },
+        get dimensions() {
+          return getNewWindowInfoById(this.id)?.dimensions ?? windowInfo.dimensions;
+        },
+        get isMinimized() {
+          return getNewWindowInfoById(this.id)?.isMinimized ?? windowInfo.isMinimized;
+        },
+        get isMaximized() {
+          return getNewWindowInfoById(this.id)?.isMaximized ?? windowInfo.isMaximized;
+        },
+        get isRestored() {
+          return getNewWindowInfoById(this.id)?.isRestored ?? windowInfo.isRestored;
+        },
+        get isFocused() {
+          return getNewWindowInfoById(this.id)?.isFocused ?? windowInfo.isFocused;
+        },
+        get isAlwaysOnTop() {
+          return getNewWindowInfoById(this.id)?.isAlwaysOnTop ?? windowInfo.isAlwaysOnTop;
+        },
         minimize() {
           if (this.isMinimized) {
             return true;
