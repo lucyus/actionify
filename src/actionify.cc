@@ -43,6 +43,8 @@ struct MonitorInfo {
   int originY;
   int width;
   int height;
+  float scaleX;
+  float scaleY;
 };
 
 // Structure to hold window information
@@ -78,6 +80,12 @@ struct Position {
 struct Dimension {
   int width;
   int height;
+};
+
+// Structure to hold 2D scale
+struct Scale {
+  float x;
+  float y;
 };
 
 // Structure to hold a matched region
@@ -1946,6 +1954,16 @@ void ActivateDpiAwareness() {
   SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 }
 
+Scale GetMonitorDpi(HMONITOR hMonitor) {
+  UINT dpiX;
+  UINT dpiY;
+
+  if (GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY) != S_OK) {
+    return { 1, 1 };
+  }
+  return { dpiX / 96.0f, dpiY / 96.0f };
+}
+
 // Function to enumerate monitors and store their details
 BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
   std::vector<MonitorInfo>* monitors = reinterpret_cast<std::vector<MonitorInfo>*>(dwData);
@@ -1955,12 +1973,15 @@ BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
   if (GetMonitorInfo(hMonitor, &monitorInfo)) {
     int width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
     int height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+    Scale monitorScale = GetMonitorDpi(hMonitor);
     monitors->push_back({
       static_cast<int>(monitors->size()),
       monitorInfo.rcMonitor.left,
       monitorInfo.rcMonitor.top,
       width,
-      height
+      height,
+      monitorScale.x,
+      monitorScale.y
     });
   }
 
@@ -1978,6 +1999,10 @@ Napi::Object BuildJSMonitorInfo(const Napi::Env& env, const MonitorInfo& monitor
   dimensions.Set(Napi::String::New(env, "width"), Napi::Number::New(env, monitor.width));
   dimensions.Set(Napi::String::New(env, "height"), Napi::Number::New(env, monitor.height));
   monitorObj.Set(Napi::String::New(env, "dimensions"), dimensions);
+  Napi::Object scale = Napi::Object::New(env);
+  scale.Set(Napi::String::New(env, "x"), Napi::Number::New(env, monitor.scaleX));
+  scale.Set(Napi::String::New(env, "y"), Napi::Number::New(env, monitor.scaleY));
+  monitorObj.Set(Napi::String::New(env, "scale"), scale);
   return monitorObj;
 }
 
