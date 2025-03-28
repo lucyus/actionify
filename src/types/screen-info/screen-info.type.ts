@@ -8,4 +8,8 @@ export type ScreenInfo = {
     width: number;
     height: number;
   };
+  scale: {
+    x: number;
+    y: number;
+  };
 };
