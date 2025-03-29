@@ -4039,7 +4039,7 @@ export const trayIcon = {
   },
 };
 
-export default {
+export const Actionify = {
   input,
   mouse,
   keyboard,
@@ -4055,3 +4055,5 @@ export default {
   restart,
   loop
 };
+
+export default Actionify;
