@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "actionify",
-      "sources": ["src/actionify.cc"],
+      "sources": ["src/addon/actionify/actionify.cc"],
       "include_dirs": [
         "node_modules/node-addon-api"
       ],
