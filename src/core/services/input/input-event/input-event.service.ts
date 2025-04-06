@@ -475,7 +475,7 @@ export class InputEventService {
    *
    * @param currentEvent
    */
-  public static get mainListener() {
+  public static get mainListener(): (event: InputEvent) => void {
     return InputEventService.#mainListener;
   }
 
