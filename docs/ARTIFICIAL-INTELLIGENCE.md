@@ -9,7 +9,7 @@
 ### 1.1. Extract text from an image
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Extract text from an image using system default language
 const text = Actionify.ai.image("/path/to/image.png").text();
@@ -54,7 +54,7 @@ const text = Actionify.ai.image("/path/to/image.png").text("ar");
 #### 2.1.1. Perfect-only matches
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Find regions in the image that exactly match the given sub-image
 const perfectMatches = Actionify.ai
@@ -81,7 +81,7 @@ for (const perfectMatch of perfectMatches) {
 #### 2.1.2. Approximate matches
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Find regions in the image, ranked from most to least likely to match the given sub-image
 const matches = Actionify.ai
@@ -109,7 +109,7 @@ if (bestMatch) {
 #### 2.1.3. All matches
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Find all regions in the image, ordered from most to least likely to contain the given sub-image
 const allMatches = Actionify.ai

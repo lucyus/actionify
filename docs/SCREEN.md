@@ -24,7 +24,7 @@ All screen-related positions are relative to the top-left corner of the main scr
 ### 1.1. List all active screens
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const screens = Actionify.screen.list();
 ```
@@ -36,7 +36,7 @@ See also: [ScreenInfo](../src/core/types/screen-info/screen-info.type.ts), [Scre
 ### 2.1. Take a screenshot
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Take a screenshot of the main monitor
 const screenshotFilepath = Actionify.screen.shot();
@@ -56,7 +56,7 @@ const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, "/path/to/s
 ### 2.2. Get the current color of a pixel
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get the color of the pixel at the current mouse position
 const color = Actionify.screen.pixel.color();

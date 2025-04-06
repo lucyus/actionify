@@ -11,7 +11,7 @@
 #### 1.1.1. Simulate instantaneous mouse movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Move mouse to (100, 100)
 Actionify.mouse.move(100, 100);
@@ -32,7 +32,7 @@ Actionify.mouse.move();
 
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Move mouse to (100, 100) in 1 second
 await Actionify.mouse.move(100, 100, {
@@ -45,7 +45,7 @@ await Actionify.mouse.move(100, 100, {
 #### 1.1.3. Simulate delayed linear motion mouse movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Move mouse to (100, 100) in a linear motion over 1 second
 await Actionify.mouse.move(100, 100, {
@@ -62,7 +62,7 @@ await Actionify.mouse.move(100, 100, {
 #### 1.1.4. Simulate delayed arc motion mouse movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Move mouse to (100, 100) in an arc motion over 1 second
 await Actionify.mouse.move(100, 100, {
@@ -83,7 +83,7 @@ await Actionify.mouse.move(100, 100, {
 #### 1.1.5. Simulate delayed wave motion mouse movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Move mouse to (100, 100) in a wave motion over 1 second
 await Actionify.mouse.move(100, 100, {
@@ -106,7 +106,7 @@ await Actionify.mouse.move(100, 100, {
 ### 1.2. Simulate mouse left button events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Press [Left Mouse Button] immediately
 Actionify.mouse.left.down();
@@ -127,7 +127,7 @@ await Actionify.mouse.left.click({ delay: 1000 });
 ### 1.3. Simulate mouse middle button events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Press [Middle Mouse Button] immediately
 Actionify.mouse.middle.down();
@@ -148,7 +148,7 @@ await Actionify.mouse.middle.click({ delay: 1000 });
 ### 1.4. Simulate mouse right button events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Press [Right Mouse Button] immediately
 Actionify.mouse.right.down();
@@ -173,7 +173,7 @@ await Actionify.mouse.right.click({ delay: 1000 });
 ##### 1.5.1.1. Simulate instantaneous scroll down events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll down immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
 Actionify.mouse.scroll.down();
@@ -187,7 +187,7 @@ Actionify.mouse.scroll.down(240);
 ##### 1.5.1.2. Simulate delayed scroll down events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll down in 1 second with system default's wheel deltas (commonly 120)
 await Actionify.mouse.scroll.down(undefined, { delay: 1000 });
@@ -201,7 +201,7 @@ await Actionify.mouse.scroll.down(240, { delay: 1000 });
 ##### 1.5.1.3. Simulate delayed linear motion scroll down events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll down linearly over 1 second with system default's wheel deltas (commonly 120)
 await Actionify.mouse.scroll.down(undefined, {
@@ -227,7 +227,7 @@ await Actionify.mouse.scroll.down(240, {
 ##### 1.5.2.1. Simulate instantaneous scroll up events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll up immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
 Actionify.mouse.scroll.up();
@@ -241,7 +241,7 @@ Actionify.mouse.scroll.up(240);
 ##### 1.5.2.2. Simulate delayed scroll up events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll up in 1 second with system default's wheel deltas (commonly 120)
 await Actionify.mouse.scroll.up(undefined, { delay: 1000 });
@@ -255,7 +255,7 @@ await Actionify.mouse.scroll.up(240, { delay: 1000 });
 ##### 1.5.2.3. Simulate delayed linear motion scroll up events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Scroll up linearly over 1 second with system default's wheel deltas (commonly 120)
 await Actionify.mouse.scroll.up(undefined, {
@@ -281,7 +281,7 @@ await Actionify.mouse.scroll.up(240, {
 ### 2.1. Get the current mouse coordinates
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 Actionify.mouse.x;
 Actionify.mouse.y;
@@ -292,7 +292,7 @@ Actionify.mouse.y;
 ### 2.2. Set the current mouse coordinates
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 Actionify.mouse.x = 100;
 Actionify.mouse.y = 100;
@@ -309,7 +309,7 @@ Actionify.mouse.y = 100;
 ##### 3.1.1.1. Start listening to all mouse events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
   .all((mouseEvent, listenerController) => {
@@ -323,7 +323,7 @@ const mouseListenerControl = Actionify.mouse.events
 
 You can **listen to single or multiple mouse events** in a single listener:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
   .on("left", "right")
@@ -334,7 +334,7 @@ const mouseListenerControl = Actionify.mouse.events
 
 You can also **listen to mouse combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const mouseListenerControl = Actionify.mouse.events
   .on("left down", "right down")
@@ -395,7 +395,7 @@ Actionify.mouse.events.off(mouseListener);
 
 You can **suppress a single or multiple mouse inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [Left Mouse Button] and [Right Mouse Button] press/release events
 Actionify.mouse.events.suppress("left", "right");
@@ -403,7 +403,7 @@ Actionify.mouse.events.suppress("left", "right");
 
 You can also **suppress specific mouse states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [Left Mouse Button] and [Right Mouse Button] press events only
 Actionify.mouse.events.suppress("left down", "right down");
@@ -419,7 +419,7 @@ Actionify.mouse.events.suppress("left down", "right down");
 
 You can **unsuppress a single or multiple mouse inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [Left Mouse Button] and [Right Mouse Button] press/release events
 Actionify.mouse.events.unsuppress("left", "right");
@@ -427,7 +427,7 @@ Actionify.mouse.events.unsuppress("left", "right");
 
 You can also **unsuppress specific mouse states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [Left Mouse Button] and [Right Mouse Button] press events only
 Actionify.mouse.events.unsuppress("left down", "right down");
@@ -444,7 +444,7 @@ Actionify.mouse.events.unsuppress("left down", "right down");
 #### 4.1.1. Start recording all mouse events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all mouse events into an Actionify Track (.act) file.
 const mouseRecorderControl = Actionify.mouse.track
@@ -457,7 +457,7 @@ const mouseRecorderControl = Actionify.mouse.track
 
 You can **record a single or multiple mouse inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [Left Mouse Button] and [Mouse Movement] mouse events into an Actionify Track (.act) file.
 const mouseRecorderControl = Actionify.mouse.track
@@ -468,7 +468,7 @@ const mouseRecorderControl = Actionify.mouse.track
 
 You can also **only record mouse input combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [Left Mouse Button] and [Right Mouse Button] combined press events into an Actionify Track (.act) file.
 const mouseRecorderControl = Actionify.mouse.track
@@ -510,7 +510,7 @@ mouseRecorderControl.stop();
 ### 5.1. Replay recorded input actions
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Replay all input events from an Actionify Track (.act) file
 await Actionify.mouse.track.replay("/path/to/mouse-record.act");
