@@ -14,7 +14,7 @@ const Actionify = require("@lucyus/actionify");
 const windows = Actionify.window.list();
 ```
 
-> See also: [Window](../src/types/window/window.type.ts), [WindowInfo](../src/types/window-info/window-info.type.ts), [WindowInteraction](../src/types/window-interaction/window-interaction.type.ts)
+> See also: [Window](../src/core/types/window/window.type.ts), [WindowInfo](../src/core/types/window/window-info/window-info.type.ts), [WindowInteraction](../src/core/types/window/window-interaction/window-interaction.type.ts)
 
 ### 1.2. Search for a specific running window
 
@@ -34,7 +34,7 @@ const window = Actionify.window.get("My App");
 const window = Actionify.window.get("myapp.exe");
 ```
 
-> See also: [Window](../src/types/window/window.type.ts), [WindowInfo](../src/types/window-info/window-info.type.ts), [WindowInteraction](../src/types/window-interaction/window-interaction.type.ts)
+> See also: [Window](../src/core/types/window/window.type.ts), [WindowInfo](../src/core/types/window/window-info/window-info.type.ts), [WindowInteraction](../src/core/types/window/window-interaction/window-interaction.type.ts)
 
 ## 2. Window Interaction
 

@@ -76,7 +76,7 @@ for (const perfectMatch of perfectMatches) {
   * When omitted, `minSimilarity` defaults to `0.5`.
 
 
-> See also: [MatchRegion](../src/types/match-region/match-region.type.ts)
+> See also: [MatchRegion](../src/core/types/match-region/match-region.type.ts)
 
 #### 2.1.2. Approximate matches
 
@@ -104,7 +104,7 @@ if (bestMatch) {
   * A `minSimilarity` of `0` will return all regions, with their associated `similarity` scores ranging from `0` to `1` (essentially, this produces a [correlation map](https://en.wikipedia.org/wiki/Correlation)).
   * When omitted, `minSimilarity` defaults to `0.5`.
 
-> See also: [MatchRegion](../src/types/match-region/match-region.type.ts)
+> See also: [MatchRegion](../src/core/types/match-region/match-region.type.ts)
 
 #### 2.1.3. All matches
 
@@ -131,7 +131,7 @@ for (const match of allMatches) {
   * A `minSimilarity` of `0` will return all regions, with their associated `similarity` scores ranging from `0` to `1` (essentially, this produces a [correlation map](https://en.wikipedia.org/wiki/Correlation)).
   * When omitted, `minSimilarity` defaults to `0.5`.
 
-> See also: [MatchRegion](../src/types/match-region/match-region.type.ts)
+> See also: [MatchRegion](../src/core/types/match-region/match-region.type.ts)
 
 ---
 

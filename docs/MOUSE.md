@@ -317,7 +317,7 @@ const mouseListenerControl = Actionify.mouse.events
   });
 ```
 
-> See also: [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [MouseListenerController](../src/types/event/mouse/mouse-listener-controller/mouse-listener-controller.type.ts)
+> See also: [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
 
 ##### 3.1.1.2. Start listening to specific mouse events
 
@@ -343,7 +343,7 @@ const mouseListenerControl = Actionify.mouse.events
   });
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [MouseListenerController](../src/types/event/mouse/mouse-listener-controller/mouse-listener-controller.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
 
 #### 3.1.2. Pause a mouse listener
 
@@ -353,7 +353,7 @@ Once you have [started a mouse listener](#311-start-a-mouse-listener), you can p
 mouseListenerControl.pause();
 ```
 
-You can also pause any [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
+You can also pause any [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.mouse.events.pause(mouseListener);
@@ -367,7 +367,7 @@ Once you have [paused a mouse listener](#312-pause-a-mouse-listener), you can re
 mouseListenerControl.resume();
 ```
 
-You can also resume any [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
+You can also resume any [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.mouse.events.resume(mouseListener);
@@ -381,7 +381,7 @@ Once you have [started a mouse listener](#311-start-a-mouse-listener), you can s
 mouseListenerControl.off();
 ```
 
-You can also stop any [MouseListener](../src/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
+You can also stop any [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.mouse.events.off(mouseListener);
@@ -413,7 +413,7 @@ Actionify.mouse.events.suppress("left down", "right down");
 
 > ⚠️ Use Suppress Mouse Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Start a Mouse Listener](#311-start-a-mouse-listener)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Start a Mouse Listener](#311-start-a-mouse-listener)
 
 #### 3.2.2. Unsuppress mouse events
 
@@ -433,7 +433,7 @@ const Actionify = require("@lucyus/actionify");
 Actionify.mouse.events.unsuppress("left down", "right down");
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts)
 
 ## 4. Mouse Recorder
 
@@ -477,7 +477,7 @@ const mouseRecorderControl = Actionify.mouse.track
   .start();
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts)
 
 ### 4.2. Pause a mouse recorder
 
