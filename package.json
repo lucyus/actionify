@@ -1,6 +1,6 @@
 {
   "name": "@lucyus/actionify",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Actionify is a lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, windows and sound, with additional features like OCR and more.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -48,11 +48,9 @@
   ],
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2",
-    "rimraf": "^6.0.1",
+    "node-addon-api": "^8.3.0",
     "node-gyp": "^11.0.0",
-    "node-addon-api": "^8.3.0"
-  },
-  "dependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.2"
   }
 }
