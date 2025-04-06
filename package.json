@@ -7,11 +7,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rimraf lib && node-gyp clean",
-    "copy:assets": "rimraf lib/src/assets && cp -r src/assets lib/src/assets",
+    "copy:assets": "rimraf lib/assets && cp -r src/assets lib/assets",
     "build": "npm run clean && node-gyp configure && node-gyp rebuild && tsc -p . && npm run copy:assets",
     "build:prod": "npm run clean && node-gyp configure --release && node-gyp rebuild --release && tsc -p . --sourceMap false --declarationMap false && npm run copy:assets",
     "deploy": "npm run build:prod && npm publish --access public",
-    "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [`lib/${(process.argv[1] || '').replace('.ts', '.js')}`], { stdio: 'inherit', shell: true });\"",
+    "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [process.argv[1].replace('src', 'lib').replace('.ts', '.js')], { stdio: 'inherit', shell: true });\"",
     "build:execute": "npm run build && npm run execute",
     "fastbuild:execute": "tsc -p . && npm run copy:assets && npm run execute",
     "install": "exit 0"
