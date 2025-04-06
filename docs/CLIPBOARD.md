@@ -9,7 +9,7 @@
 ### 1.1. Copy text to clipboard
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const text = Actionify.clipboard.copy(`
 Hello,
@@ -23,7 +23,7 @@ world!
 ### 1.2. Copy a file or directory to clipboard
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Copy file to clipboard
 const absoluteFilePath = Actionify.clipboard.copy("/path/to/file.extension");
@@ -37,7 +37,7 @@ const absoluteDirectoryPath = Actionify.clipboard.copy("/path/to/directory/");
 ## 2. Paste from Clipboard
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 Actionify.clipboard.paste();
 ```

@@ -9,7 +9,7 @@
 ### 1.1. Simulate keyboard events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Press [A] key immediately
 Actionify.keyboard.down("a");
@@ -49,7 +49,7 @@ await Actionify.keyboard.tap(0x41, { delay: 1000 });
 ### 1.2. Type Unicode-compatible text
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Type a multi-line text with unicode characters immediately
 Actionify.keyboard.type(`
@@ -77,7 +77,7 @@ world!
 ##### 2.1.1.1. Start listening to all keyboard events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
   .all((keyboardEvent, listenerController) => {
@@ -91,7 +91,7 @@ const keyboardListenerControl = Actionify.keyboard.events
 
 You can **listen to single or multiple keyboard inputs** in a single listener:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
   .on("a", "b")
@@ -102,7 +102,7 @@ const keyboardListenerControl = Actionify.keyboard.events
 
 You can also **listen to keyboard input combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const keyboardListenerControl = Actionify.keyboard.events
   .on("lctrl down", "a down")
@@ -163,7 +163,7 @@ Actionify.keyboard.events.off(keyboardListener);
 
 You can **suppress a single or multiple keyboard inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [A] and [B] press/release events
 Actionify.keyboard.events.suppress("a", "b");
@@ -171,7 +171,7 @@ Actionify.keyboard.events.suppress("a", "b");
 
 You can also **suppress specific key states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [Left Control] and [A] press events only
 Actionify.keyboard.events.suppress("lctrl down", "a down");
@@ -187,7 +187,7 @@ Actionify.keyboard.events.suppress("lctrl down", "a down");
 
 You can **unsuppress a single or multiple keyboard inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [A] and [B] press/release events
 Actionify.keyboard.events.unsuppress("a", "b");
@@ -195,7 +195,7 @@ Actionify.keyboard.events.unsuppress("a", "b");
 
 You can also **unsuppress specific key states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [A] and [B] press events only
 Actionify.keyboard.events.unsuppress("a down", "b down");
@@ -212,7 +212,7 @@ Actionify.keyboard.events.unsuppress("a down", "b down");
 #### 3.1.1. Start recording all keyboard events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all keyboard events into an Actionify Track (.act) file.
 const keyboardRecorderControl = Actionify.keyboard.track
@@ -225,7 +225,7 @@ const keyboardRecorderControl = Actionify.keyboard.track
 
 You can **record a single or multiple keyboard inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [A], [B] keyboard events into an Actionify Track (.act) file.
 const keyboardRecorderControl = Actionify.keyboard.track
@@ -236,7 +236,7 @@ const keyboardRecorderControl = Actionify.keyboard.track
 
 You can also **only record key combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [Left Control] and [A] combined press events into an Actionify Track (.act) file.
 const keyboardRecorderControl = Actionify.keyboard.track
@@ -278,7 +278,7 @@ keyboardRecorderControl.stop();
 ### 4.1. Replay recorded input actions
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Replay all input events from an Actionify Track (.act) file
 await Actionify.keyboard.track.replay("/path/to/keyboard-record.act");

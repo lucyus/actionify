@@ -21,7 +21,7 @@ Other formats may require external codecs.
 ### 1.1. Start Playback
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Play an audio file
 const soundController = Actionify.sound.play("/path/to/audio.mp3");

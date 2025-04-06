@@ -13,7 +13,7 @@
 ##### 1.1.1.1. Start listening to all mouse/keyboard events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
   .all((event, listenerController) => {
@@ -27,7 +27,7 @@ const inputListenerControl = Actionify.input.events
 
 You can **listen to single or multiple inputs** in a single listener:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
   .on("a", "b", "left", "right")
@@ -38,7 +38,7 @@ const inputListenerControl = Actionify.input.events
 
 You can also **listen to input combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const inputListenerControl = Actionify.input.events
   .on("lctrl down", "left down")
@@ -99,7 +99,7 @@ Actionify.input.events.off(inputListener);
 
 You can **suppress a single or multiple inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [A] and [Left Mouse Button] press/release events
 Actionify.input.events.suppress("a", "left");
@@ -107,7 +107,7 @@ Actionify.input.events.suppress("a", "left");
 
 You can also **suppress specific input states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Block all [A] and [Left Mouse Button] press events only
 Actionify.input.events.suppress("a down", "left down");
@@ -123,7 +123,7 @@ Actionify.input.events.suppress("a down", "left down");
 
 You can **unsuppress a single or multiple inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [A] and [Left Mouse Button] press/release events
 Actionify.input.events.unsuppress("a", "left");
@@ -131,7 +131,7 @@ Actionify.input.events.unsuppress("a", "left");
 
 You can also **unsuppress specific input states**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Restore all [A] and [Left Mouse Button] press events only
 Actionify.input.events.unsuppress("a down", "left down");
@@ -148,7 +148,7 @@ Actionify.input.events.unsuppress("a down", "left down");
 #### 2.1.1. Start recording all mouse/keyboard events
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all input events into an Actionify Track (.act) file.
 const inputRecorderControl = Actionify.input.track
@@ -161,7 +161,7 @@ const inputRecorderControl = Actionify.input.track
 
 You can **record a single or multiple inputs** at the same time:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [A], [B], [Left Mouse Button], [Right Mouse Button] input events into an Actionify Track (.act) file.
 const inputRecorderControl = Actionify.input.track
@@ -172,7 +172,7 @@ const inputRecorderControl = Actionify.input.track
 
 You can also **only record input combinations**:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Record all [Left Control] and [Left Mouse Button] combined press events into an Actionify Track (.act) file.
 const inputRecorderControl = Actionify.input.track
@@ -214,7 +214,7 @@ inputRecorderControl.stop();
 ### 3.1 Replay recorded inputs
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Replay all input events from an Actionify Track (.act) file
 await Actionify.input.track.replay("/path/to/input-record.act");

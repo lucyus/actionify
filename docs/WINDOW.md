@@ -9,7 +9,7 @@
 ### 1.1. List all running windows
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const windows = Actionify.window.list();
 ```
@@ -19,7 +19,7 @@ const windows = Actionify.window.list();
 ### 1.2. Search for a specific running window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get window information using its window ID
 const window = Actionify.window.get(123);
@@ -43,7 +43,7 @@ const window = Actionify.window.get("myapp.exe");
 #### 2.1.1. Instantaneous window movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -68,7 +68,7 @@ windows[0].move();
 #### 2.1.2. Delayed window movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -86,7 +86,7 @@ await windows[0].move(100, 100, {
 #### 2.1.3. Delayed linear motion window movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -108,7 +108,7 @@ await windows[0].move(100, 100, {
 #### 2.1.4. Delayed arc motion window movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -134,7 +134,7 @@ await windows[0].move(100, 100, {
 #### 2.1.5. Delayed wave motion window movements
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -164,7 +164,7 @@ await windows[0].move(100, 100, {
 #### 2.2.1. Instantaneous window resizing
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -187,7 +187,7 @@ windows[0].resize();
 #### 2.2.2. Delayed window resizing
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -203,7 +203,7 @@ await windows[0].resize(400, 200, {
 #### 2.2.3. Delayed linear motion window resizing
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -223,7 +223,7 @@ await windows[0].resize(400, 200, {
 #### 2.2.4. Delayed arc motion window resizing
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -247,7 +247,7 @@ await windows[0].resize(400, 200, {
 #### 2.2.5. Delayed wave motion window resizing
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -273,7 +273,7 @@ await windows[0].resize(400, 200, {
 ### 2.3. Minimize a window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -285,7 +285,7 @@ windows[0].minimize();
 ### 2.4. Maximize a window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -297,7 +297,7 @@ windows[0].maximize();
 ### 2.5. Restore a window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -309,7 +309,7 @@ windows[0].restore();
 ### 2.6. Focus a window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -323,7 +323,7 @@ windows[0].focus();
 ### 2.7. Close a window
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -335,7 +335,7 @@ windows[0].close();
 ### 2.8. Keep a window always on top
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -352,7 +352,7 @@ windows[0].alwaysOnTop(false);
 ### 2.9. Bring a window to the foreground
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();
@@ -364,7 +364,7 @@ windows[0].top();
 ### 2.10. Send a window to the background
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Get running windows
 const windows = Actionify.window.list();

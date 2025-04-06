@@ -9,7 +9,7 @@
 ### 1.1. Loop
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Infinite loop
 Actionify.loop((index) => {
@@ -32,7 +32,7 @@ await Actionify.loop((index) => {
 ### 2.1. Exit
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Synchronously stops and exit the program
 Actionify.exit();
@@ -46,7 +46,7 @@ Actionify.exit(1);
 ### 2.2. Restart
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Synchronously stops and restarts the program in detached mode
 Actionify.restart();

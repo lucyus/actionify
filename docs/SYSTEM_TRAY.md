@@ -9,7 +9,7 @@
 ### 1.1. Create a Tray Icon
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Create a default tray icon
 const trayIconController = Actionify.trayIcon.create();

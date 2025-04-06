@@ -9,7 +9,7 @@
 ### 1.1. Synchronous wait
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Synchronously sleep for 1 second
 Actionify.time.waitSync(1000);
@@ -20,7 +20,7 @@ Actionify.time.waitSync(1000);
 ### 1.2. Asynchronous wait
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 // Wait asynchronously for 1 second
 await Actionify.time.waitAsync(1000);
@@ -32,14 +32,14 @@ await Actionify.time.waitAsync(1000, () => console.log("At least 1 second has pa
 ## 2. Get Current Time
 
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const now = Actionify.time.now();
 ```
 
 This feature can be used to compute delays:
 ```js
-const Actionify = require("@lucyus/actionify");
+const { Actionify } = require("@lucyus/actionify");
 
 const startTime = Actionify.time.now();
 /* Execute a time-consuming task... */
