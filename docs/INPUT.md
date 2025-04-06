@@ -21,7 +21,7 @@ const inputListenerControl = Actionify.input.events
   });
 ```
 
-> See also: [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [InputListenerController](../src/types/event/input/input-listener-controller/input-listener-controller.type.ts)
+> See also: [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
 
 ##### 1.1.1.2. Start listening to specific mouse/keyboard events
 
@@ -47,7 +47,7 @@ const inputListenerControl = Actionify.input.events
   });
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [InputListenerController](../src/types/event/input/input-listener-controller/input-listener-controller.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
 
 #### 1.1.2. Pause an input listener
 
@@ -57,7 +57,7 @@ Once you have [started an input listener](#111-start-an-input-listener), you can
 inputListenerControl.pause();
 ```
 
-You can also pause any [InputListener](../src/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
+You can also pause any [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.input.events.pause(inputListener);
@@ -71,7 +71,7 @@ Once you have [paused an input listener](#112-pause-an-input-listener), you can 
 inputListenerControl.resume();
 ```
 
-You can also resume any [InputListener](../src/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
+You can also resume any [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.input.events.resume(inputListener);
@@ -85,7 +85,7 @@ Once you have [started an input listener](#111-start-an-input-listener), you can
 inputListenerControl.off();
 ```
 
-You can also stop any [InputListener](../src/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
+You can also stop any [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts) directly with its reference:
 
 ```js
 Actionify.input.events.off(inputListener);
@@ -117,7 +117,7 @@ Actionify.input.events.suppress("a down", "left down");
 
 > ⚠️ Use Suppress Input Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts), [Start an Input Listener](#111-start-an-input-listener)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [Start an Input Listener](#111-start-an-input-listener)
 
 #### 1.2.2. Unsuppress input events
 
@@ -137,7 +137,7 @@ const Actionify = require("@lucyus/actionify");
 Actionify.input.events.unsuppress("a down", "left down");
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
 
 ## 2. Input Recorder
 
@@ -181,7 +181,7 @@ const inputRecorderControl = Actionify.input.track
   .start();
 ```
 
-> See also: [MouseInput](../src/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/data/key-to-virtual-key-code.map.ts), [KeyState](../src/types/event/keyboard/key-state/key-state.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
 
 ### 2.2. Pause an input recorder
 

@@ -29,7 +29,7 @@ const Actionify = require("@lucyus/actionify");
 const screens = Actionify.screen.list();
 ```
 
-See also: [ScreenInfo](../src/types/screen-info/screen-info.type.ts), [Screen Coordinates System](#10-screen-coordinates-system)
+See also: [ScreenInfo](../src/core/types/screen-info/screen-info.type.ts), [Screen Coordinates System](#10-screen-coordinates-system)
 
 ## 2. Screen Interaction
 
@@ -65,7 +65,7 @@ const color = Actionify.screen.pixel.color();
 const color = Actionify.screen.pixel.color(100, 100);
 ```
 
-> See also: [Color](../src/types/color/color.type.ts)
+> See also: [Color](../src/core/types/color/color.type.ts)
 
 ---
 
