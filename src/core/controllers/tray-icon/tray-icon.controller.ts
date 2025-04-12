@@ -1,14 +1,17 @@
+import path from "path";
+import { Actionify } from "../../../core";
 import {
   removeTrayIcon,
+  updateTrayIcon,
+  updateTrayIconTooltip,
 } from "../../../addon";
-import { TrayIconUpdateController } from "../../../core/controllers";
-import { DataService } from "../../../core/services";
-import type { TrayIconData } from "../../../core/types";
 import { Inspectable } from "../../../core/utilities";
 
 export class TrayIconController {
 
-  readonly #trayIconUpdateController: TrayIconUpdateController;
+  readonly #windowId: number;
+  #absoluteIconPath: string;
+  #tooltip: string;
 
   public constructor(
     trayIconWindowId: number,
@@ -17,34 +20,77 @@ export class TrayIconController {
     onTrayMenuRestartClick: () => void,
     onTrayMenuExitClick: () => void
   ) {
-    DataService.set(this, {
-      trayIconWindowId,
-      absoluteIconPath,
-      tooltip,
-      onTrayMenuRestartClick,
-      onTrayMenuExitClick,
-    });
-    this.#trayIconUpdateController = new TrayIconUpdateController(this);
-  }
-
-  get #trayIconData(): TrayIconData {
-    return DataService.get(this);
+    this.#windowId = trayIconWindowId;
+    this.#absoluteIconPath = absoluteIconPath;
+    this.#tooltip = tooltip;
   }
 
   /**
-   * @description Update the tray icon in real time.
+   * @description Get the tray icon absolute image path.
+   *
+   * ---
+   * @example
+   * // Create a tray icon
+   * const trayIconController = Actionify.trayIcon.create();
+   * // Get the tray icon absolute image path
+   * const iconPath = trayIconController.icon;
+   */
+  public get icon(): string {
+    return this.#absoluteIconPath;
+  }
+
+  /**
+   * @description Update the tray icon.
+   *
+   * @param iconOrIconPath The icon path or one of the presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
    *
    * ---
    * @example
    * // Create a tray icon
    * const trayIconController = Actionify.trayIcon.create();
    * // Update the tray icon with a custom icon
-   * trayIconController.update.icon("/path/to/icon.ico");
-   * // Update the tray icon tooltip
-   * trayIconController.update.tooltip("Your new tooltip text");
+   * trayIconController.icon = "/path/to/icon.ico";
+   * // Update the tray icon with a preset icon
+   * trayIconController.icon = "success"; // All presets: "default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"
    */
-  public get update(): TrayIconUpdateController {
-    return this.#trayIconUpdateController;
+  public set icon(iconOrIconPath: "default" | "running" | "completed" | "paused" | "stopped" | "info" | "success" | "warn" | "error" | string) {
+    const newAbsoluteIconPath = ["default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"].includes(iconOrIconPath) ? path.resolve(__dirname, `../../../assets/images/icons/${iconOrIconPath}.ico`) : path.resolve(iconOrIconPath);
+    if (!Actionify.filesystem.exists(newAbsoluteIconPath)) {
+      throw new Error(`File does not exist: ${newAbsoluteIconPath}`);
+    }
+    this.#absoluteIconPath = newAbsoluteIconPath;
+    updateTrayIcon(this.#windowId, this.#absoluteIconPath);
+  }
+
+  /**
+   * @description Get the tray icon tooltip.
+   *
+   * ---
+   * @example
+   * // Create a tray icon
+   * const trayIconController = Actionify.trayIcon.create();
+   * // Get the tray icon tooltip
+   * const tooltip = trayIconController.tooltip;
+   */
+  public get tooltip(): string {
+    return this.#tooltip;
+  }
+
+  /**
+   * @description Update the tray icon tooltip.
+   *
+   * @param tooltip The tooltip text.
+   *
+   * ---
+   * @example
+   * // Create a tray icon
+   * const trayIconController = Actionify.trayIcon.create();
+   * // Update the tray icon tooltip
+   * trayIconController.tooltip = "Your new tooltip text";
+   */
+  public set tooltip(tooltip: string) {
+    this.#tooltip = tooltip;
+    updateTrayIconTooltip(this.#windowId, this.#tooltip);
   }
 
   /**
@@ -58,7 +104,7 @@ export class TrayIconController {
    * trayIconController.remove();
    */
   public remove(): void {
-    removeTrayIcon(this.#trayIconData.trayIconWindowId);
+    removeTrayIcon(this.#windowId);
   }
 
   /**

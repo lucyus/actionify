@@ -7,5 +7,4 @@ export * from './match-region';
 export * from './optional';
 export * from './position';
 export * from './screen-info';
-export * from './system-tray';
 export * from './window';
