@@ -1,3 +1,8 @@
+## [0.9.2](https://github.com/lucyus/actionify/compare/v0.9.1...v0.9.2) (2025-04-12)
+
+### Miscellaneous Chores
+
+* **@config:** ensure version tags are pushed when running 'npm run release:*' ([3ba3c2e](https://github.com/lucyus/actionify/commit/3ba3c2ed18332817f38add95ad306bacdb819032))
 ## [0.9.1](https://github.com/lucyus/actionify/compare/v0.9.0...v0.9.1) (2025-04-12)
 
 ### Documentation
