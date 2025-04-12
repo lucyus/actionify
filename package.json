@@ -10,6 +10,7 @@
     "copy:assets": "rimraf lib/assets && cp -r src/assets lib/assets",
     "build": "npm run clean && node-gyp configure && node-gyp rebuild && tsc -p . && npm run copy:assets",
     "build:prod": "npm run clean && node-gyp configure --release && node-gyp rebuild --release && tsc -p . --sourceMap false --declarationMap false && npm run copy:assets",
+    "changelog": "node -e \"require('fs').writeFileSync('node_modules/conventional-changelog-conventionalcommits/src/constants.js', require('fs').readFileSync('node_modules/conventional-changelog-conventionalcommits/src/constants.js', 'utf8').replace(/\\btrue\\b/g, 'false'));\" && conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
     "deploy": "npm run build:prod && npm publish --access public",
     "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [process.argv[1].replace('src', 'lib').replace('.ts', '.js')], { stdio: 'inherit', shell: true });\"",
     "build:execute": "npm run build && npm run execute",
@@ -48,6 +49,7 @@
   ],
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "conventional-changelog-cli": "^5.0.0",
     "node-addon-api": "^8.3.0",
     "node-gyp": "^11.0.0",
     "rimraf": "^6.0.1",
