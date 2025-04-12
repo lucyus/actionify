@@ -730,9 +730,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
       break;
     }
     case WM_USER + 3: {
-      // Change tray icon tooltip
-      std::wstring tooltip = reinterpret_cast<wchar_t*>(lParam);
-      strncpy_s(nid.szTip, ConvertToUTF8(tooltip).c_str(), _countof(nid.szTip) - 1);
       Shell_NotifyIcon(NIM_MODIFY, &nid);
       break;
     }
@@ -907,7 +904,10 @@ Napi::Value UpdateTrayIconWrapper(const Napi::CallbackInfo& info) {
 }
 
 void UpdateTrayIconTooltip(HWND hwnd, const std::wstring& newTooltip) {
-  PostMessage(hwnd, WM_USER + 3, 0, reinterpret_cast<LPARAM>(newTooltip.c_str()));
+  // update the tooltip
+  strncpy_s(nid.szTip, ConvertToUTF8(newTooltip).c_str(), _countof(nid.szTip) - 1);
+  // Send message to the window to update the tray icon
+  PostMessage(hwnd, WM_USER + 3, 0, 0);
 }
 
 Napi::Value UpdateTrayIconTooltipWrapper(const Napi::CallbackInfo& info) {
