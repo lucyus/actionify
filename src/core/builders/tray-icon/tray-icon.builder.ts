@@ -34,7 +34,7 @@ export class TrayIconBuilder {
    * });
    */
   public create(options?: { tooltip?: string, icon?: "default" | "running" | "completed" | "paused" | "stopped" | "info" | "success" | "warn" | "error" | string }) {
-    const tooltip = options?.tooltip ?? "Actionify";
+    const tooltip = (options?.tooltip ?? "Actionify").substring(0, 127);
     const icon = options?.icon ?? "default";
     const absoluteIconPath = ["default", "running", "completed", "paused", "stopped", "info", "success", "warn", "error"].includes(icon) ? path.resolve(__dirname, `../../../assets/images/icons/${icon}.ico`) : path.resolve(icon);
     if (!Actionify.filesystem.exists(absoluteIconPath)) {

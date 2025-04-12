@@ -89,7 +89,7 @@ export class TrayIconController {
    * trayIconController.tooltip = "Your new tooltip text";
    */
   public set tooltip(tooltip: string) {
-    this.#tooltip = tooltip;
+    this.#tooltip = tooltip.substring(0, 127);
     updateTrayIconTooltip(this.#windowId, this.#tooltip);
   }
 
