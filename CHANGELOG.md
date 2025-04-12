@@ -17,17 +17,17 @@
 ### Code Refactoring
 
 * **@core:** simplify tray icon usage by flattening icon and tooltip handling ([4594c8e](https://github.com/lucyus/actionify/commit/4594c8ec3503428eccc553185c95727ea57dc6a3))
-## [0.8.2](https://github.com/lucyus/actionify/compare/v0.8.1...v0.8.2) (2025-04-12)
+## [0.8.2](https://github.com/lucyus/actionify/compare/v0.8.1...v0.8.2) (2025-04-07)
 
 ### Bug Fixes
 
 * **@core/services:** specify return type of 'InputEventService.mainListener' to resolve TypeScript type inference issue ([c3d7104](https://github.com/lucyus/actionify/commit/c3d7104fa79ff670401517eeb73700370322cc03))
-## [0.8.1](https://github.com/lucyus/actionify/compare/v0.8.0...v0.8.1) (2025-04-12)
+## [0.8.1](https://github.com/lucyus/actionify/compare/v0.8.0...v0.8.1) (2025-04-07)
 
 ### Code Refactoring
 
 * **@docs:** update Actionify example imports to match TypeScript export syntax ([a4491eb](https://github.com/lucyus/actionify/commit/a4491ebe1e6490fc96d747ef599cd2d380ba6937))
-## [0.8.0](https://github.com/lucyus/actionify/compare/v0.7.0...v0.8.0) (2025-04-12)
+## [0.8.0](https://github.com/lucyus/actionify/compare/v0.7.0...v0.8.0) (2025-04-07)
 
 ### Code Refactoring
 
@@ -35,7 +35,7 @@
 * **@config:** relocate NAPI C++ files for better structure ([03ab817](https://github.com/lucyus/actionify/commit/03ab817ed128786d9212a1a6903767c56e2a5712))
 * **@docs:** update broken links to reflect new TypeScript codebase folder structure ([1a1e05c](https://github.com/lucyus/actionify/commit/1a1e05cea13d4a24926c5167400a9102ad652e2b))
 * **global:** restructure TypeScript codebase for better maintainability ([785703e](https://github.com/lucyus/actionify/commit/785703e479b9a554894218e6a73abb739fd562b9))
-## [0.7.0](https://github.com/lucyus/actionify/compare/v0.6.0...v0.7.0) (2025-04-12)
+## [0.7.0](https://github.com/lucyus/actionify/compare/v0.6.0...v0.7.0) (2025-03-29)
 
 ### Features
 
@@ -50,7 +50,7 @@
 ### Code Refactoring
 
 * **@core:** support multiple import methods ([e7b24d5](https://github.com/lucyus/actionify/commit/e7b24d5147cd87056681715b5cc477d95dbf1749))
-## [0.6.0](https://github.com/lucyus/actionify/compare/v0.5.0...v0.6.0) (2025-04-12)
+## [0.6.0](https://github.com/lucyus/actionify/compare/v0.5.0...v0.6.0) (2025-03-07)
 
 ### Features
 
@@ -62,7 +62,7 @@
 ### Miscellaneous Chores
 
 * **global:** copy assets files in Typescript build directory ([5eaa592](https://github.com/lucyus/actionify/commit/5eaa5925b2936930826dc90d6e687f5050d25d39))
-## [0.5.0](https://github.com/lucyus/actionify/compare/v0.4.0...v0.5.0) (2025-04-12)
+## [0.5.0](https://github.com/lucyus/actionify/compare/v0.4.0...v0.5.0) (2025-03-05)
 
 ### Features
 
@@ -75,7 +75,7 @@
 * **@core:** forward 'time.waitAsync()' callback return value ([56e0e54](https://github.com/lucyus/actionify/commit/56e0e54456b630e567464f27b0df8868210849e8))
 * **@core:** remove leftover 'console.log()' ([dbeb6f8](https://github.com/lucyus/actionify/commit/dbeb6f8a936418198190d561d0dd9e7ca2e1046f))
 * **@docs:** improve project description and 'README.md' introduction ([a112954](https://github.com/lucyus/actionify/commit/a112954209f5bfdb2c292811cc2b1f7b8d0f2d78))
-## [0.4.0](https://github.com/lucyus/actionify/compare/v0.3.1...v0.4.0) (2025-04-12)
+## [0.4.0](https://github.com/lucyus/actionify/compare/v0.3.1...v0.4.0) (2025-02-11)
 
 ### Features
 
@@ -84,7 +84,7 @@
 * **@core:** add 'Color::alpha' ([afaeeb5](https://github.com/lucyus/actionify/commit/afaeeb5cbe9c2911cbbec574970652c53ecf8e78))
 * **@core:** implement Image Template Matching through 'ai.image().find()' ([f08d453](https://github.com/lucyus/actionify/commit/f08d4538dae8c48e8c09fcd1a679737b9e083f2d))
 * **@docs:** specify usage of Image Template Matching through 'ai.image().find()' ([ab99b58](https://github.com/lucyus/actionify/commit/ab99b58c37383b44b3850c9b112c05f58a363202))
-## [0.3.1](https://github.com/lucyus/actionify/compare/v0.3.0...v0.3.1) (2025-04-12)
+## [0.3.1](https://github.com/lucyus/actionify/compare/v0.3.0...v0.3.1) (2025-02-09)
 
 ### Bug Fixes
 
@@ -93,7 +93,7 @@
 ### Documentation
 
 * **@config:** update 'package.json' description to match 'README.md' ([e1ef89a](https://github.com/lucyus/actionify/commit/e1ef89a1864de775c7befc408683bf80e0cf920c))
-## [0.3.0](https://github.com/lucyus/actionify/compare/v0.2.0...v0.3.0) (2025-04-12)
+## [0.3.0](https://github.com/lucyus/actionify/compare/v0.2.0...v0.3.0) (2025-02-07)
 
 ### Features
 
@@ -121,7 +121,7 @@
 ### Code Refactoring
 
 * **@core:** replace unnecessary 'let' with 'const' ([c10f850](https://github.com/lucyus/actionify/commit/c10f850d39494cdf6c9687936befb3791c2099ee))
-## [0.2.0](https://github.com/lucyus/actionify/compare/v0.1.1...v0.2.0) (2025-04-12)
+## [0.2.0](https://github.com/lucyus/actionify/compare/v0.1.1...v0.2.0) (2025-02-03)
 
 ### Features
 
@@ -141,7 +141,7 @@
 ### Code Refactoring
 
 * **@core:** implement 'ListenerController' and passes it to input listeners ([9c6f5ac](https://github.com/lucyus/actionify/commit/9c6f5acede4886e4ba25e7dc4b58b8e906694694))
-## [0.1.1](https://github.com/lucyus/actionify/compare/v0.1.0...v0.1.1) (2025-04-12)
+## [0.1.1](https://github.com/lucyus/actionify/compare/v0.1.0...v0.1.1) (2025-02-01)
 
 ### Features
 
@@ -152,7 +152,7 @@
 ### Bug Fixes
 
 * **@config:** rename 'publish' script to 'deploy' to prevent conflicts with npm hooks ([b71699f](https://github.com/lucyus/actionify/commit/b71699fda6b9d81f11aab39625696dc02d06b153))
-## [0.1.0](https://github.com/lucyus/actionify/compare/bffd4bb45da9c1424f06b69060caab93a2053bc2...v0.1.0) (2025-04-12)
+## [0.1.0](https://github.com/lucyus/actionify/compare/bffd4bb45da9c1424f06b69060caab93a2053bc2...v0.1.0) (2025-01-26)
 
 ### Features
 
