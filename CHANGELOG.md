@@ -1,3 +1,13 @@
+## [0.9.1](https://github.com/lucyus/actionify/compare/v0.9.0...v0.9.1) (2025-04-12)
+
+### Documentation
+
+* **@changelog:** adjust release dates ([2d41008](https://github.com/lucyus/actionify/commit/2d41008d15c5bef0ecd2fba7a907bc8d0b354d97))
+
+### Miscellaneous Chores
+
+* **@config:** append latest version only to 'CHANGELOG.md' when using 'npm run changelog' ([3d962bf](https://github.com/lucyus/actionify/commit/3d962bf16ce55abea0b902400962a341b5ab5cd5))
+* **@config:** specify explicitly git origin and branch in 'npm run release:*' commands ([105d9a7](https://github.com/lucyus/actionify/commit/105d9a7b4b26084423defde1825c385e871935de))
 ## [0.9.0](https://github.com/lucyus/actionify/compare/v0.8.2...v0.9.0) (2025-04-12)
 
 ### Bug Fixes
