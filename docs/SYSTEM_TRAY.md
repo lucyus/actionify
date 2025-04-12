@@ -39,7 +39,7 @@ const trayIconController = Actionify.trayIcon.create({
 Once you have [created a tray icon](#11-create-a-tray-icon), you can update the tooltip seemlessly with a [TrayIconController](#11-create-a-tray-icon):
 
 ```js
-trayIconController.update.tooltip("Your new tooltip");
+trayIconController.tooltip = "Your new tooltip";
 ```
 
 
@@ -49,10 +49,10 @@ Once you have [created a tray icon](#11-create-a-tray-icon), you can update the 
 
 ```js
  // Update the tray icon with a custom icon
-trayIconController.update.icon("/path/to/icon.ico");
+trayIconController.icon = "/path/to/icon.ico";
 
 // Update the tray icon with a preset icon
-trayIconController.update.icon("success");
+trayIconController.icon = "success";
 ```
 
 > See also: [Tray Icon Presets](#14-tray-icon-presets)
