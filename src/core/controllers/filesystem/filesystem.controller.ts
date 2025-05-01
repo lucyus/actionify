@@ -179,6 +179,31 @@ export class FilesystemController {
   }
 
   /**
+   * @description Create a {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to an appendable file.
+   *
+   * @param filePath Path to an appendable file.
+   * @returns A {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to the file.
+   *
+   * ---
+   * @example
+   * const appendStream = Actionify.filesystem.appendStream("path/to/file.extension");
+   * appendStream.write("Hello, world!");
+   * appendStream.end();
+   */
+  public appendStream(filePath: string) {
+    const absoluteFilePath = path.resolve(filePath);
+    if (FilesystemController.#fileWriters.has(absoluteFilePath)) {
+      return FilesystemController.#fileWriters.get(absoluteFilePath)!;
+    }
+    const appendStream = fs.createWriteStream(absoluteFilePath, { encoding: "utf-8", flags: "a" });
+    FilesystemController.#fileWriters.set(absoluteFilePath, appendStream);
+    appendStream.on("close", () => {
+      FilesystemController.#fileWriters.delete(absoluteFilePath);
+    });
+    return appendStream;
+  }
+
+  /**
    * @description Create a file or directory.
    *
    * @param filePath Path to a file or directory.
