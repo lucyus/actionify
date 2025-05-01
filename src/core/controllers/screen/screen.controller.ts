@@ -39,7 +39,8 @@ export class ScreenController {
    * @param y The top-left corner Y position of the screenshot. If unset, the current mouse Y position will be used.
    * @param width The width of the screenshot in pixels. If unset, the width of the main monitor will be used.
    * @param height The height of the screenshot in pixels. If unset, the height of the main monitor will be used.
-   * @param filepath The file path to save the screenshot to. If unset, it will be saved in the current working directory as `screenshot_[year]-[month]-[day]_[hour]-[minute]-[second]-[millisecond].png`.
+   * @param options.filepath The file path to save the screenshot to. If unset, it will be saved in the current working directory as `screenshot_[year]-[month]-[day]_[hour]-[minute]-[second]-[millisecond].png`.
+   * @param options.scale The scale factor to apply to the screenshot. If unset, it defaults to 1.0.
    * @returns The absolute filepath of the screenshot.
    *
    * ---
@@ -51,14 +52,18 @@ export class ScreenController {
    * const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200);
    *
    * // Take a screenshot and save it to a specific file
-   * const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, "/path/to/screenshot.png");
+   * const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, { filepath: "/path/to/screenshot.png" });
+   *
+   * // Take a screenshot and apply a scale factor
+   * const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, { scale: 2.0 });
    */
-  public shot(x?: number, y?: number, width?: number, height?: number, filepath?: string): string {
+  public shot(x?: number, y?: number, width?: number, height?: number, options?: { filepath?: string, scale?: number }): string {
     const mainMonitor = this.list()[0];
     const now = new Date();
     const defaultFilepath = `screenshot_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}-${String(now.getMilliseconds()).padStart(3, "0")}.png`;
-    const absoluteFilePath = path.resolve(filepath ?? defaultFilepath);
-    takeScreenshotToFile(x ?? mainMonitor.origin.x, y ?? mainMonitor.origin.y, width ?? mainMonitor.dimensions.width, height ?? mainMonitor.dimensions.height, absoluteFilePath);
+    const absoluteFilePath = path.resolve(options?.filepath ?? defaultFilepath);
+    const scale = options?.scale ?? 1.0;
+    takeScreenshotToFile(x ?? mainMonitor.origin.x, y ?? mainMonitor.origin.y, width ?? mainMonitor.dimensions.width, height ?? mainMonitor.dimensions.height, absoluteFilePath, scale);
     return absoluteFilePath;
   }
 
