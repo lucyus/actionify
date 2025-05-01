@@ -2125,7 +2125,14 @@ bool SaveHBitmapToPNG(HBITMAP hBitmap, const std::string& filepath) {
 }
 
 // Function to take a screenshot and save it to a file
-bool TakeScreenshotToFile(int x, int y, int width, int height, const std::string& filepath) {
+bool TakeScreenshotToFile(
+  int x,
+  int y,
+  int width,
+  int height,
+  const std::string& filepath,
+  const float& scale = 1.0f
+) {
   // Get the desktop device context
   HDC hScreenDC = GetDC(nullptr);
   if (!hScreenDC) {
@@ -2141,7 +2148,7 @@ bool TakeScreenshotToFile(int x, int y, int width, int height, const std::string
     return false;
   }
 
-  // Create a compatible bitmap
+  // Create a compatible bitmap with the original dimensions (before potential scaling)
   HBITMAP hBitmap = CreateCompatibleBitmap(hScreenDC, width, height);
   if (!hBitmap) {
     std::cerr << "Failed to create compatible bitmap." << std::endl;
@@ -2166,12 +2173,41 @@ bool TakeScreenshotToFile(int x, int y, int width, int height, const std::string
   // Restore the original bitmap in the memory device context
   SelectObject(hMemoryDC, hOldBitmap);
 
-  // Save the bitmap to a PNG file
-  bool isSaved = SaveHBitmapToPNG(hBitmap, filepath);
+  // Initialize GDI+
+  Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+  ULONG_PTR gdiplusToken;
+  Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 
+  bool isSaved = false;
+  {
+    // Now that we have the bitmap, we will use GDI+ to resize it with high-quality interpolation
+    Gdiplus::Bitmap bitmap(hBitmap, nullptr);
+
+    // Calculate the new dimensions based on the scale factor
+    int scaledWidth = static_cast<int>(width * scale);
+    int scaledHeight = static_cast<int>(height * scale);
+
+    // Create a new bitmap for the scaled image
+    Gdiplus::Bitmap scaledBitmap(scaledWidth, scaledHeight, bitmap.GetPixelFormat());
+    Gdiplus::Graphics graphics(&scaledBitmap);
+
+    // Set the high-quality interpolation mode for better resizing
+    graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+    graphics.DrawImage(&bitmap, 0, 0, scaledWidth, scaledHeight);
+
+    // Save the scaled bitmap to a file (in PNG format)
+    CLSID clsid;
+    GetEncoderClsid(L"image/png", &clsid);  // Get the PNG encoder CLSID
+    isSaved = scaledBitmap.Save(std::wstring(filepath.begin(), filepath.end()).c_str(), &clsid, nullptr) == Gdiplus::Status::Ok;
+  }
+
+  // Clean up
   DeleteObject(hBitmap);
   DeleteDC(hMemoryDC);
   ReleaseDC(nullptr, hScreenDC);
+
+  // Shutdown GDI+
+  Gdiplus::GdiplusShutdown(gdiplusToken);
 
   return isSaved;
 }
@@ -2180,7 +2216,7 @@ bool TakeScreenshotToFile(int x, int y, int width, int height, const std::string
 Napi::Value TakeScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
-  if (info.Length() < 5 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber() || !info[4].IsString()) {
+  if (info.Length() < 6 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber() || !info[4].IsString() || !info[5].IsNumber()) {
     Napi::TypeError::New(env, "Arguments must be: (x, y, width, height, filepath)").ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -2190,8 +2226,9 @@ Napi::Value TakeScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   int width = info[2].As<Napi::Number>().Int32Value();
   int height = info[3].As<Napi::Number>().Int32Value();
   std::string filepath = info[4].As<Napi::String>().Utf8Value();
+  float scale = info[5].As<Napi::Number>().FloatValue();
 
-  bool success = TakeScreenshotToFile(x, y, width, height, filepath);
+  bool success = TakeScreenshotToFile(x, y, width, height, filepath, scale);
 
   return Napi::Boolean::New(env, success);
 }
