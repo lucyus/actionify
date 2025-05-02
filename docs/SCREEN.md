@@ -44,8 +44,11 @@ const screenshotFilepath = Actionify.screen.shot();
 // Take a screenshot between (100, 100) and (500, 300)
 const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200);
 
+// Take a screenshot between (100, 100) and (500, 300) and apply a scale factor
+const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, { scale: 2.0 });
+
 // Take a screenshot between (100, 100) and (500, 300) and save it to a specific file
-const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, "/path/to/screenshot.png");
+const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, { filepath: "/path/to/screenshot.png" });
 ```
 
 * Screenshots are saved in PNG format.
