@@ -54,7 +54,13 @@ writeStream.end();
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Synchronously append to a file
 Actionify.filesystem.append("path/to/file.extension", "Hello, world!");
+
+// Asynchronously append to a file
+const appendStream = Actionify.filesystem.appendStream("path/to/file.extension");
+appendStream.write("Hello, world!");
+appendStream.end();
 ```
 
 ### 1.5. Remove a file or directory
