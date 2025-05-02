@@ -52,7 +52,7 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.restart();
 ```
 
-> Hint: `Actionify.restart()` can be used as a hot reloader when combined with [Input Listeners](./INPUT.md#111-start-an-input-listener) or [System Tray Icons](./SYSTEM_TRAY.md#11-create-a-tray-icon).
+> Hint: `Actionify.restart()` can be used as a hot reloader when combined with [Input Listeners](./INPUT.md#111-start-an-input-listener), [File Watchers](./FILESYSTEM.md#16-watch-a-file-or-directory) or [System Tray Icons](./SYSTEM_TRAY.md#11-create-a-tray-icon).
 
 ---
 

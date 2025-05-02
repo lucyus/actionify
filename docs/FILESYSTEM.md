@@ -75,6 +75,25 @@ Actionify.filesystem.remove("/path/to/file.extension");
 Actionify.filesystem.remove("/path/to/directory");
 ```
 
+### 1.6. Watch a file or directory
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Watch for file changes
+const fileWatcher = Actionify.filesystem.watch("/path/to/file.extension", (event, filename) => {
+  // The file has changed, do something here...
+});
+
+// Watch for changes inside a directory
+const directoryWatcher = Actionify.filesystem.watch("/path/to/directory", (event, filename) => {
+  // Something in the directory has changed, do something here...
+});
+```
+
+> Hint: `Actionify.filesystem.watch()` can be used as a hot reloader when combined with [Actionify.restart()](./LIFECYCLE.md#22-restart)
+
+
 ## 2. File Verification
 
 ### 2.1. Check if a file exists

@@ -154,6 +154,7 @@ You're ready to go! 🚀
     * [1.3. Write to a file](./docs/FILESYSTEM.md#13-write-to-a-file)
     * [1.4. Append to a file](./docs/FILESYSTEM.md#14-append-to-a-file)
     * [1.5. Remove a file or directory](./docs/FILESYSTEM.md#15-remove-a-file-or-directory)
+    * [1.6. Watch a file or directory](./docs/FILESYSTEM.md#16-watch-a-file-or-directory)
   * [2. File Verification](./docs/FILESYSTEM.md#2-file-verification)
     * [2.1. Check if a file exists](./docs/FILESYSTEM.md#21-check-if-a-file-exists)
     * [2.2. Check if a file is readable](./docs/FILESYSTEM.md#22-check-if-a-file-is-readable)
