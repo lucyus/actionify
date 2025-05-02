@@ -243,6 +243,34 @@ export class FilesystemController {
   }
 
   /**
+   * @description Watch a file or directory for changes.
+   *
+   * @param path The file or directory path to watch.
+   * @param callback The callback to call when the file or directory changes.
+   * @param options The options to pass to the watcher.
+   * @returns A {@link https://nodejs.org/api/fs.html#class-fsfswatcher FSWatcher}
+   *
+   * ---
+   * @example
+   * // Watch a file for changes
+   * const fileWatcher = Actionify.filesystem.watch("/path/to/file.extension", (event, filename) => {
+   *   // The file has changed, do something here...
+   * });
+   *
+   * // Watch a directory for changes
+   * const directoryWatcher = Actionify.filesystem.watch("/path/to/directory", (event, filename) => {
+   *   // Something in the directory has changed, do something here...
+   * });
+   */
+  public watch(
+    path: string,
+    callback: fs.WatchListener<string | Buffer> = () => {},
+    options: fs.WatchOptions = { encoding: "utf-8", recursive: true },
+  ): fs.FSWatcher {
+    return fs.watch(path, options, callback);
+  }
+
+  /**
    * @description Customize the default inspect output (with `console.log`) of a
    * class instance.
    */
