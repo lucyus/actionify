@@ -95,6 +95,8 @@ const directoryWatcher = Actionify.filesystem.watch("/path/to/directory", (event
 
 > Hint: `Actionify.filesystem.watch()` can be used as a hot reloader when combined with [Actionify.restart()](./LIFECYCLE.md#22-restart)
 
+> See also: [FSWatcher](https://nodejs.org/docs/latest/api/fs.html#class-fsfswatcher)
+
 
 ## 2. File Verification
 
