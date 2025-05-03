@@ -63,6 +63,8 @@ appendStream.write("Hello, world!");
 appendStream.end();
 ```
 
+> See also: [WriteStream](https://nodejs.org/api/stream.html#writable-streams)
+
 ### 1.5. Remove a file or directory
 
 ```js
