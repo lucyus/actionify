@@ -1,3 +1,9 @@
+## [0.10.1](https://github.com/lucyus/actionify/compare/v0.10.0...v0.10.1) (2025-05-03)
+
+### Documentation
+
+* **@docs/filesystem:** add 'fs.FSWatcher' reference for 'FilesystemController::watch' usage ([ccc99dd](https://github.com/lucyus/actionify/commit/ccc99dd786f56caa683ebdb694139df397d2bfa8))
+* **@docs/filesystem:** add 'fs.WriteStream' reference for 'FilesystemController::appendStream' usage ([c799e57](https://github.com/lucyus/actionify/commit/c799e5775742c6164fcde6dd0a2b5b372bca2916))
 ## [0.10.0](https://github.com/lucyus/actionify/compare/v0.9.2...v0.10.0) (2025-05-03)
 
 ### Features
