@@ -1,3 +1,17 @@
+## [0.10.0](https://github.com/lucyus/actionify/compare/v0.9.2...v0.10.0) (2025-05-03)
+
+### Features
+
+* **@addon:** implement screenshot image scaling ([fd5dd1f](https://github.com/lucyus/actionify/commit/fd5dd1fb6e3100b16f853ea0fd91154d35300710))
+* **@core/controllers:** add 'FilesystemController::watch' ([160f996](https://github.com/lucyus/actionify/commit/160f996c9fc8cfabc21cc45cf76aee84007b977f))
+* **@core/controllers:** implement 'FilesystemController::appendStream' ([68dfa96](https://github.com/lucyus/actionify/commit/68dfa9654c2182559a21947ccb0980fe844f5af0))
+* **@core/controllers:** implement screenshot image scaling ([3c650d1](https://github.com/lucyus/actionify/commit/3c650d11ea509841fc454e677d1e7cf9cabf3b5f))
+
+### Documentation
+
+* **@docs/filesystem:** specify usage of 'FilesystemController::appendStream' ([3fc5a65](https://github.com/lucyus/actionify/commit/3fc5a65e153fe26a7405140da890f3d42292c2ef))
+* **@docs/screen:** specify usage of screenshot image scaling ([613cde4](https://github.com/lucyus/actionify/commit/613cde427f1ecc946b91a2f190e0e2a85465a03f))
+* **@docs:** specify usage of 'FilesystemController::watch' ([1d6ef2a](https://github.com/lucyus/actionify/commit/1d6ef2af66849f50ac8fd8149c890979e1dfd651))
 ## [0.9.2](https://github.com/lucyus/actionify/compare/v0.9.1...v0.9.2) (2025-04-12)
 
 ### Miscellaneous Chores
