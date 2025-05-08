@@ -52,6 +52,10 @@ const {
   removeTrayIcon,
   updateTrayIcon,
   updateTrayIconTooltip,
+  addTrayIconMenuItem,
+  updateTrayIconMenuItemLabel,
+  updateTrayIconMenuItemCallback,
+  removeTrayIconMenuItem,
 } = require('../../../build/Release/actionify.node') as typeof import("@napi/actionify");
 
 export {
@@ -108,4 +112,8 @@ export {
   removeTrayIcon,
   updateTrayIcon,
   updateTrayIconTooltip,
+  addTrayIconMenuItem,
+  updateTrayIconMenuItemLabel,
+  updateTrayIconMenuItemCallback,
+  removeTrayIconMenuItem,
 };

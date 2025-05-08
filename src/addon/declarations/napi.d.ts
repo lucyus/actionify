@@ -55,10 +55,14 @@ declare module "@napi/actionify" {
     setSoundVolume: (volume: number) => void;
     getSoundSpeed: (soundId: string) => number;
     setSoundSpeed: (soundId: string, speed: number) => void;
-    createTrayIcon: (tooltip: string, iconPath: string, onRestart: Function, onQuit: Function) => number;
+    createTrayIcon: (tooltip: string, iconPath: string) => number;
     removeTrayIcon: (hwnd: number) => void;
     updateTrayIcon: (hwnd: number, iconPath: string) => void;
     updateTrayIconTooltip: (hwnd: number, tooltip: string) => void;
+    addTrayIconMenuItem: (hwnd: number, itemId: number, position: number, label: string, onClick: Function) => void;
+    updateTrayIconMenuItemLabel: (hwnd: number, itemId: number, label: string) => void;
+    updateTrayIconMenuItemCallback: (hwnd: number, itemId: number, onClick: Function) => void;
+    removeTrayIconMenuItem: (hwnd: number, itemId: number) => void;
   };
   export = value;
 }

@@ -141,10 +141,8 @@ std::atomic<bool> trayIconRunning(false);
 HWND trayIconWindowHwnd;
 NOTIFYICONDATA nid = { 0 };
 HMENU hMenu;
-std::function<void()> restartCallback;
-Napi::ThreadSafeFunction jsRestartCallback;
-std::function<void()> quitCallback;
-Napi::ThreadSafeFunction jsQuitCallback;
+std::map<int, std::function<void()>> trayIconMenuItemsCallbacks;
+std::map<int, Napi::ThreadSafeFunction> trayIconMenuItemsJsCallbacks;
 
 // =============================================================================
 // ============================== UTILITY CLASSES ==============================
@@ -218,9 +216,12 @@ void CleanupTrayIcon() {
   // Unregister the window class (only if not reusing the class name elsewhere)
   UnregisterClassW(L"TrayIconClass", GetModuleHandle(NULL));
 
-  // Clear JS callbacks
-  jsRestartCallback.Abort();
-  jsQuitCallback.Abort();
+  // Clear tray icon menu items callbacks
+  for (const auto& [id, trayIconMenuItemJsCallback] : trayIconMenuItemsJsCallbacks) {
+    trayIconMenuItemJsCallback.Abort();
+  }
+  trayIconMenuItemsJsCallbacks.clear();
+  trayIconMenuItemsCallbacks.clear();
 
   // Reset tray icon state
   trayIconRunning = false;
@@ -701,16 +702,15 @@ Napi::Value UnsuppressInputEventsWrapper(const Napi::CallbackInfo& info) {
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_COMMAND: {
-      switch (LOWORD(wParam)) {
-        case 1: { // Restart
-          if (restartCallback) restartCallback();
-          break;
-        }
-        case 2: { // Quit
-          if (quitCallback) quitCallback();
-          PostQuitMessage(0);
-          break;
-        }
+      // Handle menu item clicks
+      int menuItemId = LOWORD(wParam);
+      try {
+        std::function<void()> trayIconMenuItemCallback = trayIconMenuItemsCallbacks.at(menuItemId);
+        trayIconMenuItemCallback();
+      } catch (const std::out_of_range& e) {
+        std::cerr << "OutOfRangeError: " << e.what() << std::endl;
+      } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
       }
       break;
     }
@@ -745,15 +745,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 // Create tray icon
-HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath, std::function<void()> onRestart, std::function<void()> onQuit) {
+HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath) {
   if (trayIconRunning) {
     return trayIconWindowHwnd;
   }
-  std::thread nestedThread([name, iconPath, onRestart, onQuit]() {
+  std::thread nestedThread([name, iconPath]() {
     {
       std::lock_guard<std::mutex> lock(trayIconMutex);
-      restartCallback = onRestart;
-      quitCallback = onQuit;
 
       HINSTANCE hInstance = GetModuleHandle(NULL);
       WNDCLASSW wc = { 0 };
@@ -766,8 +764,6 @@ HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath, std:
       trayIconWindowHwnd = hwnd;
 
       hMenu = CreatePopupMenu();
-      AppendMenuW(hMenu, MF_STRING, 1, L"Restart");
-      AppendMenuW(hMenu, MF_STRING, 2, L"Quit");
 
       nid.cbSize = sizeof(NOTIFYICONDATA);
       nid.hWnd = hwnd;
@@ -802,8 +798,8 @@ Napi::Value CreateTrayIconWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   // Validate arguments
-  if (info.Length() < 3 || !info[0].IsString() || !info[1].IsString() || !info[2].IsFunction() || !info[3].IsFunction()) {
-    Napi::TypeError::New(env, "Expected four arguments").ThrowAsJavaScriptException();
+  if (info.Length() < 2 || !info[0].IsString() || !info[1].IsString()) {
+    Napi::TypeError::New(env, "Expected two arguments").ThrowAsJavaScriptException();
     return env.Null();
   }
 
@@ -811,43 +807,9 @@ Napi::Value CreateTrayIconWrapper(const Napi::CallbackInfo& info) {
   std::wstring name = std::wstring(u16Name.begin(), u16Name.end());
   std::u16string u16IconPath = info[1].As<Napi::String>().Utf16Value();
   std::wstring iconPath = std::wstring(u16IconPath.begin(), u16IconPath.end());
-  Napi::Function onRestart = info[2].As<Napi::Function>();
-  Napi::Function onQuit = info[3].As<Napi::Function>();
-
-  jsRestartCallback = Napi::ThreadSafeFunction::New(
-    env, // the main NAPI environment
-    onRestart, // callback function that needs to be called in thread(s)
-    "Tray Icon Restart Callback", // JS string used to provide diagnostic information
-    0, // maximum queue size (0 for unlimited)
-    1, // initial number of threads which will be making use of this function
-    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
-    }
-  );
-
-  jsQuitCallback = Napi::ThreadSafeFunction::New(
-    env, // the main NAPI environment
-    onQuit, // callback function that needs to be called in thread(s)
-    "Tray Icon Quit Callback", // JS string used to provide diagnostic information
-    0, // maximum queue size (0 for unlimited)
-    1, // initial number of threads which will be making use of this function
-    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
-    }
-  );
 
   // Create the tray icon
-  HWND trayIconId = CreateTrayIcon(name, iconPath, [&onRestart]() {
-    jsRestartCallback.BlockingCall([](const Napi::Env& env, const Napi::Function& jsCallback) {
-      if (!jsCallback.IsEmpty()) {
-        jsCallback.Call({ });
-      }
-    });
-  }, [&onQuit]() {
-    jsQuitCallback.BlockingCall([](const Napi::Env& env, const Napi::Function& jsCallback) {
-      if (!jsCallback.IsEmpty()) {
-        jsCallback.Call({ });
-      }
-    });
-  });
+  HWND trayIconId = CreateTrayIcon(name, iconPath);
 
   return Napi::Number::New(env, reinterpret_cast<uintptr_t>(trayIconId));
 }
@@ -926,6 +888,173 @@ Napi::Value UpdateTrayIconTooltipWrapper(const Napi::CallbackInfo& info) {
   UpdateTrayIconTooltip(trayIconWindowId, newTooltip);
 
   return env.Undefined();
+}
+
+bool AddTrayIconMenuItem(const std::wstring& itemText, UINT itemId, UINT position) {
+  std::lock_guard<std::mutex> lock(trayIconMutex);
+  if (!trayIconRunning || hMenu == nullptr) {
+    return false;
+  }
+  return InsertMenuW(hMenu, position, MF_BYPOSITION | MF_STRING, itemId, itemText.c_str()) != 0;
+}
+
+Napi::Value AddTrayIconMenuItemWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 5 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsString() || !info[4].IsFunction()) {
+    Napi::TypeError::New(env, "Expected number (hwnd), number (item id), number (position), string (label) and function (onClick callback) arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  UINT itemId = info[1].As<Napi::Number>().Uint32Value();
+  UINT position = info[2].As<Napi::Number>().Uint32Value();
+  std::u16string u16ItemText = info[3].As<Napi::String>().Utf16Value();
+  std::wstring itemText = std::wstring(u16ItemText.begin(), u16ItemText.end());
+  Napi::Function onClick = info[4].As<Napi::Function>();
+
+  // Create JS and C++ tray icon menu item callback
+  Napi::ThreadSafeFunction trayIconMenuItemJsCallback = Napi::ThreadSafeFunction::New(
+    env, // the main NAPI environment
+    onClick, // callback function that needs to be called in thread(s)
+    "Tray Icon Callback " + std::to_string(itemId), // JS string used to provide diagnostic information
+    0, // maximum queue size (0 for unlimited)
+    1, // initial number of threads which will be making use of this function
+    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
+    }
+  );
+  trayIconMenuItemsJsCallbacks[itemId] = trayIconMenuItemJsCallback;
+  std::function<void()> trayIconMenuItemCallback = [itemId]() {
+    try {
+      Napi::ThreadSafeFunction trayIconMenuItemJsCallback = trayIconMenuItemsJsCallbacks.at(itemId);
+      trayIconMenuItemJsCallback.BlockingCall([](const Napi::Env& env, const Napi::Function& jsCallback) {
+        if (!jsCallback.IsEmpty()) {
+          jsCallback.Call({ });
+        }
+      });
+    } catch (const std::out_of_range& e) {
+      std::cerr << "OutOfRangeError: " << e.what() << std::endl;
+      return;
+    } catch (const std::exception& e) {
+      std::cerr << "Error: " << e.what() << std::endl;
+      return;
+    }
+  };
+  trayIconMenuItemsCallbacks[itemId] = trayIconMenuItemCallback;
+
+  // Add the menu item
+  bool result = AddTrayIconMenuItem(itemText, itemId, position);
+
+  return Napi::Boolean::New(env, result);
+}
+
+bool UpdateTrayIconMenuItemLabel(UINT itemId, const std::wstring& newLabel) {
+  std::lock_guard<std::mutex> lock(trayIconMutex);
+  if (!trayIconRunning || hMenu == nullptr) {
+    return false;
+  }
+
+  // Update the label by ID
+  return ModifyMenuW(hMenu, itemId, MF_BYCOMMAND | MF_STRING, itemId, newLabel.c_str()) != 0;
+}
+
+Napi::Value UpdateTrayIconMenuItemLabelWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 3 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsString()) {
+    Napi::TypeError::New(env, "Expected number (hwnd), number (item id) and string (label) arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  UINT itemId = info[1].As<Napi::Number>().Uint32Value();
+  std::u16string u16NewLabel = info[2].As<Napi::String>().Utf16Value();
+  std::wstring newLabel = std::wstring(u16NewLabel.begin(), u16NewLabel.end());
+
+  // Update the menu item label
+  bool result = UpdateTrayIconMenuItemLabel(itemId, newLabel);
+
+  return Napi::Boolean::New(env, result);
+}
+
+bool UpdateTrayIconMenuItemCallback(UINT itemId, const Napi::ThreadSafeFunction& newTrayIconMenuItemJsCallback) {
+  std::lock_guard<std::mutex> lock(trayIconMutex);
+  if (!trayIconRunning || hMenu == nullptr) {
+    return false;
+  }
+  if (trayIconMenuItemsJsCallbacks.count(itemId) == 0) {
+    return false;
+  }
+
+  // Update the callback by ID
+  trayIconMenuItemsJsCallbacks[itemId].Abort();
+  trayIconMenuItemsJsCallbacks[itemId] = newTrayIconMenuItemJsCallback;
+  return true;
+}
+
+Napi::Value UpdateTrayIconMenuItemCallbackWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 3 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsFunction()) {
+    Napi::TypeError::New(env, "Expected number (hwnd), number (item id) and function (callback) arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  UINT itemId = info[1].As<Napi::Number>().Uint32Value();
+  Napi::Function newJsCallback = info[2].As<Napi::Function>();
+  Napi::ThreadSafeFunction newTrayIconMenuItemJsCallback = Napi::ThreadSafeFunction::New(
+    env, // the main NAPI environment
+    newJsCallback, // callback function that needs to be called in thread(s)
+    "Tray Icon Callback " + std::to_string(itemId), // JS string used to provide diagnostic information
+    0, // maximum queue size (0 for unlimited)
+    1, // initial number of threads which will be making use of this function
+    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
+    }
+  );
+
+  // Update the menu item callback
+  bool result = UpdateTrayIconMenuItemCallback(itemId, newTrayIconMenuItemJsCallback);
+
+  return Napi::Boolean::New(env, result);
+}
+
+bool RemoveTrayIconMenuItem(UINT itemId) {
+  std::lock_guard<std::mutex> lock(trayIconMutex);
+  if (!trayIconRunning || hMenu == nullptr) {
+    return false;
+  }
+  // Attempt to remove the menu item using the item ID
+  if (RemoveMenu(hMenu, itemId, MF_BYCOMMAND) != 0) {
+    // Clean up the C++ callback
+    trayIconMenuItemsCallbacks.erase(itemId);
+    // Clean up the JS callback
+    trayIconMenuItemsJsCallbacks[itemId].Abort();
+    trayIconMenuItemsJsCallbacks.erase(itemId);
+    return true;
+  }
+  return false;
+}
+
+Napi::Value RemoveTrayIconMenuItemWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate arguments
+  if (info.Length() < 2 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Expected number (hwnd) and number (item id) arguments").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND trayIconWindowId = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  UINT itemId = info[1].As<Napi::Number>().Uint32Value();
+
+  // Remove the menu item
+  bool result = RemoveTrayIconMenuItem(itemId);
+
+  return Napi::Boolean::New(env, result);
 }
 
 
@@ -3073,6 +3202,10 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "removeTrayIcon"), Napi::Function::New(env, RemoveTrayIconWrapper));
   exports.Set(Napi::String::New(env, "updateTrayIcon"), Napi::Function::New(env, UpdateTrayIconWrapper));
   exports.Set(Napi::String::New(env, "updateTrayIconTooltip"), Napi::Function::New(env, UpdateTrayIconTooltipWrapper));
+  exports.Set(Napi::String::New(env, "addTrayIconMenuItem"), Napi::Function::New(env, AddTrayIconMenuItemWrapper));
+  exports.Set(Napi::String::New(env, "updateTrayIconMenuItemLabel"), Napi::Function::New(env, UpdateTrayIconMenuItemLabelWrapper));
+  exports.Set(Napi::String::New(env, "updateTrayIconMenuItemCallback"), Napi::Function::New(env, UpdateTrayIconMenuItemCallbackWrapper));
+  exports.Set(Napi::String::New(env, "removeTrayIconMenuItem"), Napi::Function::New(env, RemoveTrayIconMenuItemWrapper));
   return exports;
 }
 
