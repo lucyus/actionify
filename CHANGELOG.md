@@ -1,3 +1,14 @@
+## [0.11.0](https://github.com/lucyus/actionify/compare/v0.10.1...v0.11.0) (2025-05-08)
+
+### Features
+
+* **@addon:** implement CRUD for tray icon menu items ([dafec03](https://github.com/lucyus/actionify/commit/dafec03e9d0f34b79406ff54672c2b5f094333bc))
+* **@core/types:** add 'TrayIconMenuItemsOptions' type ([1e50c3d](https://github.com/lucyus/actionify/commit/1e50c3d0a44f98240043a8c404c6bf8e300bab42))
+* **@core:** implement CRUD for tray icon menu items ([c043ccc](https://github.com/lucyus/actionify/commit/c043cccf35bc7258354f4c1fd7f2488a941bf405))
+
+### Documentation
+
+* **@docs:** specify CRUD usage of tray icon menu items ([64d561a](https://github.com/lucyus/actionify/commit/64d561ad3f0158ed8a8232785d7c7f5c0eb6a2c6))
 ## [0.10.1](https://github.com/lucyus/actionify/compare/v0.10.0...v0.10.1) (2025-05-03)
 
 ### Documentation
