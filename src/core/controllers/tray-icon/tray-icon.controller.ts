@@ -1,10 +1,11 @@
 import path from "path";
-import { Actionify } from "../../../core";
 import {
   removeTrayIcon,
   updateTrayIcon,
   updateTrayIconTooltip,
 } from "../../../addon";
+import { Actionify } from "../../../core";
+import { TrayIconMenuController } from "../../../core/controllers";
 import { Inspectable } from "../../../core/utilities";
 
 export class TrayIconController {
@@ -12,17 +13,17 @@ export class TrayIconController {
   readonly #windowId: number;
   #absoluteIconPath: string;
   #tooltip: string;
+  #trayIconMenuController: TrayIconMenuController;
 
   public constructor(
     trayIconWindowId: number,
     absoluteIconPath: string,
     tooltip: string,
-    onTrayMenuRestartClick: () => void,
-    onTrayMenuExitClick: () => void
   ) {
     this.#windowId = trayIconWindowId;
     this.#absoluteIconPath = absoluteIconPath;
     this.#tooltip = tooltip;
+    this.#trayIconMenuController = new TrayIconMenuController(this.#windowId);
   }
 
   /**
@@ -91,6 +92,29 @@ export class TrayIconController {
   public set tooltip(tooltip: string) {
     this.#tooltip = tooltip.substring(0, 127);
     updateTrayIconTooltip(this.#windowId, this.#tooltip);
+  }
+
+  /**
+   * @description Get the tray icon menu controller.
+   *
+   * ---
+   * @example
+   *
+   * // Create a tray icon
+   * const trayIconController = Actionify.trayIcon.create();
+   *
+   * // Create a tray icon menu item
+   * const menuItem = trayIconController.menu.item.add({
+   *   label: "Your menu item",
+   *   onClick() { console.log("You clicked on the menu item!"); },
+   *   position: 0
+   * });
+   *
+   * // List all tray icon menu items
+   * const menuItems = trayIconController.menu.item.list();
+   */
+  public get menu(): TrayIconMenuController {
+    return this.#trayIconMenuController;
   }
 
   /**
