@@ -122,6 +122,7 @@ You're ready to go! 🚀
     * [2.8. Keep a window always on top](./docs/WINDOW.md#28-keep-a-window-always-on-top)
     * [2.9. Bring a window to the foreground](./docs/WINDOW.md#29-bring-a-window-to-the-foreground)
     * [2.10. Send a window to the background](./docs/WINDOW.md#210-send-a-window-to-the-background)
+    * [2.11. Take a window screenshot](./docs/WINDOW.md#211-take-a-window-screenshot)
 * [**VIII. Sound Manager**](./docs/SOUND.md)
   * [1. Audio Playback](./docs/SOUND.md#1-audio-playback)
     * [1.1. Start Playback](./docs/SOUND.md#11-start-playback)

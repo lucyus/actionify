@@ -54,7 +54,7 @@ const screenshotFilepath = Actionify.screen.shot(100, 100, 400, 200, { filepath:
 * Screenshots are saved in PNG format.
 * If no file path is specified, the screenshot will be saved in the [current working directory](https://nodejs.org/api/process.html#processcwd) with the following name: `screenshot_[year]-[month]-[day]_[hour]-[minute]-[second]-[millisecond].png`
 
-> See also: [Screen Coordinates System](#10-screen-coordinates-system)
+> See also: [Screen Coordinates System](#10-screen-coordinates-system), [Take a window screenshot](./WINDOW.md#211-take-a-window-screenshot)
 
 ### 2.2. Get the current color of a pixel
 

@@ -373,6 +373,42 @@ const windows = Actionify.window.list();
 windows[0].bottom();
 ```
 
+### 2.11. Take a window screenshot
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Select a window to take a screenshot of, here we'll take the first window
+const window = Actionify.window.list()[0];
+
+try {
+  // Take a screenshot of the entire window
+  const screenshotFilepath = window.shot();
+
+  // Take a screenshot of the window between (100, 100) and (500, 300) relative to the window's top-left corner
+  const screenshotFilepath = window.shot(100, 100, 400, 200);
+
+  // Take a screenshot of the window between (100, 100) and (500, 300) and apply a scale factor
+  const screenshotFilepath = window.shot(100, 100, 400, 200, { scale: 2.0 });
+
+  // Take a screenshot of the window between (100, 100) and (500, 300) and save it to a specific file
+  const screenshotFilepath = window.shot(100, 100, 400, 200, { filepath: "/path/to/screenshot.png" });
+}
+catch (error) {
+  // Handle error here...
+}
+```
+
+* Screenshots are saved in PNG format.
+* If no file path is specified, the screenshot will be saved in the [current working directory](https://nodejs.org/api/process.html#processcwd) with the following name: `screenshot_[year]-[month]-[day]_[hour]-[minute]-[second]-[millisecond].png`
+* An error may be thrown if:
+  * The window no longer exists,
+  * The window does not allow direct screenshots. Use [Actionify.screen.shot()](./SCREEN.md#21-take-a-screenshot) instead as a fallback,
+  * The window is running as administrator but Actionify is not. Try running Actionify as administrator or use [Actionify.screen.shot()](./SCREEN.md#21-take-a-screenshot) instead as a fallback.
+
+
+> See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system), [Take a screenshot](./SCREEN.md#21-take-a-screenshot)
+
 ---
 
 [← Home](../README.md#features)
