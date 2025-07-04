@@ -2341,7 +2341,6 @@ bool TakeScreenshotToFile(
   return isSaved;
 }
 
-
 Napi::Value TakeScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -2358,6 +2357,132 @@ Napi::Value TakeScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   float scale = info[5].As<Napi::Number>().FloatValue();
 
   bool success = TakeScreenshotToFile(x, y, width, height, filepath, scale);
+
+  return Napi::Boolean::New(env, success);
+}
+
+// Function to take a screenshot of a specific window and save it to a file
+bool TakeWindowScreenshotToFile(
+    HWND hwnd,
+    int x,
+    int y,
+    int width,
+    int height,
+    const std::string& filepath,
+    const float& scale = 1.0f
+) {
+  if (!IsWindow(hwnd)) {
+    std::cerr << "Invalid window handle." << std::endl;
+    return false;
+  }
+
+  // Get full window size
+  RECT windowRect;
+  if (!GetWindowRect(hwnd, &windowRect)) {
+    std::cerr << "Failed to get window rectangle." << std::endl;
+    return false;
+  }
+  int windowOuterWidth = windowRect.right - windowRect.left;
+  int windowOuterHeight = windowRect.bottom - windowRect.top;
+
+  // Get inner window size (client area)
+  RECT clientRect;
+  if (!GetClientRect(hwnd, &clientRect)) {
+    std::cerr << "Failed to get client rectangle." << std::endl;
+    return false;
+  }
+  int windowInnerWidth = clientRect.right - clientRect.left;
+  int windowInnerHeight = clientRect.bottom - clientRect.top;
+
+
+  // Create a device context and bitmap for the window image
+  HDC hWindowDC = GetDC(hwnd);
+  HDC hMemDC = CreateCompatibleDC(hWindowDC);
+  HBITMAP hBitmap = CreateCompatibleBitmap(hWindowDC, windowOuterWidth, windowOuterHeight);
+  HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+  // Try to use PrintWindow to capture the window contents
+  if (!PrintWindow(hwnd, hMemDC, PW_RENDERFULLCONTENT)) {
+    std::cerr << "PrintWindow failed." << std::endl;
+    SelectObject(hMemDC, hOldBitmap);
+    DeleteObject(hBitmap);
+    DeleteDC(hMemDC);
+    ReleaseDC(hwnd, hWindowDC);
+    return false;
+  }
+
+  // Cleanup device contexts
+  SelectObject(hMemDC, hOldBitmap);
+  DeleteDC(hMemDC);
+  ReleaseDC(hwnd, hWindowDC);
+
+  // Initialize GDI+
+  Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+  ULONG_PTR gdiplusToken;
+  Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+
+  bool isSaved = false;
+  {
+    Gdiplus::Bitmap bitmap(hBitmap, nullptr);
+
+    // Apply scaling
+    int scaledWidth = static_cast<int>(width * scale);
+    int scaledHeight = static_cast<int>(height * scale);
+
+    // Compute window offsets
+    int offsetX = (windowOuterWidth - windowInnerWidth) / 2;
+    int offsetY = (windowOuterHeight - windowInnerHeight) / 2;
+
+    // Compute user desired area to capture
+    int startX = x + offsetX;
+    int startY = y + offsetY;
+    int desiredWidth = width;
+    int desiredHeight = height;
+
+    Gdiplus::Bitmap scaledBitmap(scaledWidth, scaledHeight, bitmap.GetPixelFormat());
+    Gdiplus::Graphics graphics(&scaledBitmap);
+    graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+    // graphics.DrawImage(&bitmap, (int)0/* windowRect.right */, (int)0/* -windowRect.top */, (int)(scaledWidth/*  - 2 * windowRect.right */), (int)(scaledHeight/*  + 2 * windowRect.top */));
+    graphics.DrawImage(&bitmap,
+      Gdiplus::Rect(0, 0, scaledWidth, scaledHeight),
+      startX, startY, desiredWidth, desiredHeight,
+      Gdiplus::UnitPixel
+    );
+
+    // Save as PNG
+    CLSID pngClsid;
+    if (GetEncoderClsid(L"image/png", &pngClsid)) {
+      std::wstring widePath(filepath.begin(), filepath.end());
+      isSaved = scaledBitmap.Save(widePath.c_str(), &pngClsid, nullptr) == Gdiplus::Status::Ok;
+    } else {
+      std::cerr << "Could not find PNG encoder." << std::endl;
+    }
+  }
+
+  // Cleanup GDI+ and bitmap
+  DeleteObject(hBitmap);
+  Gdiplus::GdiplusShutdown(gdiplusToken);
+
+  return isSaved;
+}
+
+Napi::Value TakeWindowScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() < 7 || !info[0].IsNumber() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber() || !info[4].IsNumber() || !info[5].IsString() || !info[6].IsNumber()) {
+    Napi::TypeError::New(env, "Arguments must be: (hwnd, x, y, width, height, filepath, scale)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  HWND hwnd = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+  int x = info[1].As<Napi::Number>().Int32Value();
+  int y = info[2].As<Napi::Number>().Int32Value();
+  int width = info[3].As<Napi::Number>().Int32Value();
+  int height = info[4].As<Napi::Number>().Int32Value();
+  std::string filepath = info[5].As<Napi::String>().Utf8Value();
+  float scale = info[6].As<Napi::Number>().FloatValue();
+
+  bool success = TakeWindowScreenshotToFile(hwnd, x, y, width, height, filepath, scale);
 
   return Napi::Boolean::New(env, success);
 }
@@ -3179,6 +3304,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "setWindowToAlwaysOnTop"), Napi::Function::New(env, SetWindowToAlwaysOnTopWrapper));
   exports.Set(Napi::String::New(env, "getPixelColor"), Napi::Function::New(env, GetPixelColorWrapper));
   exports.Set(Napi::String::New(env, "takeScreenshotToFile"), Napi::Function::New(env, TakeScreenshotToFileWrapper));
+  exports.Set(Napi::String::New(env, "takeWindowScreenshotToFile"), Napi::Function::New(env, TakeWindowScreenshotToFileWrapper));
   exports.Set(Napi::String::New(env, "copyTextToClipboard"), Napi::Function::New(env, CopyTextToClipboard));
   exports.Set(Napi::String::New(env, "copyFileToClipboard"), Napi::Function::New(env, CopyFileToClipboardWrapper));
   exports.Set(Napi::String::New(env, "sleep"), Napi::Function::New(env, SleepWrapper));

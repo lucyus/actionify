@@ -36,6 +36,7 @@ declare module "@napi/actionify" {
     setWindowToAlwaysOnTop: (hwnd: number, shouldBeAlwaysOnTop: boolean) => boolean;
     getPixelColor: (x: number, y: number) => Color;
     takeScreenshotToFile: (x: number, y: number, width: number, height: number, filePath: string, scale: number) => string;
+    takeWindowScreenshotToFile: (hwnd: number, x: number, y: number, width: number, height: number, filePath: string, scale: number) => boolean;
     copyTextToClipboard: (text: string) => boolean;
     copyFileToClipboard: (filePath: string) => boolean;
     sleep: (milliseconds: number) => void;
