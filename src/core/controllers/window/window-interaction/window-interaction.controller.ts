@@ -1,3 +1,4 @@
+import path from "path";
 import { Actionify } from "../../../../core";
 import {
   closeWindow,
@@ -11,6 +12,7 @@ import {
   setWindowToAlwaysOnTop,
   setWindowToBottom,
   setWindowToTop,
+  takeWindowScreenshotToFile,
 } from "../../../../addon";
 import type { WindowInfo } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
@@ -521,6 +523,54 @@ export class WindowInteractionController {
       this.restore();
     }
     return setWindowToBottom(this.id);
+  }
+
+  /**
+   * @description Take a screenshot of the window and save it to a PNG file.
+   *
+   * @param x The top-left corner X position of the screenshot, relative to the window. If unset, it defaults to `0`.
+   * @param y The top-left corner Y position of the screenshot, relative to the window. If unset, it defaults to `0`.
+   * @param width The width of the screenshot in pixels. If unset, the width of the window will be used.
+   * @param height The height of the screenshot in pixels. If unset, the height of the window will be used.
+   * @param options.filepath The file path to save the screenshot to. If unset, it will be saved in the current working directory as `screenshot_[year]-[month]-[day]_[hour]-[minute]-[second]-[millisecond].png`.
+   * @param options.scale The scale factor to apply to the screenshot. If unset, it defaults to `1.0`.
+   * @returns The absolute filepath of the screenshot.
+   * @throws An error is thrown if the window does not allow screenshots (e.g.:
+   * the window is running as administrator but Actionify is not, the window no
+   * longer exists, etc.).
+   *
+   * ---
+   * @example
+   * // Select a window to take a screenshot of, here we take the first window
+   * const window = Actionify.window.list()[0];
+   *
+   * try {
+   *   // Take a screenshot of the entire window
+   *   const screenshotFilepath = window.shot();
+   *
+   *   // Take a screenshot of a specific area of the window
+   *   const screenshotFilepath = window.shot(100, 100, 400, 200);
+   *
+   *   // Take a screenshot of the window and save it to a specific file
+   *   const screenshotFilepath = window.shot(100, 100, 400, 200, { filepath: "/path/to/screenshot.png" });
+   *
+   *   // Take a screenshot of the window and apply a scale factor
+   *   const screenshotFilepath = window.shot(100, 100, 400, 200, { scale: 2.0 });
+   * }
+   * catch (error) {
+   *   // Handle potential errors here (some windows does not allow screenshots)...
+   * }
+   */
+  public shot(x?: number, y?: number, width?: number, height?: number, options?: { filepath?: string, scale?: number }): string {
+    const now = new Date();
+    const defaultFilepath = `screenshot_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}-${String(now.getMilliseconds()).padStart(3, "0")}.png`;
+    const absoluteFilePath = path.resolve(options?.filepath ?? defaultFilepath);
+    const scale = options?.scale ?? 1.0;
+    const hasTakenScreenshot = takeWindowScreenshotToFile(this.id, x ?? 0, y ?? 0, width ?? this.dimensions.width, height ?? this.dimensions.height, absoluteFilePath, scale);
+    if (!hasTakenScreenshot) {
+      throw new Error(`Failed to take a screenshot of the window with ID ${this.id}. The window may not allow screenshots, is running as administrator while Actionify is not, or may no longer exist.`);
+    }
+    return absoluteFilePath;
   }
 
   /**
