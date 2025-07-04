@@ -1,3 +1,13 @@
+## [0.12.0](https://github.com/lucyus/actionify/compare/v0.11.0...v0.12.0) (2025-07-04)
+
+### Features
+
+* **@addon:** implement window screenshot ([a4153eb](https://github.com/lucyus/actionify/commit/a4153eb0e7b1139dd4e51f5ad620e4b4aea3b8f7))
+* **@core/controllers:** implement window screenshot ([a7a8761](https://github.com/lucyus/actionify/commit/a7a87613cebc45ca17a42d35b887c6f95051d434))
+
+### Documentation
+
+* **@docs:** specify usage of window screenshot ([1cf0305](https://github.com/lucyus/actionify/commit/1cf0305f4bdb7b5970c5e7c236f9d1e1bfe2d293))
 ## [0.11.0](https://github.com/lucyus/actionify/compare/v0.10.1...v0.11.0) (2025-05-08)
 
 ### Features
