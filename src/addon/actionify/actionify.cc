@@ -3125,7 +3125,10 @@ float GetSoundSpeed(const std::wstring& soundId) {
   // Get the speed of the sound
   wchar_t buffer[128];
   std::wstring command = L"status " + soundId + L" speed";
-  mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL);
+  if (mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL) != 0) {
+    // Some audio formats may not support speed, then only default speed is allowed
+    return 1.0f;
+  }
   return std::stoi(buffer) / 1000.0f;
 }
 
