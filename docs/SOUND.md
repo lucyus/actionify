@@ -125,6 +125,8 @@ const currentSpeed = soundController.speed;
 soundController.speed = 2;
 ```
 
+> Note: Some audio formats may not support speed adjustment, in which case the speed will always be `1.0`.
+
 
 ### 1.8. Track Time Position Management
 
