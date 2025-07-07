@@ -51,9 +51,9 @@ struct MonitorInfo {
 struct WindowInfo {
   HWND hwnd;                     // Handle to the window
   DWORD pid;                     // Process ID associated with the window
-  std::string title;             // Window title
-  std::string executableFile;    // Executable name (path to the program)
-  std::string className;         // Window class name
+  std::wstring title;            // Window title
+  std::wstring executableFile;    // Executable name (path to the program)
+  std::wstring className;         // Window class name
   bool isFocused;                // Whether the window has focus (i.e. is the foreground window)
   bool isMinimized;              // Whether the window is minimized
   bool isMaximized;              // Whether the window is maximized
@@ -108,7 +108,7 @@ struct RawEvent {
 };
 
 struct SoundInfo {
-  std::string id;
+  std::wstring id;
   unsigned int duration;
 };
 
@@ -139,7 +139,7 @@ std::mutex trayIconMutex;
 std::condition_variable trayIconCondition;
 std::atomic<bool> trayIconRunning(false);
 HWND trayIconWindowHwnd;
-NOTIFYICONDATA nid = { 0 };
+NOTIFYICONDATAW nid = { 0 };
 HMENU hMenu;
 std::map<int, std::function<void()>> trayIconMenuItemsCallbacks;
 std::map<int, Napi::ThreadSafeFunction> trayIconMenuItemsJsCallbacks;
@@ -188,9 +188,9 @@ class PromiseWorker : public Napi::AsyncWorker {
 // =============================================================================
 
 std::string ConvertToUTF8(const std::wstring& wideStr) {
-  int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), -1, NULL, 0, NULL, NULL);
+  int bufferSize = WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), wideStr.size(), NULL, 0, NULL, NULL);
   std::string utf8Str(bufferSize, 0);
-  WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), -1, &utf8Str[0], bufferSize, NULL, NULL);
+  WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), wideStr.size(), &utf8Str[0], bufferSize, NULL, NULL);
   return utf8Str;
 }
 
@@ -206,7 +206,7 @@ uint64_t Now() {
 void CleanupTrayIcon() {
   std::lock_guard<std::mutex> lock(trayIconMutex);
   // Remove the tray icon before closing the window
-  Shell_NotifyIcon(NIM_DELETE, &nid);
+  Shell_NotifyIconW(NIM_DELETE, &nid);
 
   // Destroy the window associated with the tray icon
   if (trayIconWindowHwnd) {
@@ -726,11 +726,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_USER + 2: {
       // Change tray icon
       nid.hIcon = reinterpret_cast<HICON>(wParam);
-      Shell_NotifyIcon(NIM_MODIFY, &nid);
+      Shell_NotifyIconW(NIM_MODIFY, &nid);
       break;
     }
     case WM_USER + 3: {
-      Shell_NotifyIcon(NIM_MODIFY, &nid);
+      Shell_NotifyIconW(NIM_MODIFY, &nid);
       break;
     }
     case WM_DESTROY: {
@@ -765,15 +765,15 @@ HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath) {
 
       hMenu = CreatePopupMenu();
 
-      nid.cbSize = sizeof(NOTIFYICONDATA);
+      nid.cbSize = sizeof(NOTIFYICONDATAW);
       nid.hWnd = hwnd;
       nid.uID = 1;
       nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
       nid.uCallbackMessage = WM_USER + 1;
-      strncpy_s(nid.szTip, ConvertToUTF8(name).c_str(), _countof(nid.szTip) - 1);
+      wcscpy_s(nid.szTip, _countof(nid.szTip), name.c_str());
       nid.hIcon = static_cast<HICON>(LoadImageW(NULL, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
 
-      Shell_NotifyIcon(NIM_ADD, &nid);
+      Shell_NotifyIconW(NIM_ADD, &nid);
     }
     trayIconRunning = true;
     trayIconCondition.notify_all();
@@ -867,7 +867,7 @@ Napi::Value UpdateTrayIconWrapper(const Napi::CallbackInfo& info) {
 
 void UpdateTrayIconTooltip(HWND hwnd, const std::wstring& newTooltip) {
   // update the tooltip
-  strncpy_s(nid.szTip, ConvertToUTF8(newTooltip).c_str(), _countof(nid.szTip) - 1);
+  wcscpy_s(nid.szTip, _countof(nid.szTip), newTooltip.c_str());
   // Send message to the window to update the tray icon
   PostMessage(hwnd, WM_USER + 3, 0, 0);
 }
@@ -2222,7 +2222,7 @@ bool GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
 }
 
 // Function to save a HBITMAP to a PNG file
-bool SaveHBitmapToPNG(HBITMAP hBitmap, const std::string& filepath) {
+bool SaveHBitmapToPNG(HBITMAP hBitmap, const std::wstring& filepath) {
   Gdiplus::GdiplusStartupInput gdiplusStartupInput;
   ULONG_PTR gdiplusToken;
 
@@ -2236,11 +2236,9 @@ bool SaveHBitmapToPNG(HBITMAP hBitmap, const std::string& filepath) {
     Gdiplus::Bitmap bitmap(hBitmap, nullptr);
     CLSID pngClsid;
 
-    std::wstring wideFilepath(filepath.begin(), filepath.end());
-
     if (bitmap.GetLastStatus() == Gdiplus::Ok &&
       GetEncoderClsid(L"image/png", &pngClsid)) {
-      if (bitmap.Save(wideFilepath.c_str(), &pngClsid, nullptr) == Gdiplus::Ok) {
+      if (bitmap.Save(filepath.c_str(), &pngClsid, nullptr) == Gdiplus::Ok) {
         result = true;
       } else {
         std::cerr << "Failed to save PNG file." << std::endl;
@@ -2259,7 +2257,7 @@ bool TakeScreenshotToFile(
   int y,
   int width,
   int height,
-  const std::string& filepath,
+  const std::wstring& filepath,
   const float& scale = 1.0f
 ) {
   // Get the desktop device context
@@ -2353,7 +2351,8 @@ Napi::Value TakeScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   int y = info[1].As<Napi::Number>().Int32Value();
   int width = info[2].As<Napi::Number>().Int32Value();
   int height = info[3].As<Napi::Number>().Int32Value();
-  std::string filepath = info[4].As<Napi::String>().Utf8Value();
+  std::u16string u16Filepath = info[4].As<Napi::String>().Utf16Value();
+  std::wstring filepath = std::wstring(u16Filepath.begin(), u16Filepath.end());
   float scale = info[5].As<Napi::Number>().FloatValue();
 
   bool success = TakeScreenshotToFile(x, y, width, height, filepath, scale);
@@ -2368,7 +2367,7 @@ bool TakeWindowScreenshotToFile(
     int y,
     int width,
     int height,
-    const std::string& filepath,
+    const std::wstring& filepath,
     const float& scale = 1.0f
 ) {
   if (!IsWindow(hwnd)) {
@@ -2479,7 +2478,8 @@ Napi::Value TakeWindowScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
   int y = info[2].As<Napi::Number>().Int32Value();
   int width = info[3].As<Napi::Number>().Int32Value();
   int height = info[4].As<Napi::Number>().Int32Value();
-  std::string filepath = info[5].As<Napi::String>().Utf8Value();
+  std::u16string u16Filepath = info[5].As<Napi::String>().Utf16Value();
+  std::wstring filepath = std::wstring(u16Filepath.begin(), u16Filepath.end());
   float scale = info[6].As<Napi::Number>().FloatValue();
 
   bool success = TakeWindowScreenshotToFile(hwnd, x, y, width, height, filepath, scale);
@@ -2493,10 +2493,10 @@ Napi::Value TakeWindowScreenshotToFileWrapper(const Napi::CallbackInfo& info) {
 // =============================================================================
 
 // Helper to get the window title
-std::string GetWindowTitle(HWND hwnd) {
-  char title[256];
-  GetWindowTextA(hwnd, title, sizeof(title));
-  return std::string(title);
+std::wstring GetWindowTitle(HWND hwnd) {
+  wchar_t title[256];
+  GetWindowTextW(hwnd, title, sizeof(title));
+  return std::wstring(title);
 }
 
 // Function to list windows
@@ -2525,7 +2525,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
   }
 
   // Skip windows without a title
-  std::string title = GetWindowTitle(hwnd);
+  std::wstring title = GetWindowTitle(hwnd);
   if (title.empty()) {
     return TRUE;
   }
@@ -2545,16 +2545,16 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
   GetWindowThreadProcessId(hwnd, &pid);
 
   // Retrieve the executable name
-  char executableFile[MAX_PATH] = {0};
+  wchar_t executableFile[MAX_PATH] = {0};
   HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
   if (process) {
-    GetModuleFileNameExA(process, NULL, executableFile, MAX_PATH);
+    GetModuleFileNameExW(process, NULL, executableFile, MAX_PATH);
     CloseHandle(process);
   }
 
   // Retrieve window class name
-  char className[256];
-  GetClassNameA(hwnd, className, sizeof(className));
+  wchar_t className[256];
+  GetClassNameW(hwnd, className, sizeof(className) / sizeof(wchar_t));
 
   // Check if the current window is in the foreground
   HWND foregroundWindow = GetForegroundWindow();
@@ -2596,9 +2596,9 @@ Napi::Value ListWindows(const Napi::CallbackInfo& info) {
     Napi::Object winObj = Napi::Object::New(env);
     winObj.Set("id", reinterpret_cast<uintptr_t>(win.hwnd));
     winObj.Set("pid", Napi::Number::New(env, win.pid));
-    winObj.Set("title", Napi::String::New(env, win.title));
-    winObj.Set("executableFile", Napi::String::New(env, win.executableFile));
-    winObj.Set("className", Napi::String::New(env, win.className));
+    winObj.Set("title", Napi::String::New(env, ConvertToUTF8(win.title)));
+    winObj.Set("executableFile", Napi::String::New(env, ConvertToUTF8(win.executableFile)));
+    winObj.Set("className", Napi::String::New(env, ConvertToUTF8(win.className)));
     Napi::Object position = Napi::Object::New(env);
     position.Set("x", Napi::Number::New(env, win.rect.left));
     position.Set("y", Napi::Number::New(env, win.rect.top));
@@ -2921,11 +2921,11 @@ Napi::Value SetWindowToAlwaysOnTopWrapper(const Napi::CallbackInfo& info) {
 // ============================= SOUND FUNCTIONS ==============================
 // =============================================================================
 
-void StopSound(const std::string& soundId) {
-  std::string command = "stop " + soundId;
-  mciSendString(command.c_str(), NULL, 0, NULL);
-  command = "close " + soundId;
-  mciSendString(command.c_str(), NULL, 0, NULL);
+void StopSound(const std::wstring& soundId) {
+  std::wstring command = L"stop " + soundId;
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
+  command = L"close " + soundId;
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
 }
 
 Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
@@ -2936,7 +2936,8 @@ Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Stop the sound
   StopSound(soundId);
@@ -2944,9 +2945,9 @@ Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-void PauseSound(const std::string& soundId) {
-  std::string command = "pause " + soundId;
-  mciSendString(command.c_str(), NULL, 0, NULL);
+void PauseSound(const std::wstring& soundId) {
+  std::wstring command = L"pause " + soundId;
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
 }
 
 Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
@@ -2957,7 +2958,8 @@ Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Pause the sound
   PauseSound(soundId);
@@ -2965,9 +2967,9 @@ Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-void ResumeSound(const std::string& soundId) {
-  std::string command = "resume " + soundId;
-  mciSendString(command.c_str(), NULL, 0, NULL);
+void ResumeSound(const std::wstring& soundId) {
+  std::wstring command = L"resume " + soundId;
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
 }
 
 Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
@@ -2978,7 +2980,8 @@ Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Resume the sound
   ResumeSound(soundId);
@@ -2986,10 +2989,10 @@ Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-std::string GetSoundStatus(const std::string& soundId) {
-  std::string command = "status " + soundId + " mode";
-  char status[256];
-  mciSendString(command.c_str(), status, sizeof(status), NULL);
+std::wstring GetSoundStatus(const std::wstring& soundId) {
+  std::wstring command = L"status " + soundId + L" mode";
+  wchar_t status[256];
+  mciSendStringW(command.c_str(), status, sizeof(status) / sizeof(wchar_t), NULL);
   return status;
 }
 
@@ -3001,19 +3004,20 @@ Napi::Value GetSoundStatusWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the status of the sound
-  std::string status = GetSoundStatus(soundId);
+  std::wstring status = GetSoundStatus(soundId);
 
-  return Napi::String::New(env, status);
+  return Napi::String::New(env, ConvertToUTF8(status));
 }
 
-int GetSoundTrackTime(const std::string& soundId) {
-  std::string command = "status " + soundId + " position";
-  char time[256];
-  mciSendString(command.c_str(), time, sizeof(time), NULL);
-  return atoi(time);
+int GetSoundTrackTime(const std::wstring& soundId) {
+  std::wstring command = L"status " + soundId + L" position";
+  wchar_t time[256];
+  mciSendStringW(command.c_str(), time, sizeof(time) / sizeof(wchar_t), NULL);
+  return std::stoi(time);
 }
 
 Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
@@ -3024,7 +3028,8 @@ Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the track time of the sound
   int trackTime = GetSoundTrackTime(soundId);
@@ -3032,13 +3037,13 @@ Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, trackTime);
 }
 
-void setSoundTrackTime(const std::string& soundId, int trackTime) {
-  std::string previousStatus = GetSoundStatus(soundId);
-  std::string command = "seek " + soundId + " to " + std::to_string(trackTime);
-  mciSendString(command.c_str(), NULL, 0, NULL);
-  command = "play " + soundId;
-  mciSendString(command.c_str(), NULL, 0, NULL);
-  if (previousStatus == "paused") {
+void setSoundTrackTime(const std::wstring& soundId, int trackTime) {
+  std::wstring previousStatus = GetSoundStatus(soundId);
+  std::wstring command = L"seek " + soundId + L" to " + std::to_wstring(trackTime);
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
+  command = L"play " + soundId;
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
+  if (previousStatus == L"paused") {
     PauseSound(soundId);
   }
 }
@@ -3051,7 +3056,8 @@ Napi::Value SetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Ensure the second argument is a number
   if (info.Length() < 2 || !info[1].IsNumber()) {
@@ -3115,12 +3121,12 @@ Napi::Value SetSoundVolumeWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-float GetSoundSpeed(const std::string& soundId) {
+float GetSoundSpeed(const std::wstring& soundId) {
   // Get the speed of the sound
-  char buffer[128];
-  std::string command = "status " + soundId + " speed";
-  mciSendString(command.c_str(), buffer, sizeof(buffer), NULL);
-  return atoi(buffer) / 1000.0f;
+  wchar_t buffer[128];
+  std::wstring command = L"status " + soundId + L" speed";
+  mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL);
+  return std::stoi(buffer) / 1000.0f;
 }
 
 Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
@@ -3131,7 +3137,8 @@ Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
     Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the speed of the sound
   float speed = GetSoundSpeed(soundId);
@@ -3139,10 +3146,10 @@ Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, speed);
 }
 
-void SetSoundSpeed(const std::string& soundId, float speed) {
+void SetSoundSpeed(const std::wstring& soundId, float speed) {
   // Set the speed of the sound
-  std::string command = "set " + soundId + " speed " + std::to_string(static_cast<int>(std::round(speed * 1000)));
-  mciSendString(command.c_str(), NULL, 0, NULL);
+  std::wstring command = L"set " + soundId + L" speed " + std::to_wstring(static_cast<int>(std::round(speed * 1000)));
+  mciSendStringW(command.c_str(), NULL, 0, NULL);
 }
 
 Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
@@ -3154,7 +3161,8 @@ Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
     return env.Null();
   }
 
-  std::string soundId = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
   float speed = info[1].As<Napi::Number>().FloatValue();
 
   // Set the speed of the sound
@@ -3163,7 +3171,7 @@ Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-SoundInfo PlaySound(const std::string& filePath, float volume = 1.0f, float speed = 1.0f, int startTime = -1, int endTime = -1) {
+SoundInfo PlaySound(const std::wstring& filePath, float volume = 1.0f, float speed = 1.0f, int startTime = -1, int endTime = -1) {
   // Clamp volume between 0.0 and 1.0
   if (volume < 0.0f) volume = 0.0f;
   if (volume > 1.0f) volume = 1.0f;
@@ -3173,19 +3181,19 @@ SoundInfo PlaySound(const std::string& filePath, float volume = 1.0f, float spee
   if (speed > 4.0f) speed = 4.0f;
 
   // Generate a time-based unique ID for the sound instance
-  std::string soundId = "sound_" + std::to_string(Now());
+  std::wstring soundId = L"sound_" + std::to_wstring(Now());
 
 
   // Open the audio file
-  std::string command = "open \"" + filePath + "\" alias " + soundId;
-  if (mciSendString(command.c_str(), NULL, 0, NULL) != 0) {
+  std::wstring command = L"open \"" + filePath + L"\" alias " + soundId;
+  if (mciSendStringW(command.c_str(), NULL, 0, NULL) != 0) {
     return {};
   }
 
   // Get the total length of the audio
-  char buffer[128];
-  command = "status " + soundId + " length";
-  mciSendString(command.c_str(), buffer, sizeof(buffer), NULL);
+  wchar_t buffer[128];
+  command = L"status " + soundId + L" length";
+  mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL);
   int duration = std::stoi(buffer);
 
   // Clamp start and end times
@@ -3202,10 +3210,10 @@ SoundInfo PlaySound(const std::string& filePath, float volume = 1.0f, float spee
   SetSoundSpeed(soundId, speed);
 
   // Play the sound asynchronously
-  command = "play " + soundId + " from " + std::to_string(startTime) + " to " + std::to_string(endTime);
-  if (mciSendString(command.c_str(), NULL, 0, NULL) != 0) {
-    command = "close " + soundId;
-    mciSendString(command.c_str(), NULL, 0, NULL);
+  command = L"play " + soundId + L" from " + std::to_wstring(startTime) + L" to " + std::to_wstring(endTime);
+  if (mciSendStringW(command.c_str(), NULL, 0, NULL) != 0) {
+    command = L"close " + soundId;
+    mciSendStringW(command.c_str(), NULL, 0, NULL);
     return {};
   }
 
@@ -3243,7 +3251,8 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
   }
 
   // Get the sound file path from the first argument
-  std::string filePath = info[0].As<Napi::String>().Utf8Value();
+  std::u16string u16FilePath = info[0].As<Napi::String>().Utf16Value();
+  std::wstring filePath = std::wstring(u16FilePath.begin(), u16FilePath.end());
   // Get the volume from the second argument
   float volume = (info.Length() >= 2 && !info[1].IsUndefined()) ? info[1].As<Napi::Number>().FloatValue() : 1.0f;
   // Get the speed from the third argument
@@ -3256,12 +3265,12 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
   // Play the sound asynchronously
   SoundInfo soundInfo = PlaySound(filePath, volume, speed, startTime, endTime);
   if (soundInfo.id.empty()) {
-    Napi::TypeError::New(env, "Error playing sound: " + filePath).ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, "Error playing sound: " + ConvertToUTF8(filePath)).ThrowAsJavaScriptException();
     return env.Null();
   }
 
   Napi::Object result = Napi::Object::New(env);
-  result.Set("id", Napi::String::New(env, soundInfo.id));
+  result.Set("id", Napi::String::New(env, ConvertToUTF8(soundInfo.id)));
   result.Set("duration", Napi::Number::New(env, soundInfo.duration));
   return result;
 }
