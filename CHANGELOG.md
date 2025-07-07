@@ -1,3 +1,13 @@
+## [0.12.1](https://github.com/lucyus/actionify/compare/v0.12.0...v0.12.1) (2025-07-07)
+
+### Bug Fixes
+
+* **@addon:** handle properly non-ASCII characters in C++ environment ([dd12a31](https://github.com/lucyus/actionify/commit/dd12a31f8033942658ea84ef5c12b49b8008051d))
+* **@addon:** handle unsupported speed adjustment for certain audio formats ([781687d](https://github.com/lucyus/actionify/commit/781687df379c5c189c3d61351039b50231df7076))
+
+### Documentation
+
+* **@docs/sound:** specify behavior for audio formats without speed adjustment support ([f450db1](https://github.com/lucyus/actionify/commit/f450db1f0635ac12f0143fe9b695c711dc7f726a))
 ## [0.12.0](https://github.com/lucyus/actionify/compare/v0.11.0...v0.12.0) (2025-07-04)
 
 ### Features
