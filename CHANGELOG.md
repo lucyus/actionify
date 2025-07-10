@@ -1,3 +1,8 @@
+## [0.12.2](https://github.com/lucyus/actionify/compare/v0.12.1...v0.12.2) (2025-07-10)
+
+### Documentation
+
+* **@core:** add missing JSDoc for some exposed types and class members ([369a21f](https://github.com/lucyus/actionify/commit/369a21ff880c9730e248fa08d8d39d6566019065))
 ## [0.12.1](https://github.com/lucyus/actionify/compare/v0.12.0...v0.12.1) (2025-07-07)
 
 ### Bug Fixes
