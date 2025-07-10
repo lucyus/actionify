@@ -12,6 +12,9 @@ import { Inspectable } from "../../../core/utilities";
  */
 export class ScreenController {
 
+  /**
+   * @description Screen pixel management.
+   */
   readonly pixel: ScreenPixelController;
 
   public constructor() {

@@ -15,6 +15,8 @@ export class MouseLeftController {
   /**
    * @description Simulate mouse left button press.
    *
+   * @param options.delay Delay in milliseconds before the mouse left button is pressed.
+   *
    * @returns A promise which resolves after the mouse left button is pressed.
    *
    * ---
@@ -34,6 +36,8 @@ export class MouseLeftController {
   /**
    * @description Simulate mouse left button release.
    *
+   * @param options.delay Delay in milliseconds before the mouse left button is released.
+   *
    * @returns A promise which resolves after the mouse left button is released.
    *
    * ---
@@ -52,6 +56,8 @@ export class MouseLeftController {
 
   /**
    * @description Simulate mouse left button click (press then release).
+   *
+   * @param options.delay Delay in milliseconds before the mouse left button is clicked.
    *
    * @returns A promise which resolves after the mouse left button is clicked.
    *

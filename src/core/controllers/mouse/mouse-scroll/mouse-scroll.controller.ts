@@ -16,6 +16,7 @@ export class MouseScrollController {
    * @description Simulate mouse wheel scroll down.
    *
    * @param scrollAmount Amount of wheel deltas to scroll down. If unset, the default mouse wheel scroll amount will be used.
+   * @param options.delay Delay in milliseconds before the mouse wheel is scrolled down.
    * @returns A promise which resolves after the mouse wheel is scrolled down.
    *
    * ---
@@ -85,6 +86,7 @@ export class MouseScrollController {
    * @description Simulate mouse wheel scroll up.
    *
    * @param scrollAmount Amount of wheel deltas to scroll up. If unset, the default mouse wheel scroll amount will be used.
+   * @param options.delay Delay in milliseconds before the mouse wheel is scrolled up.
    * @returns A promise which resolves after the mouse wheel is scrolled up.
    *
    * ---

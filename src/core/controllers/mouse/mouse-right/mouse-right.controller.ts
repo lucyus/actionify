@@ -15,6 +15,8 @@ export class MouseRightController {
   /**
    * @description Simulate mouse right button press.
    *
+   * @param options.delay Delay in milliseconds before the mouse right button is pressed.
+   *
    * @returns A promise which resolves after the mouse right button is pressed.
    *
    * ---
@@ -34,6 +36,8 @@ export class MouseRightController {
   /**
    * @description Simulate mouse right button release.
    *
+   * @param options.delay Delay in milliseconds before the mouse right button is released.
+   *
    * @returns A promise which resolves after the mouse right button is released.
    *
    * ---
@@ -52,6 +56,8 @@ export class MouseRightController {
 
   /**
    * @description Simulate mouse right button click (press then release).
+   *
+   * @param options.delay Delay in milliseconds before the mouse right button is clicked.
    *
    * @returns A promise which resolves after the mouse right button is clicked.
    *

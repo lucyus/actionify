@@ -15,6 +15,8 @@ export class MouseMiddleController {
   /**
    * @description Simulate mouse middle button press.
    *
+   * @param options.delay Delay in milliseconds before the mouse middle button is pressed.
+   *
    * @returns A promise which resolves after the mouse middle button is pressed.
    *
    * ---
@@ -34,6 +36,8 @@ export class MouseMiddleController {
   /**
    * @description Simulate mouse middle button release.
    *
+   * @param options.delay Delay in milliseconds before the mouse middle button is released.
+   *
    * @returns A promise which resolves after the mouse middle button is released.
    *
    * ---
@@ -52,6 +56,8 @@ export class MouseMiddleController {
 
   /**
    * @description Simulate mouse middle button click (press then release).
+   *
+   * @param options.delay Delay in milliseconds before the mouse middle button is clicked.
    *
    * @returns A promise which resolves after the mouse middle button is clicked.
    *

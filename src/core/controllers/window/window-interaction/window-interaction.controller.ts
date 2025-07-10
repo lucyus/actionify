@@ -32,50 +32,86 @@ export class WindowInteractionController {
     return listWindows().find((windowInfo) => windowInfo.id === id);
   }
 
+  /**
+   * @description The window handle number identifier (HWND).
+   */
   public get id() {
     return this.#windowInfo.id;
   }
 
+  /**
+   * @description The process identifier (PID) of the window.
+   */
   public get pid() {
     return this.#windowInfo.pid;
   }
 
+  /**
+   * @description The title of the window.
+   */
   public get title() {
     return this.#getById(this.id)?.title ?? this.#windowInfo.title;
   }
 
+  /**
+   * @description The executable file of the window.
+   */
   public get executableFile() {
     return this.#windowInfo.executableFile;
   }
 
+  /**
+   * @description The class name of the window.
+   */
   public get className() {
     return this.#windowInfo.className;
   }
 
+  /**
+   * @description The position of the window.
+   */
   public get position() {
     return this.#getById(this.id)?.position ?? this.#windowInfo.position;
   }
 
+  /**
+   * @description The dimensions (in pixels) of the window.
+   */
   public get dimensions() {
     return this.#getById(this.id)?.dimensions ?? this.#windowInfo.dimensions;
   }
 
+  /**
+   * @description Whether the window is minimized.
+   */
   public get isMinimized() {
     return this.#getById(this.id)?.isMinimized ?? this.#windowInfo.isMinimized;
   }
 
+  /**
+   * @description Whether the window is maximized.
+   */
   public get isMaximized() {
     return this.#getById(this.id)?.isMaximized ?? this.#windowInfo.isMaximized;
   }
 
+  /**
+   * @description Whether the window is restored (neither minimized nor maximized).
+   */
   public get isRestored() {
     return this.#getById(this.id)?.isRestored ?? this.#windowInfo.isRestored;
   }
 
+  /**
+   * @description Whether the window is focused (i.e. in the foreground).
+   */
   public get isFocused() {
     return this.#getById(this.id)?.isFocused ?? this.#windowInfo.isFocused;
   }
 
+  /**
+   * @description Whether the window is always on top of other windows.
+   */
   public get isAlwaysOnTop() {
     return this.#getById(this.id)?.isAlwaysOnTop ?? this.#windowInfo.isAlwaysOnTop;
   }

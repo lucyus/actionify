@@ -136,7 +136,14 @@ export class MouseController {
    *
    * @param x The new mouse X position. If unset, the current mouse X position will be used.
    * @param y The new mouse Y position. If unset, the current mouse Y position will be used.
-   * @param options Additional mouse movement options (delay, motion, intermediate positions, etc.).
+   * @param options.delay Delay in milliseconds before the mouse movement is complete.
+   * @param options.motion The type of motion to use. If unset, `linear` will be used.
+   * @param options.steps The number of intermediate mouse position between the current and the given new position.
+   * If unset, there will be no intermediate mouse positions. Thus, the mouse movement will be instant.
+   * You can use `auto` to evenly distribute the intermediate mouse positions considering the `delay` specified and the distance between the start and end positions.
+   * @param options.curvinessFactor The curve amplitude for `arc` and `wave` motions. If unset, `0.1618` will be used.
+   * @param options.frequency The wave frequency for `wave` motion. If unset, the maximum value between `2` and the closest even number below `steps / 60` will be used.
+   * @param options.mirror If set to `true`, the mouse movement (for `arc` and `wave`) will be mirrored.
    * @returns A promise that resolves when the mouse movement is complete.
    *
    * ---
