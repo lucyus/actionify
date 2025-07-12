@@ -1,3 +1,8 @@
+## [0.13.0](https://github.com/lucyus/actionify/compare/v0.12.3...v0.13.0) (2025-07-12)
+
+### Features
+
+* **@core/controllers:** allow window method chaining ([9c3695b](https://github.com/lucyus/actionify/commit/9c3695b6a48a0d5039bb24c09725d29381366c53))
 ## [0.12.3](https://github.com/lucyus/actionify/compare/v0.12.2...v0.12.3) (2025-07-12)
 
 ### Code Refactoring
