@@ -119,7 +119,7 @@ export class WindowInteractionController {
   /**
    * @description Minimize the window.
    *
-   * @returns Whether the window is minimized.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -130,15 +130,16 @@ export class WindowInteractionController {
    */
   public minimize() {
     if (this.isMinimized) {
-      return true;
+      return this;
     }
-    return minimizeWindow(this.id);
+    minimizeWindow(this.id);
+    return this;
   }
 
   /**
    * @description Maximize the window to fit the screen it is on.
    *
-   * @returns Whether the window is maximized.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -149,16 +150,17 @@ export class WindowInteractionController {
    */
   public maximize() {
     if (this.isMaximized) {
-      return true;
+      return this;
     }
-    return maximizeWindow(this.id);
+    maximizeWindow(this.id);
+    return this;
   }
 
   /**
    * @description Restore the window.
    * This is the opposite of `minimize`.
    *
-   * @returns Whether the window is restored.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -169,9 +171,10 @@ export class WindowInteractionController {
    */
   public restore() {
     if (this.isRestored) {
-      return true;
+      return this;
     }
-    return restoreWindow(this.id);
+    restoreWindow(this.id);
+    return this;
   }
 
   /**
@@ -195,7 +198,7 @@ export class WindowInteractionController {
    * @description Put the window in the foreground and focus it.
    * If the window is initially minimized, it will be restored first.
    *
-   * @returns Whether the window is focused.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -206,12 +209,13 @@ export class WindowInteractionController {
    */
   public focus() {
     if (this.isFocused) {
-      return true;
+      return this;
     }
     if (this.isMinimized) {
       return this.restore();
     }
-    return focusWindow(this.id);
+    focusWindow(this.id);
+    return this;
   }
 
   /**
@@ -220,7 +224,7 @@ export class WindowInteractionController {
    *
    * @param x The new window X position.
    * @param y The new window Y position.
-   * @returns Whether the window has moved.
+   * @returns A promise that resolves this window controller when the movement is completed.
    *
    * ---
    * @example
@@ -242,7 +246,7 @@ export class WindowInteractionController {
    * // Wave motion over time of the first window
    * await windows[0].move(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  public move(x?: number, y?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
+  public async move(x?: number, y?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
     if (this.isMinimized || this.isMaximized) {
       this.restore();
     }
@@ -256,7 +260,8 @@ export class WindowInteractionController {
     const newX = x ?? initialX;
     const newY = y ?? initialY;
     if (steps === 0 || delay === 0) {
-      return Actionify.time.waitAsync(delay, () => setWindowPosition(this.id, newX, newY));
+      await Actionify.time.waitAsync(delay, () => setWindowPosition(this.id, newX, newY));
+      return this;
     }
     //Calculate the line from start to end (the shortest diagonal)
     const dx = newX - initialX;
@@ -365,7 +370,8 @@ export class WindowInteractionController {
       }
     }
     promises.push(Actionify.time.waitAsync(delay, () => setWindowPosition(this.id, newX, newY)));
-    return Promise.all(promises);
+    await Promise.all(promises);
+    return this;
   }
 
   /**
@@ -373,7 +379,7 @@ export class WindowInteractionController {
    *
    * @param width The new window width, in pixels.
    * @param height The new window height, in pixels.
-   * @returns Whether the window has resized.
+   * @returns A promise that resolves this window controller when the resize is complete.
    *
    * ---
    * @example
@@ -395,7 +401,7 @@ export class WindowInteractionController {
    * // Wave resize motion over time of the first window
    * await windows[0].resize(100, 100, { motion: "wave", delay: 1000, steps: "auto", frequency: "auto" });
    */
-  public resize(width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
+  public async resize(width?: number, height?: number, options?: { steps?: number | "auto", delay?: number, motion?: "linear" | "arc" | "wave", curvinessFactor?: number, mirror?: boolean, frequency?: number | "auto" }) {
     if (this.isMinimized || this.isMaximized) {
       this.restore();
     }
@@ -409,7 +415,8 @@ export class WindowInteractionController {
     const newWidth = width ?? initialWidth;
     const newHeight = height ?? initialHeight;
     if (steps === 0 || delay === 0) {
-      return Actionify.time.waitAsync(delay, () => setWindowDimensions(this.id, newWidth, newHeight));
+      await Actionify.time.waitAsync(delay, () => setWindowDimensions(this.id, newWidth, newHeight));
+      return this;
     }
     //Calculate the line from start to end (the shortest diagonal)
     const dx = newWidth - initialWidth;
@@ -518,14 +525,15 @@ export class WindowInteractionController {
       }
     }
     promises.push(Actionify.time.waitAsync(delay, () => setWindowDimensions(this.id, newWidth, newHeight)));
-    return Promise.all(promises);
+    await Promise.all(promises);
+    return this;
   }
 
   /**
    * @description Move the window to the foreground.
    * If the window is initially minimized, it will be restored first.
    *
-   * @returns Whether the window is in the foreground.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -538,14 +546,15 @@ export class WindowInteractionController {
     if (this.isMinimized) {
       this.restore();
     }
-    return setWindowToTop(this.id);
+    setWindowToTop(this.id);
+    return this;
   }
 
   /**
    * @description Move the window to the background.
    * If the window is initially minimized, it will be restored first.
    *
-   * @returns Whether the window is in the background.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -558,7 +567,8 @@ export class WindowInteractionController {
     if (this.isMinimized) {
       this.restore();
     }
-    return setWindowToBottom(this.id);
+    setWindowToBottom(this.id);
+    return this;
   }
 
   /**
@@ -614,7 +624,7 @@ export class WindowInteractionController {
    * If the window is initially minimized, it will be restored first.
    *
    * @param shouldBeAlwaysOnTop Whether the window should be always on top of other windows (topmost category).
-   * @returns Whether the window has successfully been set into the top or topmost category.
+   * @returns This window instance.
    *
    * ---
    * @example
@@ -629,7 +639,8 @@ export class WindowInteractionController {
     if (this.isMinimized) {
       this.restore();
     }
-    return setWindowToAlwaysOnTop(this.id, shouldBeAlwaysOnTop);
+    setWindowToAlwaysOnTop(this.id, shouldBeAlwaysOnTop);
+    return this;
   }
 
   /**
