@@ -39,7 +39,7 @@ export class InputEventService {
         const inputListenersToRun: InputListenerScopeController[] = [];
         const inputRecordersToRun: InputRecorderScopeController[] = [];
         // save current mouse event to history
-        const currentMouseEvent = currentEvent as MouseEvent;
+        const currentMouseEvent = currentEvent;
         InputStateService.mouseStateHistory.set(currentMouseEvent.input, currentMouseEvent);
         // Find mouse listeners that are listening to the current mouse event
         const activeMouseListeners = InputEventService.mouseListeners.filter((mouseListener) => !mouseListener.isPaused && !mouseListener.isRunning);
@@ -252,7 +252,7 @@ export class InputEventService {
         const inputListenersToRun: InputListenerScopeController[] = [];
         const inputRecordersToRun: InputRecorderScopeController[] = [];
         // save current keyboard event to history
-        const currentKeyboardEvent = currentEvent as KeyboardEvent;
+        const currentKeyboardEvent = currentEvent;
         InputStateService.keyboardStateHistory.set(currentKeyboardEvent.input, currentKeyboardEvent);
         // Find keyboard listeners that are listening to the current keyboard event
         const activeKeyboardListeners = InputEventService.keyboardListeners.filter((keyboardListener) => !keyboardListener.isPaused && !keyboardListener.isRunning);

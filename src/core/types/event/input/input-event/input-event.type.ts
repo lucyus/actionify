@@ -1,8 +1,3 @@
-import type { InputState } from "../../../../../core/types";
+import type { KeyboardEvent, MouseEvent } from "../../../../../core/types";
 
-export type InputEvent = {
-  type: "mouse" | "keyboard";
-  state: InputState;
-  timestamp: number;
-  isSuppressed: boolean;
-};
+export type InputEvent = MouseEvent | KeyboardEvent;
