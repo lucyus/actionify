@@ -1,3 +1,8 @@
+## [0.12.3](https://github.com/lucyus/actionify/compare/v0.12.2...v0.12.3) (2025-07-12)
+
+### Code Refactoring
+
+* **@core/types:** simplify InputEvent type handling ([9fdeb58](https://github.com/lucyus/actionify/commit/9fdeb58c54c9478abfd924050210f41f1a73c701))
 ## [0.12.2](https://github.com/lucyus/actionify/compare/v0.12.1...v0.12.2) (2025-07-10)
 
 ### Documentation
