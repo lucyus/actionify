@@ -161,6 +161,53 @@ await soundController.untilFinished;
 > ⚠️ Make sure the audio file is not [paused](#12-pause-playback) before awaiting `untilFinished`, or the promise will never resolve nor reject.
 
 
+## 2. Text-to-Speech (TTS)
+
+### 2.1. Speak a Text
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Speak a text
+await Actionify.sound.say("Hello, world!");
+```
+
+### 2.2. Volume Management
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Speak a text with a custom volume (range: 0 to 100, default: 100)
+await Actionify.sound.say("Hello, world!", { volume: 75 });
+```
+
+### 2.3. Speed Management
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Speak a text with a custom speed (range: -10 to 10, default: 0)
+await Actionify.sound.say("Hello, world!", { speed: 8 });
+```
+
+### 2.4. Voice Management
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Speak a text with a custom voice
+await Actionify.sound.say("Hello, world!", { voice: "Microsoft Zira Desktop" });
+```
+
+> 🌐 You can list all available voices on your system using the Powershell command (`Name` field):
+
+```powershell
+Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | ForEach-Object { $_.VoiceInfo | Select-Object Name, Culture, Gender, Age, Description }
+```
+
+> Note: You may download additional voices in `Windows Settings > Time and Language > Speech > Manage voices > Add voices`.
+
+
 ---
 
 [← Home](../README.md#features)
