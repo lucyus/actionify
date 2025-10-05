@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
+#include <sapi.h>
 #include <psapi.h>
 #include <thread>
 #include <atomic>
@@ -3278,6 +3279,136 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
   return result;
 }
 
+bool TextToSpeech(
+  const std::wstring& text,
+  float volume = 100.0f,
+  float rate = 0.0f,
+  const std::wstring& voiceName = L""
+) {
+  HRESULT hr = CoInitialize(nullptr);
+  if (FAILED(hr)) {
+    std::wcerr << L"COM initialization failed.\n";
+    return false;
+  }
+
+  ISpVoice* pVoice = nullptr;
+  hr = CoCreateInstance(CLSID_SpVoice, nullptr, CLSCTX_ALL, IID_ISpVoice, (void**)&pVoice);
+  if (FAILED(hr)) {
+    std::wcerr << L"Failed to create SAPI voice.\n";
+    CoUninitialize();
+    return false;
+  }
+
+  // Enumerate installed voices (tokens)
+  ISpObjectTokenCategory* pCategory = nullptr;
+  hr = CoCreateInstance(
+    CLSID_SpObjectTokenCategory,
+    nullptr,
+    CLSCTX_ALL,
+    IID_ISpObjectTokenCategory,
+    (void**)&pCategory
+  );
+  if (SUCCEEDED(hr)) {
+    hr = pCategory->SetId(SPCAT_VOICES, FALSE);
+    if (SUCCEEDED(hr)) {
+      IEnumSpObjectTokens* pEnum = nullptr;
+      hr = pCategory->EnumTokens(nullptr, nullptr, &pEnum);
+      if (SUCCEEDED(hr)) {
+        ISpObjectToken* pToken = nullptr;
+        ULONG fetched = 0;
+
+        bool voiceSet = false;
+
+        while (pEnum->Next(1, &pToken, &fetched) == S_OK) {
+          // Get the voice name
+          WCHAR* name = nullptr;
+          ISpDataKey* pDataKey = nullptr;
+          hr = pToken->OpenKey(L"Attributes", &pDataKey);
+          if (SUCCEEDED(hr)) {
+            hr = pDataKey->GetStringValue(L"Name", &name);
+            if (SUCCEEDED(hr) && voiceName == name) {
+              // Set the matching voice
+              hr = pVoice->SetVoice(pToken);
+              if (SUCCEEDED(hr)) {
+                voiceSet = true;
+              }
+            }
+            CoTaskMemFree(name);
+            pDataKey->Release();
+          }
+          pToken->Release();
+        }
+        pEnum->Release();
+
+        if (!voiceName.empty() && !voiceSet) {
+          std::wcerr << L"Voice not found: " << voiceName << std::endl;
+        }
+      }
+    }
+    pCategory->Release();
+  }
+
+  // Set volume (0-100)
+  pVoice->SetVolume(static_cast<USHORT>(volume));
+
+  // Set rate (-10 to 10)
+  pVoice->SetRate(static_cast<LONG>(rate));
+
+  // Speak
+  hr = pVoice->Speak(text.c_str(), SPF_DEFAULT, nullptr);
+  if (FAILED(hr)) {
+    std::wcerr << L"Failed to speak text.\n";
+  }
+
+  pVoice->Release();
+  CoUninitialize();
+  return SUCCEEDED(hr);
+}
+
+Napi::Value TextToSpeechWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  // Ensure there are four arguments: text (string), volume (number), rate (number), voiceName (string)
+  if (
+    info.Length() < 4 ||
+    !info[0].IsString() ||
+    !info[1].IsNumber() ||
+    !info[2].IsNumber() ||
+    !info[3].IsString()
+  ) {
+    Napi::TypeError::New(env, "Arguments must be: (text: string, volume: number, rate: number, voiceName: string)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Get the text to speak from the first argument
+  std::u16string u16Text = info[0].As<Napi::String>().Utf16Value();
+  std::wstring text = std::wstring(u16Text.begin(), u16Text.end());
+  // Get the volume from the second argument
+  float volume = info[1].As<Napi::Number>().FloatValue();
+  // Get the rate from the third argument
+  float rate = info[2].As<Napi::Number>().FloatValue();
+  // Get the voice name from the fourth argument
+  std::u16string u16VoiceName = info[3].As<Napi::String>().Utf16Value();
+  std::wstring voiceName = std::wstring(u16VoiceName.begin(), u16VoiceName.end());
+
+  // Create a deferred Promise
+  Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+
+  // Run Text-to-Speech asynchronously
+  PromiseWorker* asyncWorker = new PromiseWorker(
+    env,
+    deferred,
+    [text, volume, rate, voiceName]() {
+      bool success = TextToSpeech(text, volume, rate, voiceName);
+      if (!success) {
+        throw std::runtime_error("Text-to-Speech failed.");
+      }
+    }
+  );
+  asyncWorker->Queue();
+
+  return deferred.Promise();
+}
+
 
 // =============================================================================
 // =========================== MODULE INITIALIZATION ===========================
@@ -3336,6 +3467,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "setSoundVolume"), Napi::Function::New(env, SetSoundVolumeWrapper));
   exports.Set(Napi::String::New(env, "getSoundSpeed"), Napi::Function::New(env, GetSoundSpeedWrapper));
   exports.Set(Napi::String::New(env, "setSoundSpeed"), Napi::Function::New(env, SetSoundSpeedWrapper));
+  exports.Set(Napi::String::New(env, "textToSpeech"), Napi::Function::New(env, TextToSpeechWrapper));
   exports.Set(Napi::String::New(env, "createTrayIcon"), Napi::Function::New(env, CreateTrayIconWrapper));
   exports.Set(Napi::String::New(env, "removeTrayIcon"), Napi::Function::New(env, RemoveTrayIconWrapper));
   exports.Set(Napi::String::New(env, "updateTrayIcon"), Napi::Function::New(env, UpdateTrayIconWrapper));
