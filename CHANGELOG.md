@@ -1,3 +1,10 @@
+## [0.14.0](https://github.com/lucyus/actionify/compare/v0.13.0...v0.14.0) (2025-10-05)
+
+### Features
+
+* **@addon:** implement Text-to-Speech (TTS) ([e88a65f](https://github.com/lucyus/actionify/commit/e88a65fb4566eb23d64c7ed162e9e4794ca949c6))
+* **@core/controllers:** implement Text-to-Speech (TTS) ([5c44ef9](https://github.com/lucyus/actionify/commit/5c44ef9fe75818cee206513bbb065958a864dadb))
+* **@docs:** specify Text-to-Speech usage ([acef9b3](https://github.com/lucyus/actionify/commit/acef9b30c133a068b639a90dc9d26af797f71f05))
 ## [0.13.0](https://github.com/lucyus/actionify/compare/v0.12.3...v0.13.0) (2025-07-12)
 
 ### Features
