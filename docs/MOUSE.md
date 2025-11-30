@@ -309,6 +309,8 @@ await Actionify.mouse.extraButton(1).click({ delay: 1000 });
 await Actionify.mouse.extraButton(2).click({ delay: 1000 });
 ```
 
+> Note: Windows only supports two extra mouse buttons ([see XBUTTON1 and XBUTTON2 documentation here](https://learn.microsoft.com/en-us/windows/win32/learnwin32/mouse-clicks)). For mice with more extra buttons, those might be mapped to [supported mouse](#31-listening-to-mouse-events) or [keyboard inputs](./KEYBOARD.md#21-listening-to-keyboard-events) via manufacturer's driver and/or software.
+
 ## 2. Mouse Coordinates
 
 ### 2.1. Get the current mouse coordinates
