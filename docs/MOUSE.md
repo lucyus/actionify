@@ -276,6 +276,39 @@ await Actionify.mouse.scroll.up(240, {
 
 > See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
+### 1.6. Simulate mouse extra button events
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Press [Extra Mouse Button 1] immediately
+Actionify.mouse.extraButton(1).down();
+// Press [Extra Mouse Button 2] immediately
+Actionify.mouse.extraButton(2).down();
+// Press [Extra Mouse Button 1] in 1 second
+await Actionify.mouse.extraButton(1).down({ delay: 1000 });
+// Press [Extra Mouse Button 2] in 1 second
+await Actionify.mouse.extraButton(2).down({ delay: 1000 });
+
+// Release [Extra Mouse Button 1] immediately
+Actionify.mouse.extraButton(1).up();
+// Release [Extra Mouse Button 2] immediately
+Actionify.mouse.extraButton(2).up();
+// Release [Extra Mouse Button 1] in 1 second
+await Actionify.mouse.extraButton(1).up({ delay: 1000 });
+// Release [Extra Mouse Button 2] in 1 second
+await Actionify.mouse.extraButton(2).up({ delay: 1000 });
+
+// Click [Extra Mouse Button 1] immediately
+Actionify.mouse.extraButton(1).click();
+// Click [Extra Mouse Button 2] immediately
+Actionify.mouse.extraButton(2).click();
+// Click [Extra Mouse Button 1] in 1 second
+await Actionify.mouse.extraButton(1).click({ delay: 1000 });
+// Click [Extra Mouse Button 2] in 1 second
+await Actionify.mouse.extraButton(2).click({ delay: 1000 });
+```
+
 ## 2. Mouse Coordinates
 
 ### 2.1. Get the current mouse coordinates

@@ -52,6 +52,7 @@ You're ready to go! 🚀
     * [1.3. Simulate mouse middle button events](./docs/MOUSE.md#13-simulate-mouse-middle-button-events)
     * [1.4. Simulate mouse right button events](./docs/MOUSE.md#14-simulate-mouse-right-button-events)
     * [1.5. Simulate mouse scroll events](./docs/MOUSE.md#15-simulate-mouse-scroll-events)
+    * [1.6. Simulate mouse extra button events](./docs/MOUSE.md#16-simulate-mouse-extra-button-events)
   * [2. Mouse Coordinates](./docs/MOUSE.md#2-mouse-coordinates)
     * [2.1. Get the current mouse coordinates](./docs/MOUSE.md#21-get-the-current-mouse-coordinates)
     * [2.2. Set the current mouse coordinates](./docs/MOUSE.md#22-set-the-current-mouse-coordinates)
