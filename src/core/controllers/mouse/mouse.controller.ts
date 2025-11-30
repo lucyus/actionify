@@ -5,6 +5,7 @@ import {
 } from "../../../addon";
 import {
   MouseEventsController,
+  MouseExtraButtonController,
   MouseLeftController,
   MouseMiddleController,
   MouseRightController,
@@ -19,6 +20,7 @@ import { Inspectable } from "../../../core/utilities";
 export class MouseController {
 
   #mouseEventsController: MouseEventsController;
+  #mouseExtraButtonController: MouseExtraButtonController;
   #mouseLeftController: MouseLeftController;
   #mouseMiddleController: MouseMiddleController;
   #mouseRightController: MouseRightController;
@@ -31,6 +33,7 @@ export class MouseController {
     this.#mouseMiddleController = new MouseMiddleController();
     this.#mouseRightController = new MouseRightController();
     this.#mouseScrollController = new MouseScrollController();
+    this.#mouseExtraButtonController = new MouseExtraButtonController(1);
     this.#mouseTracksController = new MouseTracksController();
   }
 
@@ -128,6 +131,15 @@ export class MouseController {
    */
   public get scroll(): MouseScrollController {
     return this.#mouseScrollController;
+  }
+
+  /**
+   * @description Simulate extra mouse button press and/or release.
+   * @param index The extra button index (defaults to `1`).
+   */
+  public extraButton(index: 1 | 2 = 1) {
+    this.#mouseExtraButtonController.index = index;
+    return this.#mouseExtraButtonController;
   }
 
   /**

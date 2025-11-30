@@ -173,6 +173,12 @@ export class InputEventService {
             case "wheel":
               input = 4;
               break;
+            case "extraButton1":
+              input = 5;
+              break;
+            case "extraButton2":
+              input = 6;
+              break;
             default:
               input = -1;
               break;
@@ -217,6 +223,12 @@ export class InputEventService {
               break;
             case "wheel":
               input = 4;
+              break;
+            case "extraButton1":
+              input = 5;
+              break;
+            case "extraButton2":
+              input = 6;
               break;
             default:
               input = -1;

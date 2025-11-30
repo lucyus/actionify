@@ -168,6 +168,8 @@ export class MouseEventsController {
         case "right": mappedInput = 2; break;
         case "middle": mappedInput = 3; break;
         case "wheel": mappedInput = 4; break;
+        case "extraButton1": mappedInput = 5; break;
+        case "extraButton2": mappedInput = 6; break;
         default: break;
       }
       const mappedStates = [];
@@ -217,6 +219,8 @@ export class MouseEventsController {
         case "right": mappedInput = 2; break;
         case "middle": mappedInput = 3; break;
         case "wheel": mappedInput = 4; break;
+        case "extraButton1": mappedInput = 5; break;
+        case "extraButton2": mappedInput = 6; break;
         default: break;
       }
       const mappedStates = [];

@@ -59,7 +59,7 @@ export class InputEventsController {
     const inputActions: InputAction[] = actions.map((action) => {
       const parts = action.split(" ");
       const input = parts[0] as Input;
-      if (["move", "left", "middle", "right", "wheel"].includes(input)) {
+      if (["move", "left", "middle", "right", "wheel", "extraButton1", "extraButton2"].includes(input)) {
         const mouseType = "mouse";
         const mouseInput = input as MouseInput;
         const mouseState = parts[1] as MouseState | undefined;
@@ -162,7 +162,7 @@ export class InputEventsController {
     const inputActions: InputAction[] = actions.map((action) => {
       const parts = action.split(" ");
       const input = parts[0] as Input;
-      if (["move", "left", "middle", "right", "wheel"].includes(input)) {
+      if (["move", "left", "middle", "right", "wheel", "extraButton1", "extraButton2"].includes(input)) {
         const mouseType = "mouse";
         const mouseInput = input as MouseInput;
         const mouseState = parts[1] as MouseState | undefined;
@@ -184,6 +184,8 @@ export class InputEventsController {
           case "right": mappedInput = 2; break;
           case "middle": mappedInput = 3; break;
           case "wheel": mappedInput = 4; break;
+          case "extraButton1": mappedInput = 5; break;
+          case "extraButton2": mappedInput = 6; break;
           default: break;
         }
         const mappedStates = [];
@@ -231,7 +233,7 @@ export class InputEventsController {
     const inputActions: InputAction[] = actions.map((action) => {
       const parts = action.split(" ");
       const input = parts[0] as Input;
-      if (["move", "left", "middle", "right", "wheel"].includes(input)) {
+      if (["move", "left", "middle", "right", "wheel", "extraButton1", "extraButton2"].includes(input)) {
         const mouseType = "mouse";
         const mouseInput = input as MouseInput;
         const mouseState = parts[1] as MouseState | undefined;
@@ -253,6 +255,8 @@ export class InputEventsController {
           case "right": mappedInput = 2; break;
           case "middle": mappedInput = 3; break;
           case "wheel": mappedInput = 4; break;
+          case "extraButton1": mappedInput = 5; break;
+          case "extraButton2": mappedInput = 6; break;
           default: break;
         }
         const mappedStates = [];

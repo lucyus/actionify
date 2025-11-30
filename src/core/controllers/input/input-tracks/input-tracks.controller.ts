@@ -42,7 +42,7 @@ export class InputTracksController {
     const inputActions: InputAction[] = actions.map((action) => {
       const parts = action.split(" ");
       const input = parts[0] as Input;
-      if (["move", "left", "middle", "right", "wheel"].includes(input)) {
+      if (["move", "left", "middle", "right", "wheel", "extraButton1", "extraButton2"].includes(input)) {
         const mouseType = "mouse";
         const mouseInput = input as MouseInput;
         const mouseState = parts[1] as MouseState | undefined;
@@ -177,6 +177,22 @@ export class InputTracksController {
                   }
                   break;
                 }
+                case 5:
+                case 6:
+                  const buttonNumber = rawInput === 5 ? 1 : 2;
+                  const input: MouseInput = `extraButton${buttonNumber}`;
+                  const state: MouseState = parseInt(lineColumns[3]) === 0 ? "down" : "up";
+                  const x = parseInt(lineColumns[4]);
+                  const y = parseInt(lineColumns[5]);
+                  if (Actionify.mouse.x !== x || Actionify.mouse.y !== y) {
+                    Actionify.mouse.move(x, y);
+                  }
+                  if (state === "down") {
+                    Actionify.mouse.extraButton(buttonNumber).down();
+                  }
+                  else {
+                    Actionify.mouse.extraButton(buttonNumber).up();
+                  }
                 default:
                   break;
               }
