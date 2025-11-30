@@ -1,3 +1,10 @@
+## [0.15.0](https://github.com/lucyus/actionify/compare/v0.14.0...v0.15.0) (2025-11-30)
+
+### Features
+
+* **@addon:** add support for mouse extra buttons ([2d6b314](https://github.com/lucyus/actionify/commit/2d6b31432af977f3d3b3a2cca18ba31bc0bc0b99))
+* **@core:** add support for mouse extra buttons ([cc2a41c](https://github.com/lucyus/actionify/commit/cc2a41c9ff4522df60c659dea0fb2f16b7614cbd))
+* **@docs:** specify mouse extra buttons usage ([6b24da6](https://github.com/lucyus/actionify/commit/6b24da6d5d2bfd31aadb62140b15422ddd5afcd7))
 ## [0.14.0](https://github.com/lucyus/actionify/compare/v0.13.0...v0.14.0) (2025-10-05)
 
 ### Features
