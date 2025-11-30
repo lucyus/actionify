@@ -1,3 +1,8 @@
+## [0.15.1](https://github.com/lucyus/actionify/compare/v0.15.0...v0.15.1) (2025-11-30)
+
+### Documentation
+
+* **@docs/mouse:** clarify Windows support for extra mouse buttons ([0e9812e](https://github.com/lucyus/actionify/commit/0e9812e3cc5d454f1d320a50d839b54bdf736079))
 ## [0.15.0](https://github.com/lucyus/actionify/compare/v0.14.0...v0.15.0) (2025-11-30)
 
 ### Features
