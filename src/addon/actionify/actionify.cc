@@ -340,6 +340,22 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
           }
           break;
         }
+        case WM_XBUTTONDOWN: {
+          WORD xButton = HIWORD(mouseStruct->mouseData);
+          input = "extraButton" + std::to_string(xButton);
+          mappedInput = 4 + xButton;
+          state = "down";
+          mappedState = 0;
+          break;
+        }
+        case WM_XBUTTONUP: {
+          WORD xButton = HIWORD(mouseStruct->mouseData);
+          input = "extraButton" + std::to_string(xButton);
+          mappedInput = 4 + xButton;
+          state = "up";
+          mappedState = 1;
+          break;
+        }
       }
 
       if (!input.empty()) {
@@ -1691,6 +1707,56 @@ Napi::Value MouseWheelPressUp(const Napi::CallbackInfo& info) {
   // Send the mouse middle click up
   if (SendInput(1, &input, sizeof(INPUT)) == 0) {
     Napi::Error::New(env, "Failed to mouse middle click up").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  return env.Undefined();
+}
+
+// Function to simulate extra mouse button down
+Napi::Value MouseExtraButtonDown(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate argument
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Expected extra button index (strictly positive integer)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  int extraButtonIndex = info[0].As<Napi::Number>().Int32Value();
+
+  INPUT input = { 0 };
+  input.type = INPUT_MOUSE;
+  input.mi.dwFlags = MOUSEEVENTF_XDOWN;
+  input.mi.mouseData = extraButtonIndex;
+
+  if (SendInput(1, &input, sizeof(INPUT)) == 0) {
+    Napi::Error::New(env, "Failed to mouse extra button down").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  return env.Undefined();
+}
+
+// Function to simulate extra mouse button up
+Napi::Value MouseExtraButtonUp(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Validate argument
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Expected extra button index (strictly positive integer)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  int extraButtonIndex = info[0].As<Napi::Number>().Int32Value();
+
+  INPUT input = { 0 };
+  input.type = INPUT_MOUSE;
+  input.mi.dwFlags = MOUSEEVENTF_XUP;
+  input.mi.mouseData = extraButtonIndex;
+
+  if (SendInput(1, &input, sizeof(INPUT)) == 0) {
+    Napi::Error::New(env, "Failed to mouse extra button up").ThrowAsJavaScriptException();
     return env.Null();
   }
 
@@ -3427,6 +3493,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "mouseWheelScrollUp"), Napi::Function::New(env, MouseWheelScrollUp));
   exports.Set(Napi::String::New(env, "mouseWheelPressDown"), Napi::Function::New(env, MouseWheelPressDown));
   exports.Set(Napi::String::New(env, "mouseWheelPressUp"), Napi::Function::New(env, MouseWheelPressUp));
+  exports.Set(Napi::String::New(env, "mouseExtraButtonDown"), Napi::Function::New(env, MouseExtraButtonDown));
+  exports.Set(Napi::String::New(env, "mouseExtraButtonUp"), Napi::Function::New(env, MouseExtraButtonUp));
   exports.Set(Napi::String::New(env, "keyPressDown"), Napi::Function::New(env, KeyPressDown));
   exports.Set(Napi::String::New(env, "keyPressUp"), Napi::Function::New(env, KeyPressUp));
   exports.Set(Napi::String::New(env, "typeUnicodeCharacter"), Napi::Function::New(env, TypeUnicodeCharacter));

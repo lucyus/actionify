@@ -16,6 +16,8 @@ declare module "@napi/actionify" {
     mouseWheelScrollUp: (scrollAmount?: number) => void;
     mouseWheelPressDown: () => void;
     mouseWheelPressUp: () => void;
+    mouseExtraButtonDown: (index: 1 | 2) => void;
+    mouseExtraButtonUp: (index: 1 | 2) => void;
     keyPressDown: (keyCode: number) => void;
     keyPressUp: (keyCode: number) => void;
     typeUnicodeCharacter: (character: string) => void;
