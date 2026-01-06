@@ -1,3 +1,8 @@
+## [0.15.2](https://github.com/lucyus/actionify/compare/v0.15.1...v0.15.2) (2026-01-06)
+
+### Miscellaneous Chores
+
+* **license:** update copyright year to 2026 ([629bb97](https://github.com/lucyus/actionify/commit/629bb97a86bf8e238529c3b63e8119046541c72a))
 ## [0.15.1](https://github.com/lucyus/actionify/compare/v0.15.0...v0.15.1) (2025-11-30)
 
 ### Documentation
