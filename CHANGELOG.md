@@ -1,3 +1,10 @@
+## [0.16.0](https://github.com/lucyus/actionify/compare/v0.15.2...v0.16.0) (2026-02-14)
+
+### Features
+
+* **@addon:** expose 'isInjected' to emitted input events ([8441c16](https://github.com/lucyus/actionify/commit/8441c16673794d5afff84f44987330f92c3ee869))
+* **@core:** add 'ignoreInjected' option to filter injected input events ([d5e8eb3](https://github.com/lucyus/actionify/commit/d5e8eb3656b1e359c7052398560bcf5ec3eeb6a4))
+* **@docs:** specify 'ignoreInjected' input events usage ([f0ad6bb](https://github.com/lucyus/actionify/commit/f0ad6bb096ed6b7681627b45b5eafad36dd9b0e9))
 ## [0.15.2](https://github.com/lucyus/actionify/compare/v0.15.1...v0.15.2) (2026-01-06)
 
 ### Miscellaneous Chores
