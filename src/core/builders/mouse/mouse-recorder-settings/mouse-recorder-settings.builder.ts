@@ -25,12 +25,22 @@ export class MouseRecorderSettingsBuilder {
    *   .record()
    *   .into("/path/to/mouse-record.act")
    *   .start();
+   * // Record all hardware/driver only mouse events
+   * const mouseRecordController = Actionify.mouse.track
+   *   .record()
+   *   .into("/path/to/mouse-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all mouse left and right button events
    * const mouseRecordController = Actionify.mouse.track
    *   .record("left", "right")
    *   .into("/path/to/mouse-record.act")
    *   .start();
+   * // Record all hardware/driver only mouse left and right button events
+   * const mouseRecordController = Actionify.mouse.track
+   *   .record("left", "right")
+   *   .into("/path/to/mouse-record.act")
+   *   .start({ ignoreInjected: true });
    */
   public into(filepath: string) {
     return new MouseRecorderScopeBuilder(this.#mouseActions, filepath);

@@ -4,7 +4,7 @@ import {
 } from "../../../../../addon";
 import { LifecycleController, MouseRecorderController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
-import type { MouseAction } from "../../../../../core/types";
+import type { MouseAction, MouseRecorderOptions } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
 
 export class MouseRecorderScopeController {
@@ -13,20 +13,31 @@ export class MouseRecorderScopeController {
   #writeStream: WriteStream;
   #isPaused: boolean;
   #mouseRecorderController: MouseRecorderController;
+  #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     mouseActions: MouseAction[],
-    writeStream: WriteStream
+    writeStream: WriteStream,
+    mouseRecorderOptions?: MouseRecorderOptions,
   ) {
     this.#mouseActions = mouseActions;
     this.#writeStream = writeStream;
     this.#isPaused = false;
     this.#mouseRecorderController = new MouseRecorderController(this);
+    this.#shouldIgnoreInjectedInputEvents = mouseRecorderOptions?.ignoreInjected ?? false;
     InputEventService.mouseRecorders.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
       startEventListener(InputEventService.mainListener);
     }
+  }
+
+  public get ignoreInjected() {
+    return this.#shouldIgnoreInjectedInputEvents;
+  }
+
+  public set ignoreInjected(ignoreInjected: boolean) {
+    this.#shouldIgnoreInjectedInputEvents = ignoreInjected;
   }
 
   public get isPaused() {

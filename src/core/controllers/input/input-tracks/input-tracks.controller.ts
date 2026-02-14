@@ -31,12 +31,22 @@ export class InputTracksController {
    *   .record()
    *   .into("/path/to/input-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard and mouse events
+   * const inputRecordController = Actionify.input.track
+   *   .record()
+   *   .into("/path/to/input-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all keyboard "A" key events and mouse left button events
    * const inputRecordController = Actionify.input.track
    *   .record("a", "left")
    *   .into("/path/to/input-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard "A" key events and mouse left button events
+   * const inputRecordController = Actionify.input.track
+   *   .record("a", "left")
+   *   .into("/path/to/input-record.act")
+   *   .start({ ignoreInjected: true });
    */
   public record(...actions: Array<`${MouseInput}` | `${MouseInput} ${MouseState}` | `${CaseInsensitiveKey<any>}` | `${CaseInsensitiveKey<any>} ${KeyState}`>) {
     const inputActions: InputAction[] = actions.map((action) => {

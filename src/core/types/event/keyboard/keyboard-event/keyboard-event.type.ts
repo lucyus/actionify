@@ -32,4 +32,11 @@ export type KeyboardEvent = {
    * will not be transmitted to other processes, as if it never happened.
    */
   isSuppressed: boolean;
+
+  /**
+   * @description Whether the event is injected or not. If `true`, the input
+   * comes from a process (including this one). Otherwise, it comes from an
+   * input device.
+   */
+  isInjected: boolean;
 };

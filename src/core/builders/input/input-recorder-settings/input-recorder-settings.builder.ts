@@ -25,12 +25,22 @@ export class InputRecorderSettingsBuilder {
    *   .record()
    *   .into("/path/to/input-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard and mouse events
+   * const inputRecordController = Actionify.input.track
+   *   .record()
+   *   .into("/path/to/input-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all keyboard "A" key events and mouse left button events
    * const inputRecordController = Actionify.input.track
    *   .record("a", "left")
    *   .into("/path/to/input-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard "A" key events and mouse left button events
+   * const inputRecordController = Actionify.input.track
+   *   .record("a", "left")
+   *   .into("/path/to/input-record.act")
+   *   .start({ ignoreInjected: true });
    */
   public into(filepath: string) {
     return new InputRecorderScopeBuilder(this.#inputActions, filepath);

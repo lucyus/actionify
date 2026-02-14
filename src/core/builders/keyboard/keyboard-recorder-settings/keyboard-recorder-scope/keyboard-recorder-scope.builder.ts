@@ -1,6 +1,9 @@
 import { Actionify } from "../../../../../core";
 import { KeyboardRecorderScopeController } from "../../../../../core/controllers";
-import type { KeyAction } from "../../../../../core/types";
+import type {
+  KeyAction,
+  KeyboardRecorderOptions,
+} from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
 
 export class KeyboardRecorderScopeBuilder {
@@ -18,7 +21,7 @@ export class KeyboardRecorderScopeBuilder {
 
   /**
    * @description Start recording the given keyboard actions into the given file.
-   *
+   * @param keyboardRecorderOptions The keyboard recorder options. See {@link KeyboardRecorderOptions}.
    * @returns The keyboard record controller.
    *
    * ---
@@ -28,15 +31,29 @@ export class KeyboardRecorderScopeBuilder {
    *   .record()
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record()
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all keyboard "A" and "B" key events
    * const keyboardRecordController = Actionify.keyboard.track
    *   .record("a", "b")
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard "A" and "B" key events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record("a", "b")
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    */
-  public start() {
-    const keyboardRecorderScopeController = new KeyboardRecorderScopeController(this.#keyboardActions, Actionify.filesystem.writeStream(this.#filepath));
+  public start(keyboardRecorderOptions?: KeyboardRecorderOptions) {
+    const keyboardRecorderScopeController = new KeyboardRecorderScopeController(
+      this.#keyboardActions,
+      Actionify.filesystem.writeStream(this.#filepath),
+      keyboardRecorderOptions,
+    );
     return keyboardRecorderScopeController.recorderController;
   }
 

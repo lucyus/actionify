@@ -25,12 +25,22 @@ export class KeyboardRecorderSettingsBuilder {
    *   .record()
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record()
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all keyboard "A" and "B" key events
    * const keyboardRecordController = Actionify.keyboard.track
    *   .record("a", "b")
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard "A" and "B" key events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record("a", "b")
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    */
   public into(filepath: string) {
     return new KeyboardRecorderScopeBuilder(this.#keyboardActions, filepath);

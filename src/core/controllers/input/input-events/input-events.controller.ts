@@ -14,6 +14,7 @@ import type {
   Input,
   InputAction,
   InputListener,
+  InputListenerOptions,
   KeyState,
   MouseInput,
   MouseState,
@@ -31,14 +32,22 @@ export class InputEventsController {
    * @description Attach the given input listener and start listening to all keyboard and mouse events.
    *
    * @param inputListener The input listener callback.
+   * @param inputListenerOptions The input listener options. See {@link InputListenerOptions}.
    * @returns The input listener controller.
    *
    * ---
    * @example
+   * // Listen to all keyboard and mouse events
    * Actionify.input.events.all((inputEvent, listenerController) => console.log(inputEvent));
+   *
+   * // Listen to all hardware/driver only keyboard and mouse events
+   * Actionify.input.events.all(
+   *   (inputEvent, listenerController) => console.log(inputEvent),
+   *   { ignoreInjected: true }
+   * );
    */
-  public all(inputListener: InputListener) {
-    return this.on().listen(inputListener);
+  public all(inputListener: InputListener, inputListenerOptions?: InputListenerOptions) {
+    return this.on().listen(inputListener, inputListenerOptions);
   }
 
   /**
@@ -51,9 +60,19 @@ export class InputEventsController {
    * @example
    * // Listen to all keyboard and mouse events
    * Actionify.input.events.all((inputEvent, listenerController) => console.log(inputEvent));
+   * // Listen to all hardware/driver only keyboard and mouse events
+   * Actionify.input.events.all(
+   *   (inputEvent, listenerController) => console.log(inputEvent),
+   *   { ignoreInjected: true }
+   * );
    *
    * // Listen to all keyboard "A" key and mouse "left" button events
    * Actionify.input.events.on("a", "left").listen((inputEvent, listenerController) => console.log(inputEvent));
+   * // Listen to all hardware/driver only keyboard "A" key and mouse "left" button events
+   * Actionify.input.events.on("a", "left").listen(
+   *   (inputEvent, listenerController) => console.log(inputEvent),
+   *   { ignoreInjected: true }
+   * );
    */
   public on(...actions: Array<`${MouseInput}` | `${MouseInput} ${MouseState}` | `${CaseInsensitiveKey<any>}` | `${CaseInsensitiveKey<any>} ${KeyState}`>) {
     const inputActions: InputAction[] = actions.map((action) => {

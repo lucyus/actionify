@@ -4,7 +4,7 @@ import {
 } from "../../../../../addon";
 import { InputRecorderController, LifecycleController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
-import type { InputAction } from "../../../../../core/types";
+import type { InputAction, InputRecorderOptions } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
 
 export class InputRecorderScopeController {
@@ -13,20 +13,31 @@ export class InputRecorderScopeController {
   #writeStream: WriteStream;
   #isPaused: boolean;
   #inputRecorderController: InputRecorderController;
+  #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     inputActions: InputAction[],
-    writeStream: WriteStream
+    writeStream: WriteStream,
+    inputRecorderOptions?: InputRecorderOptions,
   ) {
     this.#inputActions = inputActions;
     this.#writeStream = writeStream;
     this.#isPaused = false;
     this.#inputRecorderController = new InputRecorderController(this);
+    this.#shouldIgnoreInjectedInputEvents = inputRecorderOptions?.ignoreInjected ?? false;
     InputEventService.inputRecorders.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
       startEventListener(InputEventService.mainListener);
     }
+  }
+
+  public get ignoreInjected() {
+    return this.#shouldIgnoreInjectedInputEvents;
+  }
+
+  public set ignoreInjected(ignoreInjected: boolean) {
+    this.#shouldIgnoreInjectedInputEvents = ignoreInjected;
   }
 
   public get isPaused() {

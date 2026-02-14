@@ -28,12 +28,22 @@ export class KeyboardTracksController {
    *   .record()
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record()
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    *
    * // Record all keyboard "A" and "B" key events
    * const keyboardRecordController = Actionify.keyboard.track
    *   .record("a", "b")
    *   .into("/path/to/keyboard-record.act")
    *   .start();
+   * // Record all hardware/driver only keyboard "A" and "B" key events
+   * const keyboardRecordController = Actionify.keyboard.track
+   *   .record("a", "b")
+   *   .into("/path/to/keyboard-record.act")
+   *   .start({ ignoreInjected: true });
    */
   public record(...actions: Array<`${CaseInsensitiveKey<any>}` | `${CaseInsensitiveKey<any>} ${KeyState}`>) {
     const keyboardActions: KeyAction[] = actions.map((action) => {

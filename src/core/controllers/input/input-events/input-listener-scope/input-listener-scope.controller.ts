@@ -3,7 +3,11 @@ import {
 } from "../../../../../addon";
 import { InputListenerController, LifecycleController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
-import type { InputAction, InputListener } from "../../../../../core/types";
+import type {
+  InputAction,
+  InputListener,
+  InputListenerOptions,
+} from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
 
 export class InputListenerScopeController {
@@ -13,21 +17,32 @@ export class InputListenerScopeController {
   #inputListenerController: InputListenerController;
   #isPaused: boolean;
   #isRunning: boolean;
+  #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     inputListener: InputListener,
     inputActions: InputAction[],
+    inputListenerOptions?: InputListenerOptions,
   ) {
     this.#inputListener = inputListener;
     this.#inputListenerController = new InputListenerController(this);
     this.#inputActions = inputActions;
     this.#isPaused = false;
     this.#isRunning = false;
+    this.#shouldIgnoreInjectedInputEvents = inputListenerOptions?.ignoreInjected ?? false;
     InputEventService.inputListeners.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
       startEventListener(InputEventService.mainListener);
     }
+  }
+
+  public get ignoreInjected() {
+    return this.#shouldIgnoreInjectedInputEvents;
+  }
+
+  public set ignoreInjected(ignoreInjected: boolean) {
+    this.#shouldIgnoreInjectedInputEvents = ignoreInjected;
   }
 
   public get isPaused() {

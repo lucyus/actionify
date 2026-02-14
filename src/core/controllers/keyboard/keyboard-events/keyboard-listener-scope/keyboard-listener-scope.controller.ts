@@ -3,7 +3,7 @@ import {
 } from "../../../../../addon";
 import { KeyboardListenerController, LifecycleController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
-import type { KeyAction, KeyboardListener } from "../../../../../core/types";
+import type { KeyAction, KeyboardListener, KeyboardListenerOptions } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
 
 export class KeyboardListenerScopeController {
@@ -13,22 +13,33 @@ export class KeyboardListenerScopeController {
   #keyboardListenerController: KeyboardListenerController;
   #isPaused: boolean = false;
   #isRunning: boolean = false;
+  #shouldIgnoreInjectedInputEvents: boolean;
 
 
   public constructor(
     keyboardListener: KeyboardListener,
     keyboardActions: KeyAction[],
+    keyboardListenerOptions?: KeyboardListenerOptions,
   ) {
     this.#keyboardListener = keyboardListener;
     this.#keyboardListenerController = new KeyboardListenerController(this);
     this.#keyboardActions = keyboardActions;
     this.#isPaused = false;
     this.#isRunning = false;
+    this.#shouldIgnoreInjectedInputEvents = keyboardListenerOptions?.ignoreInjected ?? false;
     InputEventService.keyboardListeners.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
       startEventListener(InputEventService.mainListener);
     }
+  }
+
+  public get ignoreInjected() {
+    return this.#shouldIgnoreInjectedInputEvents;
+  }
+
+  public set ignoreInjected(ignoreInjected: boolean) {
+    this.#shouldIgnoreInjectedInputEvents = ignoreInjected;
   }
 
   public get isPaused() {

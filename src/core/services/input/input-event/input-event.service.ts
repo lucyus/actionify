@@ -42,8 +42,12 @@ export class InputEventService {
         const currentMouseEvent = currentEvent;
         InputStateService.mouseStateHistory.set(currentMouseEvent.input, currentMouseEvent);
         // Find mouse listeners that are listening to the current mouse event
-        const activeMouseListeners = InputEventService.mouseListeners.filter((mouseListener) => !mouseListener.isPaused && !mouseListener.isRunning);
-        for (const mouseListener of activeMouseListeners) {
+        const eligibleMouseListeners = InputEventService.mouseListeners.filter((mouseListener) =>
+          !mouseListener.isPaused &&
+          !mouseListener.isRunning &&
+          (!mouseListener.ignoreInjected || (mouseListener.ignoreInjected && !currentMouseEvent.isInjected))
+        );
+        for (const mouseListener of eligibleMouseListeners) {
           const isListeningToCurrentMouseEvent = mouseListener.when.length === 0 || mouseListener.when.find((mouseAction) => mouseAction.input === currentMouseEvent.input) !== undefined;
           if (isListeningToCurrentMouseEvent) {
             let countConditionsMet = 0;
@@ -59,8 +63,12 @@ export class InputEventService {
           }
         }
         // Find input listeners that are listening to the current mouse event
-        const activeInputListeners = InputEventService.inputListeners.filter((inputListener) => !inputListener.isPaused && !inputListener.isRunning);
-        for (const inputListener of activeInputListeners) {
+        const eligibleInputListeners = InputEventService.inputListeners.filter((inputListener) =>
+          !inputListener.isPaused &&
+          !inputListener.isRunning &&
+          (!inputListener.ignoreInjected || (inputListener.ignoreInjected && !currentMouseEvent.isInjected))
+        );
+        for (const inputListener of eligibleInputListeners) {
           const isListeningToCurrentMouseEvent = inputListener.when.length === 0 || inputListener.when.find((inputAction) => inputAction.input === currentMouseEvent.input) !== undefined;
           if (isListeningToCurrentMouseEvent) {
             let countConditionsMet = 0;
@@ -112,8 +120,11 @@ export class InputEventService {
           }
         }
         // Find mouse recorders that are listening to the current mouse event
-        const activeMouseRecorders = InputEventService.mouseRecorders.filter((mouseRecorder) => !mouseRecorder.isPaused);
-        for (const mouseRecorder of activeMouseRecorders) {
+        const eligibleMouseRecorders = InputEventService.mouseRecorders.filter((mouseRecorder) =>
+          !mouseRecorder.isPaused &&
+          (!mouseRecorder.ignoreInjected || (mouseRecorder.ignoreInjected && !currentMouseEvent.isInjected))
+        );
+        for (const mouseRecorder of eligibleMouseRecorders) {
           const isListeningToCurrentMouseEvent = mouseRecorder.when.length === 0 || mouseRecorder.when.find((mouseAction) => mouseAction.input === currentMouseEvent.input) !== undefined;
           if (isListeningToCurrentMouseEvent) {
             let countConditionsMet = 0;
@@ -129,8 +140,11 @@ export class InputEventService {
           }
         }
         // Find input recorders that are listening to the current mouse event
-        const activeInputRecorders = InputEventService.inputRecorders.filter((inputRecorder) => !inputRecorder.isPaused);
-        for (const inputRecorder of activeInputRecorders) {
+        const eligibleInputRecorders = InputEventService.inputRecorders.filter((inputRecorder) =>
+          !inputRecorder.isPaused &&
+          (!inputRecorder.ignoreInjected || (inputRecorder.ignoreInjected && !currentMouseEvent.isInjected))
+        );
+        for (const inputRecorder of eligibleInputRecorders) {
           const isListeningToCurrentMouseEvent = inputRecorder.when.length === 0 || inputRecorder.when.find((inputAction) => inputAction.input === currentMouseEvent.input) !== undefined;
           if (isListeningToCurrentMouseEvent) {
             let countConditionsMet = 0;
@@ -267,8 +281,12 @@ export class InputEventService {
         const currentKeyboardEvent = currentEvent;
         InputStateService.keyboardStateHistory.set(currentKeyboardEvent.input, currentKeyboardEvent);
         // Find keyboard listeners that are listening to the current keyboard event
-        const activeKeyboardListeners = InputEventService.keyboardListeners.filter((keyboardListener) => !keyboardListener.isPaused && !keyboardListener.isRunning);
-        for (const keyboardListener of activeKeyboardListeners) {
+        const eligibleKeyboardListeners = InputEventService.keyboardListeners.filter((keyboardListener) =>
+          !keyboardListener.isPaused &&
+          !keyboardListener.isRunning &&
+          (!keyboardListener.ignoreInjected || (keyboardListener.ignoreInjected && !currentKeyboardEvent.isInjected))
+        );
+        for (const keyboardListener of eligibleKeyboardListeners) {
           const isListeningToCurrentKeyboardEvent = keyboardListener.when.length === 0 || keyboardListener.when.find((keyboardAction) => keyboardAction.input === currentKeyboardEvent.input) !== undefined;
           if (isListeningToCurrentKeyboardEvent) {
             let countConditionsMet = 0;
@@ -284,8 +302,12 @@ export class InputEventService {
           }
         }
         // Find input listeners that are listening to the current keyboard event
-        const activeInputListeners = InputEventService.inputListeners.filter((inputListener) => !inputListener.isPaused && !inputListener.isRunning);
-        for (const inputListener of activeInputListeners) {
+        const eligibleInputListeners = InputEventService.inputListeners.filter((inputListener) =>
+          !inputListener.isPaused &&
+          !inputListener.isRunning &&
+          (!inputListener.ignoreInjected || (inputListener.ignoreInjected && !currentKeyboardEvent.isInjected))
+        );
+        for (const inputListener of eligibleInputListeners) {
           const isListeningToCurrentKeyboardEvent = inputListener.when.length === 0 || inputListener.when.find((inputAction) => inputAction.input === currentKeyboardEvent.input) !== undefined;
           if (isListeningToCurrentKeyboardEvent) {
             let countConditionsMet = 0;
@@ -337,8 +359,11 @@ export class InputEventService {
           }
         }
         // Find keyboard recorders that are listening to the current keyboard event
-        const activeKeyboardRecorders = InputEventService.keyboardRecorders.filter((keyboardRecorder) => !keyboardRecorder.isPaused);
-        for (const keyboardRecorder of activeKeyboardRecorders) {
+        const eligibleKeyboardRecorders = InputEventService.keyboardRecorders.filter((keyboardRecorder) =>
+          !keyboardRecorder.isPaused &&
+          (!keyboardRecorder.ignoreInjected || (keyboardRecorder.ignoreInjected && !currentKeyboardEvent.isInjected))
+        );
+        for (const keyboardRecorder of eligibleKeyboardRecorders) {
           const isListeningToCurrentKeyboardEvent = keyboardRecorder.when.length === 0 || keyboardRecorder.when.find((keyboardAction) => keyboardAction.input === currentKeyboardEvent.input) !== undefined;
           if (isListeningToCurrentKeyboardEvent) {
             let countConditionsMet = 0;
@@ -354,8 +379,11 @@ export class InputEventService {
           }
         }
         // Find input recorders that are listening to the current keyboard event
-        const activeInputRecorders = InputEventService.inputRecorders.filter((inputRecorder) => !inputRecorder.isPaused);
-        for (const inputRecorder of activeInputRecorders) {
+        const eligibleInputRecorders = InputEventService.inputRecorders.filter((inputRecorder) =>
+          !inputRecorder.isPaused &&
+          (!inputRecorder.ignoreInjected || (inputRecorder.ignoreInjected && !currentKeyboardEvent.isInjected))
+        );
+        for (const inputRecorder of eligibleInputRecorders) {
           const isListeningToCurrentKeyboardEvent = inputRecorder.when.length === 0 || inputRecorder.when.find((inputAction) => inputAction.input === currentKeyboardEvent.input) !== undefined;
           if (isListeningToCurrentKeyboardEvent) {
             let countConditionsMet = 0;

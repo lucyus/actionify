@@ -9,6 +9,7 @@ import type {
   MouseAction,
   MouseInput,
   MouseListener,
+  MouseListenerOptions,
   MouseState,
 } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
@@ -21,14 +22,22 @@ export class MouseEventsController {
    * @description Attach the given mouse listener and start listening to all mouse events.
    *
    * @param mouseListener The mouse listener callback.
+   * @param mouseListenerOptions The mouse listener options. See {@link MouseListenerOptions}.
    * @returns The mouse listener controller.
    *
    * ---
    * @example
+   * // Listen to all mouse events
    * Actionify.mouse.events.all((mouseEvent, listenerController) => console.log(mouseEvent));
+   *
+   * // Listen to all hardware/driver only mouse events
+   * Actionify.mouse.events.all(
+   *   (mouseEvent, listenerController) => console.log(mouseEvent),
+   *   { ignoreInjected: true }
+   * );
    */
-  public all(mouseListener: MouseListener) {
-    return this.on().listen(mouseListener);
+  public all(mouseListener: MouseListener, mouseListenerOptions?: MouseListenerOptions) {
+    return this.on().listen(mouseListener, mouseListenerOptions);
   }
 
   /**

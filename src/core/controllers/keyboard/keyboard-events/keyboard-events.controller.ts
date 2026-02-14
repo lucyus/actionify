@@ -9,6 +9,7 @@ import type {
   CaseInsensitiveKey,
   KeyAction,
   KeyboardListener,
+  KeyboardListenerOptions,
   KeyState,
 } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
@@ -24,14 +25,22 @@ export class KeyboardEventsController {
    * @description Attach the given keyboard listener and start listening to all keyboard events.
    *
    * @param keyboardListener The keyboard listener callback.
+   * @param keyboardListenerOptions The keyboard listener options. See {@link KeyboardListenerOptions}.
    * @returns The keyboard listener controller.
    *
    * ---
    * @example
+   * // Listen to all keyboard events
    * Actionify.keyboard.events.all((keyboardEvent, listenerController) => console.log(keyboardEvent));
+   *
+   * // Listen to all hardware/driver only keyboard events
+   * Actionify.keyboard.events.all(
+   *   (keyboardEvent, listenerController) => console.log(keyboardEvent),
+   *   { ignoreInjected: true }
+   * );
    */
-  public all(keyboardListener: KeyboardListener) {
-    return this.on().listen(keyboardListener);
+  public all(keyboardListener: KeyboardListener, keyboardListenerOptions?: KeyboardListenerOptions) {
+    return this.on().listen(keyboardListener, keyboardListenerOptions);
   }
 
   /**
