@@ -15,13 +15,25 @@
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all keyboard and mouse events
 const inputListenerControl = Actionify.input.events
   .all((event, listenerController) => {
     // An input event occurred, do something here...
   });
+
+// Listen to all hardware/driver only keyboard and mouse events
+const inputListenerControl = Actionify.input.events
+  .all(
+    (event, listenerController) => {
+      // An input event occurred, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [InputListenerOptions](../src/core/types/event/input/input-listener/input-listener-options/input-listener-options.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
 
 ##### 1.1.1.2. Start listening to specific mouse/keyboard events
 
@@ -29,25 +41,49 @@ You can **listen to single or multiple inputs** in a single listener:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [A], [B], [Left Mouse Button] or [Right Mouse Button] input events
 const inputListenerControl = Actionify.input.events
   .on("a", "b", "left", "right")
   .listen((event, listenerController) => {
     // An input event occurred among [A], [B], [Left Mouse Button] or [Right Mouse Button], do something here...
   });
+
+// Listen to all hardware/driver only [A], [B], [Left Mouse Button] or [Right Mouse Button] input events
+const inputListenerControl = Actionify.input.events
+  .on("a", "b", "left", "right")
+  .listen(
+    (event, listenerController) => {
+      // An input event occurred among [A], [B], [Left Mouse Button] or [Right Mouse Button], do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
 You can also **listen to input combinations**:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [Left Control] and [Left Mouse Button] input press combinations events
 const inputListenerControl = Actionify.input.events
   .on("lctrl down", "left down")
   .listen((event, listenerController) => {
     // Both [Left Control] and [Left Mouse Button] are pressed, do something here...
   });
+
+// Listen to all hardware/driver only [Left Control] and [Left Mouse Button] input press combinations events
+const inputListenerControl = Actionify.input.events
+  .on("lctrl down", "left down")
+  .listen(
+    (event, listenerController) => {
+      // Both [Left Control] and [Left Mouse Button] are pressed, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [InputListenerOptions](../src/core/types/event/input/input-listener/input-listener-options/input-listener-options.type.ts) [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
 
 #### 1.1.2. Pause an input listener
 
@@ -155,7 +191,17 @@ const inputRecorderControl = Actionify.input.track
   .record()
   .into("/path/to/input-record.act")
   .start();
+
+// Record all hardware/driver only input events into an Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record()
+  .into("/path/to/input-record.act")
+  .start({ ignoreInjected: true });
 ```
+
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
 
 #### 2.1.2. Start recording specific mouse/keyboard events
 
@@ -168,6 +214,12 @@ const inputRecorderControl = Actionify.input.track
   .record("a", "b", "left", "right")
   .into("/path/to/input-record.act")
   .start();
+
+// Record all hardware/driver only [A], [B], [Left Mouse Button], [Right Mouse Button] input events into an Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record("a", "b", "left", "right")
+  .into("/path/to/input-record.act")
+  .start({ ignoreInjected: true });
 ```
 
 You can also **only record input combinations**:
@@ -179,9 +231,17 @@ const inputRecorderControl = Actionify.input.track
   .record("lctrl down", "left down")
   .into("/path/to/input-record.act")
   .start();
+
+// Record all hardware/driver only [Left Control] and [Left Mouse Button] combined press events into an Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record("lctrl down", "left down")
+  .into("/path/to/input-record.act")
+  .start({ ignoreInjected: true });
 ```
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
 
 ### 2.2. Pause an input recorder
 

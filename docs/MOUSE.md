@@ -346,13 +346,25 @@ Actionify.mouse.y = 100;
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all mouse events
 const mouseListenerControl = Actionify.mouse.events
   .all((mouseEvent, listenerController) => {
     // A mouse event occurred, do something here...
   });
+
+// Listen to all hardware/driver only mouse events
+const mouseListenerControl = Actionify.mouse.events
+  .all(
+    (mouseEvent, listenerController) => {
+      // A mouse event occurred, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseListenerOptions](../src/core/types/event/mouse/mouse-listener/mouse-listener-options/mouse-listener-options.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
 
 ##### 3.1.1.2. Start listening to specific mouse events
 
@@ -360,25 +372,49 @@ You can **listen to single or multiple mouse events** in a single listener:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [Left Mouse Button] or [Right Mouse Button] mouse events
 const mouseListenerControl = Actionify.mouse.events
   .on("left", "right")
   .listen((mouseEvent, listenerController) => {
     // A mouse event occurred among [Left Mouse Button] or [Right Mouse Button], do something here...
   });
+
+// Listen to all hardware/driver only [Left Mouse Button] or [Right Mouse Button] mouse events
+const mouseListenerControl = Actionify.mouse.events
+  .on("left", "right")
+  .listen(
+    (mouseEvent, listenerController) => {
+      // A mouse event occurred among [Left Mouse Button] or [Right Mouse Button], do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
 You can also **listen to mouse combinations**:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [Left Mouse Button] and [Right Mouse Button] input press combinations events
 const mouseListenerControl = Actionify.mouse.events
   .on("left down", "right down")
   .listen((mouseEvent, listenerController) => {
     // Both [Left Mouse Button] and [Right Mouse Button] are pressed, do something here...
   });
+
+// Listen to all hardware/driver only [Left Mouse Button] and [Right Mouse Button] input press combinations events
+const mouseListenerControl = Actionify.mouse.events
+  .on("left down", "right down")
+  .listen(
+    (mouseEvent, listenerController) => {
+      // Both [Left Mouse Button] and [Right Mouse Button] are pressed, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseListener](../src/core/types/event/mouse/mouse-listener/mouse-listener.type.ts), [MouseListenerOptions](../src/core/types/event/mouse/mouse-listener/mouse-listener-options/mouse-listener-options.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [IMouseListenerController](../src/core/interfaces/mouse/mouse-listener-controller/mouse-listener-controller.interface.ts)
 
 #### 3.1.2. Pause a mouse listener
 
@@ -486,7 +522,17 @@ const mouseRecorderControl = Actionify.mouse.track
   .record()
   .into("/path/to/mouse-record.act")
   .start();
+
+// Record all hardware/driver only mouse events into an Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record()
+  .into("/path/to/mouse-record.act")
+  .start({ ignoreInjected: true });
 ```
+
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts)
 
 #### 4.1.2. Start recording specific mouse events
 
@@ -499,6 +545,12 @@ const mouseRecorderControl = Actionify.mouse.track
   .record("left", "move")
   .into("/path/to/mouse-record.act")
   .start();
+
+// Record all hardware/driver only [Left Mouse Button] and [Mouse Movement] mouse events into an Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record("left", "move")
+  .into("/path/to/mouse-record.act")
+  .start({ ignoreInjected: true });
 ```
 
 You can also **only record mouse input combinations**:
@@ -510,9 +562,17 @@ const mouseRecorderControl = Actionify.mouse.track
   .record("left down", "right down")
   .into("/path/to/mouse-record.act")
   .start();
+
+// Record all hardware/driver only [Left Mouse Button] and [Right Mouse Button] combined press events into an Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record("left down", "right down")
+  .into("/path/to/mouse-record.act")
+  .start({ ignoreInjected: true });
 ```
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts)
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts)
 
 ### 4.2. Pause a mouse recorder
 

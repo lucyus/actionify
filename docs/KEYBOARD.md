@@ -79,13 +79,25 @@ world!
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all keyboard events
 const keyboardListenerControl = Actionify.keyboard.events
   .all((keyboardEvent, listenerController) => {
     // A keyboard event occurred, do something here...
   });
+
+// Listen to all hardware/driver only keyboard events
+const keyboardListenerControl = Actionify.keyboard.events
+  .all(
+    (keyboardEvent, listenerController) => {
+      // A keyboard event occurred, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardListenerOptions](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener-options/keyboard-listener-options.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
 
 ##### 2.1.1.2. Start listening to specific keyboard events
 
@@ -93,25 +105,49 @@ You can **listen to single or multiple keyboard inputs** in a single listener:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [A] or [B] keyboard events
 const keyboardListenerControl = Actionify.keyboard.events
   .on("a", "b")
   .listen((keyboardEvent, listenerController) => {
     // A keyboard event occurred among [A] or [B], do something here...
   });
+
+// Listen to all hardware/driver only [A] or [B] keyboard events
+const keyboardListenerControl = Actionify.keyboard.events
+  .on("a", "b")
+  .listen(
+    (keyboardEvent, listenerController) => {
+      // A keyboard event occurred among [A] or [B], do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
 You can also **listen to keyboard input combinations**:
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
+// Listen to all [Left Control] and [A] keyboard press combinations events
 const keyboardListenerControl = Actionify.keyboard.events
   .on("lctrl down", "a down")
   .listen((keyboardEvent, listenerController) => {
     // Both [Left Control] and [A] are pressed, do something here...
   });
+
+// Listen to all hardware/driver only [Left Control] and [A] keyboard press combinations events
+const keyboardListenerControl = Actionify.keyboard.events
+  .on("lctrl down", "a down")
+  .listen(
+    (keyboardEvent, listenerController) => {
+      // Both [Left Control] and [A] are pressed, do something here...
+    },
+    { ignoreInjected: true }
+  );
 ```
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
+> 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
+
+> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardListenerOptions](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener-options/keyboard-listener-options.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
 
 #### 2.1.2. Pause a keyboard listener
 
@@ -219,7 +255,17 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record()
   .into("/path/to/keyboard-record.act")
   .start();
+
+// Record all hardware/driver only keyboard events into an Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record()
+  .into("/path/to/keyboard-record.act")
+  .start({ ignoreInjected: true });
 ```
+
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
 
 #### 3.1.2. Start recording specific keyboard events
 
@@ -232,6 +278,12 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record("a", "b")
   .into("/path/to/keyboard-record.act")
   .start();
+
+// Record all hardware/driver only [A], [B] keyboard events into an Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record("a", "b")
+  .into("/path/to/keyboard-record.act")
+  .start({ ignoreInjected: true });
 ```
 
 You can also **only record key combinations**:
@@ -243,9 +295,17 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record("lctrl down", "a down")
   .into("/path/to/keyboard-record.act")
   .start();
+
+// Record all hardware/driver only [Left Control] and [A] combined press events into an Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record("lctrl down", "a down")
+  .into("/path/to/keyboard-record.act")
+  .start({ ignoreInjected: true });
 ```
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
+> 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
+
+> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
 
 ### 3.2. Pause a keyboard recorder
 
