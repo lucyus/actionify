@@ -1,3 +1,8 @@
+## [0.16.1](https://github.com/lucyus/actionify/compare/v0.16.0...v0.16.1) (2026-02-21)
+
+### Bug Fixes
+
+* **@core:** prevent pending input events from being cancelled while a listener is running ([83909f9](https://github.com/lucyus/actionify/commit/83909f947991ed043dadd08316c3aa1c295d3bfc))
 ## [0.16.0](https://github.com/lucyus/actionify/compare/v0.15.2...v0.16.0) (2026-02-14)
 
 ### Features
