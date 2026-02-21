@@ -11,8 +11,8 @@ export class KeyboardListenerScopeController {
   #keyboardActions: KeyAction[];
   #keyboardListener: KeyboardListener;
   #keyboardListenerController: KeyboardListenerController;
-  #isPaused: boolean = false;
-  #isRunning: boolean = false;
+  #isPaused: boolean;
+  #currentRunners: number;
   #shouldIgnoreInjectedInputEvents: boolean;
 
 
@@ -25,7 +25,7 @@ export class KeyboardListenerScopeController {
     this.#keyboardListenerController = new KeyboardListenerController(this);
     this.#keyboardActions = keyboardActions;
     this.#isPaused = false;
-    this.#isRunning = false;
+    this.#currentRunners = 0;
     this.#shouldIgnoreInjectedInputEvents = keyboardListenerOptions?.ignoreInjected ?? false;
     InputEventService.keyboardListeners.push(this);
     if (InputEventService.shouldStartMainListener) {
@@ -51,11 +51,15 @@ export class KeyboardListenerScopeController {
   }
 
   public get isRunning() {
-    return this.#isRunning;
+    return this.#currentRunners > 0;
   }
 
-  public set isRunning(isRunning: boolean) {
-    this.#isRunning = isRunning;
+  public get currentRunners() {
+    return this.#currentRunners;
+  }
+
+  public set currentRunners(currentRunners: number) {
+    this.#currentRunners = currentRunners;
   }
 
   public get listener() {

@@ -44,7 +44,6 @@ export class InputEventService {
         // Find mouse listeners that are listening to the current mouse event
         const eligibleMouseListeners = InputEventService.mouseListeners.filter((mouseListener) =>
           !mouseListener.isPaused &&
-          !mouseListener.isRunning &&
           (!mouseListener.ignoreInjected || (mouseListener.ignoreInjected && !currentMouseEvent.isInjected))
         );
         for (const mouseListener of eligibleMouseListeners) {
@@ -65,7 +64,6 @@ export class InputEventService {
         // Find input listeners that are listening to the current mouse event
         const eligibleInputListeners = InputEventService.inputListeners.filter((inputListener) =>
           !inputListener.isPaused &&
-          !inputListener.isRunning &&
           (!inputListener.ignoreInjected || (inputListener.ignoreInjected && !currentMouseEvent.isInjected))
         );
         for (const inputListener of eligibleInputListeners) {
@@ -93,30 +91,30 @@ export class InputEventService {
         }
         // Run eligible mouse listeners
         for (const mouseListener of mouseListenersToRun) {
-          mouseListener.isRunning = true;
+          mouseListener.currentRunners++;
           const result = mouseListener.listener(currentMouseEvent, mouseListener.listenerController);
           if (result instanceof Promise) {
             result
               .catch((error) => { console.error(error) })
-              .finally(() => { mouseListener.isRunning = false; })
+              .finally(() => { mouseListener.currentRunners--; })
             ;
           }
           else {
-            mouseListener.isRunning = false;
+            mouseListener.currentRunners--;
           }
         }
         // Run eligible input listeners
         for (const inputListener of inputListenersToRun) {
-          inputListener.isRunning = true;
+          inputListener.currentRunners++;
           const result = inputListener.listener(currentMouseEvent, inputListener.listenerController);
           if (result instanceof Promise) {
             result
               .catch((error) => { console.error(error) })
-              .finally(() => { inputListener.isRunning = false; })
+              .finally(() => { inputListener.currentRunners--; })
             ;
           }
           else {
-            inputListener.isRunning = false;
+            inputListener.currentRunners--;
           }
         }
         // Find mouse recorders that are listening to the current mouse event
@@ -283,7 +281,6 @@ export class InputEventService {
         // Find keyboard listeners that are listening to the current keyboard event
         const eligibleKeyboardListeners = InputEventService.keyboardListeners.filter((keyboardListener) =>
           !keyboardListener.isPaused &&
-          !keyboardListener.isRunning &&
           (!keyboardListener.ignoreInjected || (keyboardListener.ignoreInjected && !currentKeyboardEvent.isInjected))
         );
         for (const keyboardListener of eligibleKeyboardListeners) {
@@ -304,7 +301,6 @@ export class InputEventService {
         // Find input listeners that are listening to the current keyboard event
         const eligibleInputListeners = InputEventService.inputListeners.filter((inputListener) =>
           !inputListener.isPaused &&
-          !inputListener.isRunning &&
           (!inputListener.ignoreInjected || (inputListener.ignoreInjected && !currentKeyboardEvent.isInjected))
         );
         for (const inputListener of eligibleInputListeners) {
@@ -332,30 +328,30 @@ export class InputEventService {
         }
         // Run eligible keyboard listeners
         for (const keyboardListener of keyboardListenersToRun) {
-          keyboardListener.isRunning = true;
+          keyboardListener.currentRunners++;
           const result = keyboardListener.listener(currentKeyboardEvent, keyboardListener.listenerController);
           if (result instanceof Promise) {
             result
               .catch((error) => { console.error(error); })
-              .finally(() => { keyboardListener.isRunning = false; })
+              .finally(() => { keyboardListener.currentRunners--; })
             ;
           }
           else {
-            keyboardListener.isRunning = false;
+            keyboardListener.currentRunners--;
           }
         }
         // Run eligible input listeners
         for (const inputListener of inputListenersToRun) {
-          inputListener.isRunning = true;
+          inputListener.currentRunners++;
           const result = inputListener.listener(currentKeyboardEvent, inputListener.listenerController);
           if (result instanceof Promise) {
             result
               .catch((error) => { console.error(error); })
-              .finally(() => { inputListener.isRunning = false; })
+              .finally(() => { inputListener.currentRunners--; })
             ;
           }
           else {
-            inputListener.isRunning = false;
+            inputListener.currentRunners--;
           }
         }
         // Find keyboard recorders that are listening to the current keyboard event

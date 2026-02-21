@@ -16,7 +16,7 @@ export class InputListenerScopeController {
   #inputListener: InputListener;
   #inputListenerController: InputListenerController;
   #isPaused: boolean;
-  #isRunning: boolean;
+  #currentRunners: number;
   #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
@@ -28,7 +28,7 @@ export class InputListenerScopeController {
     this.#inputListenerController = new InputListenerController(this);
     this.#inputActions = inputActions;
     this.#isPaused = false;
-    this.#isRunning = false;
+    this.#currentRunners = 0;
     this.#shouldIgnoreInjectedInputEvents = inputListenerOptions?.ignoreInjected ?? false;
     InputEventService.inputListeners.push(this);
     if (InputEventService.shouldStartMainListener) {
@@ -54,11 +54,15 @@ export class InputListenerScopeController {
   }
 
   public get isRunning() {
-    return this.#isRunning;
+    return this.#currentRunners > 0;
   }
 
-  public set isRunning(isRunning: boolean) {
-    this.#isRunning = isRunning;
+  public get currentRunners() {
+    return this.#currentRunners;
+  }
+
+  public set currentRunners(currentRunners: number) {
+    this.#currentRunners = currentRunners;
   }
 
   public get listener() {
