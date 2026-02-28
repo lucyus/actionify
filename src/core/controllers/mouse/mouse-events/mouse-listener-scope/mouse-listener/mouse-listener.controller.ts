@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { MouseListenerScopeController } from "../../../../../../core/controllers";
 import { IMouseListenerController } from "../../../../../../core/interfaces";
@@ -32,7 +32,7 @@ export class MouseListenerController implements IMouseListenerController {
       InputEventService.mouseListeners.splice(listenerIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

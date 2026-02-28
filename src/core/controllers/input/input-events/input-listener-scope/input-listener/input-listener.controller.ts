@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { InputListenerScopeController } from "../../../../../../core/controllers";
 import { IInputListenerController } from "../../../../../../core/interfaces";
@@ -32,7 +32,7 @@ export class InputListenerController implements IInputListenerController {
       InputEventService.inputListeners.splice(listenerIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

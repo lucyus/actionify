@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { InputRecorderScopeController } from "../../../../../../core/controllers";
 import { InputEventService } from "../../../../../../core/services";
@@ -103,7 +103,7 @@ export class InputRecorderController {
       InputEventService.inputRecorders.splice(inputRecorderIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

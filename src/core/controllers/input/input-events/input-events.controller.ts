@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
   suppressInputEvents,
   unsuppressInputEvents,
 } from "../../../../addon";
@@ -156,7 +156,7 @@ export class InputEventsController {
       InputEventService.inputListeners.splice(listenerIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

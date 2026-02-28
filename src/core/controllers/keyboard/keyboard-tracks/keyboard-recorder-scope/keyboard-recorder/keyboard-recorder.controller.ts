@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { KeyboardRecorderScopeController } from "../../../../../../core/controllers";
 import { InputEventService } from "../../../../../../core/services";
@@ -103,7 +103,7 @@ export class KeyboardRecorderController {
       InputEventService.keyboardRecorders.splice(keyboardRecorderIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

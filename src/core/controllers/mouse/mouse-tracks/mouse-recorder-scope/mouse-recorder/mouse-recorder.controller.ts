@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { MouseRecorderScopeController } from "../../../../../../core/controllers";
 import { InputEventService } from "../../../../../../core/services";
@@ -95,7 +95,7 @@ export class MouseRecorderController {
       InputEventService.mouseRecorders.splice(mouseRecorderIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

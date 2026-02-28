@@ -1,6 +1,6 @@
 import { WriteStream } from "fs";
 import {
-  startEventListener,
+  startInputEventListener,
 } from "../../../../../addon";
 import { InputRecorderController, LifecycleController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
@@ -28,7 +28,7 @@ export class InputRecorderScopeController {
     InputEventService.inputRecorders.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
-      startEventListener(InputEventService.mainListener);
+      startInputEventListener(InputEventService.mainListener);
     }
   }
 

@@ -1,5 +1,5 @@
 import {
-  stopEventListener,
+  stopInputEventListener,
 } from "../../../../../../addon";
 import { KeyboardListenerScopeController } from "../../../../../../core/controllers";
 import { IKeyboardListenerController } from "../../../../../../core/interfaces";
@@ -32,7 +32,7 @@ export class KeyboardListenerController implements IKeyboardListenerController {
       InputEventService.keyboardListeners.splice(listenerIndex, 1);
     }
     if (InputEventService.shouldStopMainListener) {
-      stopEventListener();
+      stopInputEventListener();
     }
   }
 

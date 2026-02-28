@@ -1,5 +1,5 @@
 import {
-  startEventListener,
+  startInputEventListener,
 } from "../../../../../addon";
 import { KeyboardListenerController, LifecycleController } from "../../../../../core/controllers";
 import { InputEventService } from "../../../../../core/services";
@@ -30,7 +30,7 @@ export class KeyboardListenerScopeController {
     InputEventService.keyboardListeners.push(this);
     if (InputEventService.shouldStartMainListener) {
       LifecycleController.cleanBeforeExit();
-      startEventListener(InputEventService.mainListener);
+      startInputEventListener(InputEventService.mainListener);
     }
   }
 
