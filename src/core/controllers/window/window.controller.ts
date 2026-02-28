@@ -67,7 +67,7 @@ export class WindowController {
       window.id === search ||
       window.pid === search ||
       window.title.toLowerCase().includes(search.toString().toLowerCase()) ||
-      window.executableFile.includes(search.toString().toLowerCase())
+      window.executableFile.toLowerCase().includes(search.toString().toLowerCase())
     )) ?? null;
   }
 
