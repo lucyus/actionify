@@ -14,6 +14,7 @@ import {
   setWindowToTop,
   takeWindowScreenshotToFile,
 } from "../../../../addon";
+import { WindowEventsController } from "../../../../core/controllers";
 import type { WindowInfo } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
 
@@ -23,13 +24,22 @@ import { Inspectable } from "../../../../core/utilities";
 export class WindowInteractionController {
 
   #windowInfo: WindowInfo;
+  #windowEventsController: WindowEventsController;
 
   public constructor(windowInfo: WindowInfo) {
     this.#windowInfo = windowInfo;
+    this.#windowEventsController = new WindowEventsController(this);
   }
 
   #getById(id: number): WindowInfo | undefined {
     return listWindows().find((windowInfo) => windowInfo.id === id);
+  }
+
+  /**
+   * @description window events listening manager.
+   */
+  public get events(): WindowEventsController {
+    return this.#windowEventsController;
   }
 
   /**

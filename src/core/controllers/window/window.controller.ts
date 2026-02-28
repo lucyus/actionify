@@ -1,7 +1,10 @@
 import {
   listWindows,
 } from "../../../addon";
-import { WindowInteractionController } from "../../../core/controllers";
+import {
+  WindowEventsController,
+  WindowInteractionController
+} from "../../../core/controllers";
 import type { WindowInfo } from "../../../core/types";
 import { Inspectable } from "../../../core/utilities";
 
@@ -10,7 +13,18 @@ import { Inspectable } from "../../../core/utilities";
  */
 export class WindowController {
 
-  public constructor() { }
+  #windowEventsController: WindowEventsController;
+
+  public constructor() {
+    this.#windowEventsController = new WindowEventsController();
+  }
+
+  /**
+   * @description window events listening manager.
+   */
+  public get events(): WindowEventsController {
+    return this.#windowEventsController;
+  }
 
   /**
    * @description Get information and manage each running application window.
