@@ -2608,6 +2608,17 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     return TRUE;
   }
 
+  // Get window style
+  LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+  // Skip tool windows
+  if (exStyle & WS_EX_TOOLWINDOW) {
+    return TRUE;
+  }
+  // Skip no-activate windows
+  if (exStyle & WS_EX_NOACTIVATE) {
+    return TRUE;
+  }
+
   // Check if the window is minimized
   WINDOWPLACEMENT placement = {0};
   placement.length = sizeof(WINDOWPLACEMENT);
