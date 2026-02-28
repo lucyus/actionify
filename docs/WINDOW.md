@@ -409,6 +409,124 @@ catch (error) {
 
 > See also: [Screen Coordinates System](./SCREEN.md#10-screen-coordinates-system), [Take a screenshot](./SCREEN.md#21-take-a-screenshot)
 
+## 3. Window Events
+
+### 3.1. Window Event Types
+
+| Event Type     | Description                                                                |
+| -------------- | -------------------------------------------------------------------------- |
+| **`create`**   | A window is created and becomes visible                                    |
+| **`destroy`**  | A window is closed and removed from the system                             |
+| **`focus`**    | A window becomes the active window the user is interacting with            |
+| **`blur`**     | A window stops being the active window as another window gains `focus`     |
+| **`minimize`** | A window is minimized to the taskbar or dock and is no longer visible      |
+| **`maximize`** | A window expands to fill the available screen space                        |
+| **`restore`**  | A window returns to its normal size after being `minimized` or `maximized` |
+| **`move`**     | A window changes position on the screen                                    |
+| **`resize`**   | A window’s width or height changes                                         |
+
+> See also: [WindowEventType](../src/core/types/window/window-event/window-event-type/window-event-type.type.ts)
+
+### 3.2. Listening to Window Events
+
+#### 3.2.1. Start a window listener
+
+##### 3.2.1.1. Start listening to all window events
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Listen to all window events
+const windowListenerControl = Actionify.window.events
+  .all((event, listenerController) => {
+    // A window event occurred, do something here...
+  });
+
+// Listen to all window events for specific windows
+const windowListenerControl = Actionify.window.events
+  .all(
+    (event, listenerController) => {
+      // A file explorer window event occurred, do something here...
+    },
+    { shouldListen: (window) => window.executableFile.includes("explorer.exe") }
+  );
+```
+
+> 💡 Tip: Use the `shouldListen` predicate to filter and listen only to specific windows.
+
+> See also: [WindowListener](../src/core/types/event/window/window-listener/window-listener.type.ts), [WindowListenerOptions](../src/core/types/event/window/window-listener/window-listener-options/window-listener-options.type.ts), [WindowEvent](../src/core/types/window/window-event/window-event.type.ts), [WindowListenerController](../src/core/controllers/window/window-events/window-listener-scope/window-listener/window-listener.controller.ts)
+
+##### 3.2.1.2. Start listening to specific window events
+
+You can **listen to single or multiple window events** in a single listener:
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Listen to all [move] and [resize] window events
+const windowListenerControl = Actionify.window.events
+  .on("move", "resize")
+  .listen((event, listenerController) => {
+    // A window has been moved or resized, do something here...
+  });
+
+// Listen to all [move] and [resize] window events for specific windows
+const windowListenerControl = Actionify.window.events
+  .on("move", "resize")
+  .listen(
+    (event, listenerController) => {
+      // A file explorer window has been moved or resized, do something here...
+    },
+    { shouldListen: (window) => window.executableFile.includes("explorer.exe") }
+  );
+```
+
+> 💡 Tip: Use the `shouldListen` predicate to filter and listen only to specific windows.
+
+> See also: [WindowListener](../src/core/types/event/window/window-listener/window-listener.type.ts), [WindowListenerOptions](../src/core/types/event/window/window-listener/window-listener-options/window-listener-options.type.ts), [WindowEvent](../src/core/types/window/window-event/window-event.type.ts), [WindowListenerController](../src/core/controllers/window/window-events/window-listener-scope/window-listener/window-listener.controller.ts)
+
+#### 3.2.2. Pause a window listener
+
+Once you have [started a window listener](#321-start-a-window-listener), you can pause it smoothly with a [WindowListenerControl](../src/core/controllers/window/window-events/window-listener-scope/window-listener/window-listener.controller.ts):
+
+```js
+windowListenerControl.pause();
+```
+
+You can also pause any [WindowListener](../src/core/types/event/window/window-listener/window-listener.type.ts) directly with its reference:
+
+```js
+Actionify.window.events.pause(windowListener);
+```
+
+#### 3.2.3. Resume a window listener
+
+Once you have [paused a window listener](#322-pause-a-window-listener), you can resume it smoothly with a [WindowListenerControl](../src/core/controllers/window/window-events/window-listener-scope/window-listener/window-listener.controller.ts):
+
+```js
+windowListenerControl.resume();
+```
+
+You can also resume any [WindowListener](../src/core/types/event/window/window-listener/window-listener.type.ts) directly with its reference:
+
+```js
+Actionify.window.events.resume(windowListener);
+```
+
+#### 3.2.4. Stop a window listener
+
+Once you have [started a window listener](#321-start-a-window-listener), you can stop it smoothly with a [WindowListenerControl](../src/core/controllers/window/window-events/window-listener-scope/window-listener/window-listener.controller.ts):
+
+```js
+windowListenerControl.off();
+```
+
+You can also pause any [WindowListener](../src/core/types/event/window/window-listener/window-listener.type.ts) directly with its reference:
+
+```js
+Actionify.window.events.off(windowListener);
+```
+
 ---
 
 [← Home](../README.md#features)
