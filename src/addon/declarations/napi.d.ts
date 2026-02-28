@@ -24,6 +24,8 @@ declare module "@napi/actionify" {
     getAvailableScreens: () => ScreenInfo[];
     startEventListener: (callback: Function) => void;
     stopEventListener: () => void;
+    startWindowEventListener: (callback: Function) => void;
+    stopWindowEventListener: () => void;
     cleanResources: () => void;
     listWindows: () => Array<WindowInfo>;
     focusWindow: (hwnd: number) => boolean;

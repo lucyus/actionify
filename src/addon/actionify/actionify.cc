@@ -63,6 +63,12 @@ struct WindowInfo {
   RECT rect;                     // Window position and dimensions
 };
 
+// Structure to hold window event data
+struct RawWindowEvent {
+  HWND hwnd;
+  std::string type;
+};
+
 // Structure to hold color information
 struct Color {
   int red;
@@ -135,6 +141,16 @@ std::condition_variable queueCondition;
 std::map<int, std::set<int>> suppressedMouseKeys;
 std::map<int, std::set<int>> suppressedKeyboardKeys;
 std::mutex suppressedKeysMutex;
+
+// Window events variables
+std::vector<HWINEVENTHOOK> windowEventHooks;
+std::mutex windowEventHookMutex;
+std::atomic<bool> windowEventRunning(false);
+std::condition_variable windowEventHookCondition;
+Napi::ThreadSafeFunction windowEventThreadSafeJsFunction;
+std::queue<RawWindowEvent> windowEventQueue;
+std::mutex windowEventQueueMutex;
+std::condition_variable windowEventQueueCondition;
 
 // Tray icon variables
 std::mutex trayIconMutex;
@@ -237,6 +253,14 @@ void CleanAll() {
     {
       std::unique_lock<std::mutex> lock(hooksMutex);
       hooksCondition.wait(lock, [] { return mouseHook == nullptr && keyboardHook == nullptr; });
+    }
+  }
+  if (windowEventRunning.load()) {
+    windowEventRunning = false;
+    windowEventQueueCondition.notify_all();
+    {
+      std::unique_lock<std::mutex> lock(windowEventHookMutex);
+      windowEventHookCondition.wait(lock, [] { return windowEventHooks.empty(); });
     }
   }
   if (trayIconRunning.load()) {
@@ -719,7 +743,11 @@ Napi::Value UnsuppressInputEventsWrapper(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
-// Window event callback
+// =============================================================================
+// ============================ TRAY ICON FUNCTIONS ============================
+// =============================================================================
+
+// This process' window's tray icon event callback
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   switch (uMsg) {
     case WM_COMMAND: {
@@ -2989,6 +3017,244 @@ Napi::Value SetWindowToAlwaysOnTopWrapper(const Napi::CallbackInfo& info) {
 
 
 // =============================================================================
+// ======================= WINDOW EVENTS HOOK PROCEDURES =======================
+// =============================================================================
+
+// Window event hook procedure
+void CALLBACK WindowEventProc(
+  HWINEVENTHOOK hWinEventHook,
+  DWORD event,
+  HWND hwnd,
+  LONG idObject,
+  LONG idChild,
+  DWORD dwEventThread,
+  DWORD dwmsEventTime
+) {
+  // Skip invalid window handles
+  if (!hwnd) {
+    return;
+  }
+  // Skip non-window objects
+  if (idObject != OBJID_WINDOW) {
+    return;
+  }
+  // Skip child windows
+  if (idChild != 0) {
+    return;
+  }
+  // Skip non-root windows
+  if (GetAncestor(hwnd, GA_ROOT) != hwnd) {
+    return;
+  }
+  // Get window style
+  LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+  // Skip tool windows
+  if (exStyle & WS_EX_TOOLWINDOW) {
+    return;
+  }
+  // Skip no-activate windows
+  if (exStyle & WS_EX_NOACTIVATE) {
+    return;
+  }
+  // Skip invisible windows except for destruction lifecycles
+  if (!IsWindowVisible(hwnd) && event != EVENT_OBJECT_HIDE) {
+    // TypeScript WindowEventService must track windows information history to get
+    // the details from this destroyed window's hwnd. In fact, EnumWindows won't
+    // list these windows as they would already be invisible or destroyed.
+    return;
+  }
+  // Check for taskbar visibility using DWM attributes
+  BOOL isCloaked = FALSE;
+  HRESULT hr = DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &isCloaked, sizeof(isCloaked));
+  // Skip cloaked windows
+  if (SUCCEEDED(hr) && isCloaked) {
+    return;
+  }
+  // Skip windows without a title
+  std::wstring title = GetWindowTitle(hwnd);
+  if (title.empty()) {
+    return;
+  }
+  // Determine window event
+  std::string windowEventType;
+  // Note: if new events need to be handled, make sure to add new SetWinEventHook
+  //       inside WindowEventProcessingThread function to hook them.
+  switch (event) {
+    case EVENT_OBJECT_SHOW:
+      // Window created
+      windowEventType = "create";
+      break;
+    case EVENT_OBJECT_HIDE:
+      // Window destroyed
+      windowEventType = "destroy";
+      break;
+    case EVENT_SYSTEM_FOREGROUND:
+      // Window in the foreground
+      windowEventType = "focus";
+      break;
+    case EVENT_OBJECT_LOCATIONCHANGE:
+      windowEventType = "locationchange";
+      break;
+  }
+  // Skip unwanted window events
+  if (windowEventType.empty()) {
+    return;
+  }
+  // Enqueue window event
+  {
+    RawWindowEvent rawWindowEvent = { hwnd, windowEventType };
+    std::lock_guard<std::mutex> lock(windowEventQueueMutex);
+    windowEventQueue.push(rawWindowEvent);
+    windowEventQueueCondition.notify_all();
+  }
+}
+
+// Function to convert window event data to a JavaScript object
+Napi::Object BuildWindowEventObject(const Napi::Env& env, const RawWindowEvent& rawWindowEvent) {
+  Napi::Object windowEventObj = Napi::Object::New(env);
+  windowEventObj.Set(Napi::String::New(env, "hwnd"), Napi::Number::New(env, reinterpret_cast<uintptr_t>(rawWindowEvent.hwnd)));
+  windowEventObj.Set(Napi::String::New(env, "type"), Napi::String::New(env, rawWindowEvent.type));
+  return windowEventObj;
+}
+
+void ClearWindowEventHooks() {
+  // Unhook
+  {
+    std::lock_guard<std::mutex> lock(windowEventHookMutex);
+    for (auto windowEventHook : windowEventHooks) {
+      UnhookWinEvent(windowEventHook);
+    }
+    windowEventHooks.clear();
+  }
+
+  // Clear callback
+  windowEventThreadSafeJsFunction.Abort();
+
+  windowEventHookCondition.notify_all();
+}
+
+void WindowEventProcessingThread(const Napi::Env& env) {
+  {
+    std::lock_guard<std::mutex> lock(windowEventHookMutex);
+    windowEventHooks.push_back(
+      SetWinEventHook(
+        EVENT_OBJECT_SHOW,
+        EVENT_OBJECT_SHOW,
+        nullptr,
+        WindowEventProc,
+        0,
+        0,
+        WINEVENT_OUTOFCONTEXT
+      )
+    );
+    windowEventHooks.push_back(
+      SetWinEventHook(
+        EVENT_OBJECT_HIDE,
+        EVENT_OBJECT_HIDE,
+        nullptr,
+        WindowEventProc,
+        0,
+        0,
+        WINEVENT_OUTOFCONTEXT
+      )
+    );
+    windowEventHooks.push_back(
+      SetWinEventHook(
+        EVENT_OBJECT_LOCATIONCHANGE,
+        EVENT_OBJECT_LOCATIONCHANGE,
+        nullptr,
+        WindowEventProc,
+        0,
+        0,
+        WINEVENT_OUTOFCONTEXT
+      )
+    );
+    windowEventHooks.push_back(
+      SetWinEventHook(
+        EVENT_SYSTEM_FOREGROUND,
+        EVENT_SYSTEM_FOREGROUND,
+        nullptr,
+        WindowEventProc,
+        0,
+        0,
+        WINEVENT_OUTOFCONTEXT
+      )
+    );
+    if (!windowEventHooks[0] || !windowEventHooks[1] || !windowEventHooks[2] || !windowEventHooks[3]) {
+      Napi::Error::New(env, "Failed to set window event hooks").ThrowAsJavaScriptException();
+      return;
+    }
+  }
+  windowEventRunning = true;
+  windowEventHookCondition.notify_all();
+  std::thread nestedThread([env]() {
+    while (windowEventRunning) {
+      std::unique_lock<std::mutex> lock(windowEventQueueMutex);
+      windowEventQueueCondition.wait(lock, [] { return !windowEventQueue.empty() || !windowEventRunning; });
+
+      while (!windowEventQueue.empty()) {
+        RawWindowEvent rawWindowEvent = windowEventQueue.front();
+        windowEventQueue.pop();
+
+        windowEventThreadSafeJsFunction.BlockingCall([rawWindowEvent](const Napi::Env& env, const Napi::Function& jsCallback) {
+          if (!jsCallback.IsEmpty()) {
+            jsCallback.Call({ BuildWindowEventObject(env, rawWindowEvent) });
+          }
+        });
+      }
+    }
+    ClearWindowEventHooks();
+  });
+
+  MSG msg;
+  while (GetMessage(&msg, nullptr, 0, 0)) {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+  }
+  nestedThread.join();
+}
+
+Napi::Value StartWindowEventListener(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Skip if already listening
+  if (windowEventRunning) return Napi::Boolean::New(env, true);
+
+  // Validate arguments
+  if (info.Length() < 1 || !info[0].IsFunction()) {
+    Napi::TypeError::New(env, "Expected a callback function").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Convert JS callback to a NAPI ThreadSafeFunction
+  windowEventThreadSafeJsFunction = Napi::ThreadSafeFunction::New(
+    env, // the main NAPI environment
+    info[0].As<Napi::Function>(), // callback function that needs to be called in thread(s)
+    "windowEventCallback", // JS string used to provide diagnostic information
+    0, // maximum queue size (0 for unlimited)
+    1, // initial number of threads which will be making use of this function
+    [](const Napi::Env& env) { // finalizer callback, can be used to clean threads up
+    }
+  );
+
+  // Start window event processing thread
+  std::thread(WindowEventProcessingThread, env).detach();
+  {
+    std::unique_lock<std::mutex> lock(windowEventHookMutex);
+    windowEventHookCondition.wait(lock, [] { return windowEventRunning.load(); });
+  }
+  return Napi::Boolean::New(env, true);
+}
+
+Napi::Value StopWindowEventListener(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  CleanAll();
+
+  return Napi::Boolean::New(env, true);
+}
+
+// =============================================================================
 // ============================= SOUND FUNCTIONS ==============================
 // =============================================================================
 
@@ -3505,6 +3771,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "getAvailableScreens"), Napi::Function::New(env, GetAvailableScreens));
   exports.Set(Napi::String::New(env, "startEventListener"), Napi::Function::New(env, StartEventListener));
   exports.Set(Napi::String::New(env, "stopEventListener"), Napi::Function::New(env, StopEventListener));
+  exports.Set(Napi::String::New(env, "startWindowEventListener"), Napi::Function::New(env, StartWindowEventListener));
+  exports.Set(Napi::String::New(env, "stopWindowEventListener"), Napi::Function::New(env, StopWindowEventListener));
   exports.Set(Napi::String::New(env, "cleanResources"), Napi::Function::New(env, CleanupResources));
   exports.Set(Napi::String::New(env, "listWindows"), Napi::Function::New(env, ListWindows));
   exports.Set(Napi::String::New(env, "focusWindow"), Napi::Function::New(env, FocusWindowWrapper));
