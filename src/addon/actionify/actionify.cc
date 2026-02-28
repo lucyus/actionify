@@ -103,7 +103,7 @@ struct MatchRegion {
 };
 
 // Event structure to hold raw event data
-struct RawEvent {
+struct RawInputEvent {
   std::string type; // "mouse" or "keyboard"
   std::string input;
   std::string state;
@@ -124,18 +124,16 @@ struct SoundInfo {
 // ============================== GLOBAL VARIABLES =============================
 // =============================================================================
 
-// HOOKS
+// Input events variables
 HHOOK mouseHook = nullptr;
 HHOOK keyboardHook = nullptr;
-std::mutex hooksMutex;
-std::atomic<bool> running(false);
-std::condition_variable hooksCondition;
-Napi::ThreadSafeFunction threadSafeJsFunction;
-
-// Queue to store events
-std::queue<RawEvent> eventQueue;
-std::mutex queueMutex;
-std::condition_variable queueCondition;
+std::mutex inputEventHookMutex;
+std::atomic<bool> inputEventRunning(false);
+std::condition_variable inputEventHookCondition;
+Napi::ThreadSafeFunction inputEventThreadSafeJsFunction;
+std::queue<RawInputEvent> inputEventQueue;
+std::mutex inputEventQueueMutex;
+std::condition_variable inputEventQueueCondition;
 
 // Maps to store mouse and keyboard suppressed keys
 std::map<int, std::set<int>> suppressedMouseKeys;
@@ -247,12 +245,12 @@ void CleanupTrayIcon() {
 }
 
 void CleanAll() {
-  if (running.load()) {
-    running = false;
-    queueCondition.notify_all();
+  if (inputEventRunning.load()) {
+    inputEventRunning = false;
+    inputEventQueueCondition.notify_all();
     {
-      std::unique_lock<std::mutex> lock(hooksMutex);
-      hooksCondition.wait(lock, [] { return mouseHook == nullptr && keyboardHook == nullptr; });
+      std::unique_lock<std::mutex> lock(inputEventHookMutex);
+      inputEventHookCondition.wait(lock, [] { return mouseHook == nullptr && keyboardHook == nullptr; });
     }
   }
   if (windowEventRunning.load()) {
@@ -391,10 +389,10 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
           isInputSuppressed = suppressedMouseKeys.find(mappedInput) != suppressedMouseKeys.end() && suppressedMouseKeys[mappedInput].find(mappedState) != suppressedMouseKeys[mappedInput].end();
         }
         {
-          RawEvent event = { "mouse", input, state, mouseStruct->pt.x, mouseStruct->pt.y, 0, Now(), isInputSuppressed, isInputInjected };
-          std::lock_guard<std::mutex> lock(queueMutex);
-          eventQueue.push(event);
-          queueCondition.notify_all();
+          RawInputEvent event = { "mouse", input, state, mouseStruct->pt.x, mouseStruct->pt.y, 0, Now(), isInputSuppressed, isInputInjected };
+          std::lock_guard<std::mutex> lock(inputEventQueueMutex);
+          inputEventQueue.push(event);
+          inputEventQueueCondition.notify_all();
         }
         if (isInputSuppressed) {
           return 1;
@@ -434,10 +432,10 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
           isInputSuppressed = suppressedKeyboardKeys.find(vkCode) != suppressedKeyboardKeys.end() && suppressedKeyboardKeys[vkCode].find(mappedState) != suppressedKeyboardKeys[vkCode].end();
         }
         {
-          RawEvent event = { "keyboard", "", state, 0, 0, vkCode, Now(), isInputSuppressed, isInputInjected };
-          std::lock_guard<std::mutex> lock(queueMutex);
-          eventQueue.push(event);
-          queueCondition.notify_all();
+          RawInputEvent event = { "keyboard", "", state, 0, 0, vkCode, Now(), isInputSuppressed, isInputInjected };
+          std::lock_guard<std::mutex> lock(inputEventQueueMutex);
+          inputEventQueue.push(event);
+          inputEventQueueCondition.notify_all();
         }
         if (isInputSuppressed) {
           return 1;
@@ -449,7 +447,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 }
 
 // Function to convert event data to a JavaScript object
-Napi::Object BuildEventObject(const Napi::Env& env, const RawEvent& event) {
+Napi::Object BuildInputEventObject(const Napi::Env& env, const RawInputEvent& event) {
   Napi::Object eventObj = Napi::Object::New(env);
   eventObj.Set(Napi::String::New(env, "type"), Napi::String::New(env, event.type));
   eventObj.Set(Napi::String::New(env, "timestamp"), Napi::Number::New(env, event.timestamp));
@@ -472,7 +470,7 @@ Napi::Object BuildEventObject(const Napi::Env& env, const RawEvent& event) {
 void ClearHooks() {
   // Unhook
   {
-    std::lock_guard<std::mutex> lock(hooksMutex);
+    std::lock_guard<std::mutex> lock(inputEventHookMutex);
     if (mouseHook) {
       UnhookWindowsHookEx(mouseHook);
       mouseHook = nullptr;
@@ -485,15 +483,15 @@ void ClearHooks() {
   }
 
   // Clear callback
-  threadSafeJsFunction.Abort();
+  inputEventThreadSafeJsFunction.Abort();
 
-  hooksCondition.notify_all();
+  inputEventHookCondition.notify_all();
 }
 
 // Thread to process events and invoke the JavaScript callback
-void EventProcessingThread(const Napi::Env& env) {
+void InputEventProcessingThread(const Napi::Env& env) {
   {
-    std::lock_guard<std::mutex> lock(hooksMutex);
+    std::lock_guard<std::mutex> lock(inputEventHookMutex);
     mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, nullptr, 0);
     if (!mouseHook) {
       Napi::Error::New(env, "Failed to set mouse hook").ThrowAsJavaScriptException();
@@ -506,20 +504,20 @@ void EventProcessingThread(const Napi::Env& env) {
     }
   }
 
-  running = true;
-  hooksCondition.notify_all();
+  inputEventRunning = true;
+  inputEventHookCondition.notify_all();
   std::thread nestedThread([env]() {
-    while (running) {
-      std::unique_lock<std::mutex> lock(queueMutex);
-      queueCondition.wait(lock, [] { return !eventQueue.empty() || !running; });
+    while (inputEventRunning) {
+      std::unique_lock<std::mutex> lock(inputEventQueueMutex);
+      inputEventQueueCondition.wait(lock, [] { return !inputEventQueue.empty() || !inputEventRunning; });
 
-      while (!eventQueue.empty()) {
-        RawEvent rawEvent = eventQueue.front();
-        eventQueue.pop();
+      while (!inputEventQueue.empty()) {
+        RawInputEvent rawInputEvent = inputEventQueue.front();
+        inputEventQueue.pop();
 
-        threadSafeJsFunction.BlockingCall([rawEvent](const Napi::Env& env, const Napi::Function& jsCallback) {
+        inputEventThreadSafeJsFunction.BlockingCall([rawInputEvent](const Napi::Env& env, const Napi::Function& jsCallback) {
           if (!jsCallback.IsEmpty()) {
-            jsCallback.Call({ BuildEventObject(env, rawEvent) });
+            jsCallback.Call({ BuildInputEventObject(env, rawInputEvent) });
           }
         });
       }
@@ -536,11 +534,11 @@ void EventProcessingThread(const Napi::Env& env) {
 }
 
 // Function to start monitoring input events
-Napi::Value StartEventListener(const Napi::CallbackInfo& info) {
+Napi::Value StartInputEventListener(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   // Skip if already listening
-  if (running) {
+  if (inputEventRunning) {
     return Napi::Boolean::New(env, true);
   }
 
@@ -551,7 +549,7 @@ Napi::Value StartEventListener(const Napi::CallbackInfo& info) {
   }
 
   // Convert JS callback to a NAPI ThreadSafeFunction
-  threadSafeJsFunction = Napi::ThreadSafeFunction::New(
+  inputEventThreadSafeJsFunction = Napi::ThreadSafeFunction::New(
     env, // the main NAPI environment
     info[0].As<Napi::Function>(), // callback function that needs to be called in thread(s)
     "callback", // JS string used to provide diagnostic information
@@ -562,16 +560,16 @@ Napi::Value StartEventListener(const Napi::CallbackInfo& info) {
   );
 
   // Start event processing thread
-  std::thread(EventProcessingThread, env).detach();
+  std::thread(InputEventProcessingThread, env).detach();
   {
-    std::unique_lock<std::mutex> lock(hooksMutex);
-    hooksCondition.wait(lock, [] { return running.load(); });
+    std::unique_lock<std::mutex> lock(inputEventHookMutex);
+    inputEventHookCondition.wait(lock, [] { return inputEventRunning.load(); });
   }
   return Napi::Boolean::New(env, true);
 }
 
 // Function to stop monitoring input events
-Napi::Value StopEventListener(const Napi::CallbackInfo& info) {
+Napi::Value StopInputEventListener(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   CleanAll();
@@ -3780,8 +3778,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "keyPressUp"), Napi::Function::New(env, KeyPressUp));
   exports.Set(Napi::String::New(env, "typeUnicodeCharacter"), Napi::Function::New(env, TypeUnicodeCharacter));
   exports.Set(Napi::String::New(env, "getAvailableScreens"), Napi::Function::New(env, GetAvailableScreens));
-  exports.Set(Napi::String::New(env, "startEventListener"), Napi::Function::New(env, StartEventListener));
-  exports.Set(Napi::String::New(env, "stopEventListener"), Napi::Function::New(env, StopEventListener));
+  exports.Set(Napi::String::New(env, "startInputEventListener"), Napi::Function::New(env, StartInputEventListener));
+  exports.Set(Napi::String::New(env, "stopInputEventListener"), Napi::Function::New(env, StopInputEventListener));
   exports.Set(Napi::String::New(env, "startWindowEventListener"), Napi::Function::New(env, StartWindowEventListener));
   exports.Set(Napi::String::New(env, "stopWindowEventListener"), Napi::Function::New(env, StopWindowEventListener));
   exports.Set(Napi::String::New(env, "cleanResources"), Napi::Function::New(env, CleanupResources));

@@ -22,8 +22,8 @@ declare module "@napi/actionify" {
     keyPressUp: (keyCode: number) => void;
     typeUnicodeCharacter: (character: string) => void;
     getAvailableScreens: () => ScreenInfo[];
-    startEventListener: (callback: Function) => void;
-    stopEventListener: () => void;
+    startInputEventListener: (callback: Function) => void;
+    stopInputEventListener: () => void;
     startWindowEventListener: (callback: Function) => void;
     stopWindowEventListener: () => void;
     cleanResources: () => void;
