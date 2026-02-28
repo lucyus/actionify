@@ -1,3 +1,20 @@
+## [0.17.0](https://github.com/lucyus/actionify/compare/v0.16.1...v0.17.0) (2026-02-28)
+
+### Features
+
+* **@addon:** add support for listening to window events ([f0085c9](https://github.com/lucyus/actionify/commit/f0085c928d227a7259b1f514ec20a8e92537a3fa))
+* **@core:** add support for listening to window events ([96ffd58](https://github.com/lucyus/actionify/commit/96ffd58fb7a74a0e2be6e23b26181d686c0787a0))
+* **@docs:** specify window event listeners usage ([dafaec4](https://github.com/lucyus/actionify/commit/dafaec4c99c8c180a48827ff898f1988348f00c6))
+
+### Bug Fixes
+
+* **@addon:** filter out special and non-focusable windows from 'window.list()' ([4fcf9ea](https://github.com/lucyus/actionify/commit/4fcf9eaa2b699801f97dd37e0333f9ed82c63588))
+* **@core/controllers:** make window 'executableFile' search case-insensitive ([e26c28c](https://github.com/lucyus/actionify/commit/e26c28c6a0a9175869d8b4eb10f69af274cd5f80))
+
+### Code Refactoring
+
+* **@addon:** rename input event variables for better clarity ([7f2f8f6](https://github.com/lucyus/actionify/commit/7f2f8f684d60a9038cc770c33e3a333cd95d71e0))
+* **@core/controllers:** rename input event variables for better clarity ([5994ac7](https://github.com/lucyus/actionify/commit/5994ac78518a56079f8552dd73e1b908589ce385))
 ## [0.16.1](https://github.com/lucyus/actionify/compare/v0.16.0...v0.16.1) (2026-02-21)
 
 ### Bug Fixes
