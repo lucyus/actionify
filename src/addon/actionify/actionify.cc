@@ -2727,6 +2727,153 @@ Napi::Value ListWindows(const Napi::CallbackInfo& info) {
   return result;
 }
 
+// Function to get a window by ID
+std::optional<WindowInfo> GetWindowById(HWND hwnd) {
+
+  // Check if the window exists
+  if (!IsWindow(hwnd)) {
+    return std::nullopt;
+  }
+
+  // Skip non-root windows
+  if (GetAncestor(hwnd, GA_ROOT) != hwnd) {
+    return std::nullopt;
+  }
+
+  // Skip invisible windows
+  if (!IsWindowVisible(hwnd)) {
+    return std::nullopt;
+  }
+
+  // Skip tool windows
+  LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+  if (exStyle & WS_EX_TOOLWINDOW) {
+    return std::nullopt;
+  }
+  // Skip no-activate windows
+  if (exStyle & WS_EX_NOACTIVATE) {
+    return std::nullopt;
+  }
+
+  // Skip cloaked windows
+  BOOL isCloaked = FALSE;
+  HRESULT hr = DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &isCloaked, sizeof(isCloaked));
+  if (SUCCEEDED(hr) && isCloaked) {
+    return std::nullopt;
+  }
+
+  // Get window title
+  std::wstring title = GetWindowTitle(hwnd);
+  // Skip windows with no title
+  if (title.empty()) {
+    return std::nullopt;
+  }
+
+  // Get window placement
+  WINDOWPLACEMENT placement = {0};
+  placement.length = sizeof(WINDOWPLACEMENT);
+  GetWindowPlacement(hwnd, &placement);
+
+  bool isMinimized = (placement.showCmd == SW_SHOWMINIMIZED);
+  bool isMaximized = (placement.showCmd == SW_SHOWMAXIMIZED);
+
+  // Get window dimensions
+  RECT rect;
+  GetWindowRect(hwnd, &rect);
+  // Get extended window dimensions
+  RECT extendedRect;
+  hr = DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &extendedRect, sizeof(extendedRect));
+  if (SUCCEEDED(hr)) {
+    rect = extendedRect;
+  }
+
+  // Retrieve Process ID (PID)
+  DWORD pid = 0;
+  GetWindowThreadProcessId(hwnd, &pid);
+
+  // Get executable file name
+  wchar_t executableFile[MAX_PATH] = {0};
+  HANDLE process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+  if (process) {
+    GetModuleFileNameExW(process, NULL, executableFile, MAX_PATH);
+    CloseHandle(process);
+  }
+
+  // Get window class name
+  wchar_t className[256];
+  GetClassNameW(hwnd, className, sizeof(className) / sizeof(wchar_t));
+
+  // Check if the current window is in the foreground
+  HWND foregroundWindow = GetForegroundWindow();
+  bool isForeground = (hwnd == foregroundWindow);
+
+  // Check if the current window has the focus
+  HWND focusedWindow = GetFocus();
+  bool isFocused = (hwnd == focusedWindow);
+
+  WindowInfo windowInfo;
+  windowInfo.hwnd = hwnd;
+  windowInfo.pid = pid;
+  windowInfo.title = title;
+  windowInfo.executableFile = executableFile;
+  windowInfo.className = className;
+  windowInfo.isFocused = isForeground;
+  windowInfo.isMinimized = isMinimized;
+  windowInfo.isMaximized = isMaximized;
+  windowInfo.isRestored = !isMinimized && !isMaximized;
+  windowInfo.isAlwaysOnTop = (GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0;
+  windowInfo.rect = rect;
+
+  return windowInfo;
+}
+
+// N-API function to get a window by ID
+Napi::Value GetWindowByIdWrapper(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  // Ensure the argument is a number (HWND)
+  if (info.Length() < 1 || !info[0].IsNumber()) {
+    Napi::TypeError::New(env, "Argument must be a number (HWND)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  // Get the window handle (HWND) from the argument
+  HWND hwnd = reinterpret_cast<HWND>(static_cast<intptr_t>(info[0].As<Napi::Number>().Int32Value()));
+
+  // Call the function to get the window by ID
+  std::optional<WindowInfo> maybeWindowInfo = GetWindowById(hwnd);
+
+  if (!maybeWindowInfo.has_value()) {
+    return env.Undefined();
+  }
+
+  WindowInfo windowInfo = maybeWindowInfo.value();
+
+  // Create a JavaScript object to hold the window information
+  Napi::Object windowObject = Napi::Object::New(env);
+  windowObject.Set("id", Napi::Number::New(env, reinterpret_cast<uintptr_t>(windowInfo.hwnd)));
+  windowObject.Set("pid", Napi::Number::New(env, windowInfo.pid));
+  windowObject.Set("title", Napi::String::New(env, ConvertToUTF8(windowInfo.title)));
+  windowObject.Set("executableFile", Napi::String::New(env, ConvertToUTF8(windowInfo.executableFile)));
+  windowObject.Set("className", Napi::String::New(env, ConvertToUTF8(windowInfo.className)));
+  Napi::Object position = Napi::Object::New(env);
+  position.Set("x", Napi::Number::New(env, windowInfo.rect.left));
+  position.Set("y", Napi::Number::New(env, windowInfo.rect.top));
+  windowObject.Set("position", position);
+  Napi::Object dimensions = Napi::Object::New(env);
+  dimensions.Set("width", Napi::Number::New(env, windowInfo.rect.right - windowInfo.rect.left));
+  dimensions.Set("height", Napi::Number::New(env, windowInfo.rect.bottom - windowInfo.rect.top));
+  windowObject.Set("dimensions", dimensions);
+  windowObject.Set("isMinimized", Napi::Boolean::New(env, windowInfo.isMinimized));
+  windowObject.Set("isMaximized", Napi::Boolean::New(env, windowInfo.isMaximized));
+  windowObject.Set("isRestored", Napi::Boolean::New(env, windowInfo.isRestored));
+  windowObject.Set("isFocused", Napi::Boolean::New(env, windowInfo.isFocused));
+  windowObject.Set("isAlwaysOnTop", Napi::Boolean::New(env, windowInfo.isAlwaysOnTop));
+
+  // Return the window object
+  return windowObject;
+}
+
 // Function to bring a window to the foreground
 bool FocusWindow(HWND hwnd) {
   // Attempt to bring the window to the foreground
@@ -3784,6 +3931,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "stopWindowEventListener"), Napi::Function::New(env, StopWindowEventListener));
   exports.Set(Napi::String::New(env, "cleanResources"), Napi::Function::New(env, CleanupResources));
   exports.Set(Napi::String::New(env, "listWindows"), Napi::Function::New(env, ListWindows));
+  exports.Set(Napi::String::New(env, "getWindowById"), Napi::Function::New(env, GetWindowByIdWrapper));
   exports.Set(Napi::String::New(env, "focusWindow"), Napi::Function::New(env, FocusWindowWrapper));
   exports.Set(Napi::String::New(env, "restoreWindow"), Napi::Function::New(env, RestoreWindowWrapper));
   exports.Set(Napi::String::New(env, "minimizeWindow"), Napi::Function::New(env, MinimizeWindowWrapper));

@@ -28,6 +28,7 @@ declare module "@napi/actionify" {
     stopWindowEventListener: () => void;
     cleanResources: () => void;
     listWindows: () => Array<WindowInfo>;
+    getWindowById: (hwnd: number) => WindowInfo | undefined;
     focusWindow: (hwnd: number) => boolean;
     restoreWindow: (hwnd: number) => boolean;
     minimizeWindow: (hwnd: number) => boolean;
