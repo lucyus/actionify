@@ -3,7 +3,7 @@ import { Actionify } from "../../../../core";
 import {
   closeWindow,
   focusWindow,
-  listWindows,
+  getWindowById,
   maximizeWindow,
   minimizeWindow,
   restoreWindow,
@@ -32,7 +32,7 @@ export class WindowInteractionController {
   }
 
   #getById(id: number): WindowInfo | undefined {
-    return listWindows().find((windowInfo) => windowInfo.id === id);
+    return getWindowById(id);
   }
 
   /**
