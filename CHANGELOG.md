@@ -1,3 +1,12 @@
+## [0.17.1](https://github.com/lucyus/actionify/compare/v0.17.0...v0.17.1) (2026-04-04)
+
+### Features
+
+* **@addon:** implement faster window lookup by id ([1c3a932](https://github.com/lucyus/actionify/commit/1c3a9329d71c4c8a3e7942836866adb425d85cd0))
+
+### Performance Improvements
+
+* **@core/controllers:** use getWindowById for faster window lookup ([4d0c943](https://github.com/lucyus/actionify/commit/4d0c943254d72d4c8a6709f886767d67a08c7e44))
 ## [0.17.0](https://github.com/lucyus/actionify/compare/v0.16.1...v0.17.0) (2026-02-28)
 
 ### Features
