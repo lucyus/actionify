@@ -1,7 +1,6 @@
 #include <napi.h>
 #include <windows.h>
 #include <dwmapi.h>
-#pragma comment(lib, "dwmapi.lib")
 #include <sapi.h>
 #include <psapi.h>
 #include <thread>
@@ -17,7 +16,6 @@
 #include <set>
 #include <shlobj.h> // For clipboard formats and shell operations
 #include <gdiplus.h>
-#pragma comment(lib, "gdiplus.lib")
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Globalization.h>
@@ -27,10 +25,8 @@
 #include <winrt/Windows.Storage.h>
 #include <execution>
 #include <mmsystem.h>
-#pragma comment(lib, "winmm.lib")
 #include <shellapi.h>
 #include <shellscalingapi.h>
-#pragma comment(lib, "Shcore.lib")
 
 
 // =============================================================================

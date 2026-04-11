@@ -6,6 +6,13 @@
       "include_dirs": [
         "node_modules/node-addon-api"
       ],
+      "libraries": [
+        "-lruntimeobject",
+        "-ldwmapi",
+        "-lgdiplus",
+        "-lwinmm",
+        "-lShcore"
+      ],
       "cflags": [ "-fexceptions" ],
       "cflags_cc": [ "-fexceptions" ],
       "defines": [ "NAPI_CPP_EXCEPTIONS" ],
