@@ -1,3 +1,16 @@
+## [0.17.2](https://github.com/lucyus/actionify/compare/v0.17.1...v0.17.2) (2026-04-11)
+
+### Features
+
+* **global:** add Docker-based Windows build setup and scripts ([ec19c13](https://github.com/lucyus/actionify/commit/ec19c131440b95c341302b1813288014c20c4575))
+
+### Documentation
+
+* **global:** add community guidelines ([1b7770c](https://github.com/lucyus/actionify/commit/1b7770c5fe487cf41523812d5d99b9ca32c98ed9))
+
+### Build System
+
+* **global:** link required system libraries via binding.gyp ([14f3a9b](https://github.com/lucyus/actionify/commit/14f3a9b3bcdf4170ee23d930c6914ec2b493bd90))
 ## [0.17.1](https://github.com/lucyus/actionify/compare/v0.17.0...v0.17.1) (2026-04-04)
 
 ### Features
