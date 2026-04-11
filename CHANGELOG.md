@@ -1,3 +1,8 @@
+## [0.17.3](https://github.com/lucyus/actionify/compare/v0.17.2...v0.17.3) (2026-04-11)
+
+### Miscellaneous Chores
+
+* **@npm:** exclude Dockerfile from published package ([71c1bf9](https://github.com/lucyus/actionify/commit/71c1bf97f262cdecb7e52d9b3b13ed1aac1b97ac))
 ## [0.17.2](https://github.com/lucyus/actionify/compare/v0.17.1...v0.17.2) (2026-04-11)
 
 ### Features
