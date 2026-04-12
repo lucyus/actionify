@@ -1,3 +1,8 @@
+## [0.17.4](https://github.com/lucyus/actionify/compare/v0.17.3...v0.17.4) (2026-04-12)
+
+### Miscellaneous Chores
+
+* **global:** add GitHub issue templates ([6fffb5a](https://github.com/lucyus/actionify/commit/6fffb5aefd249e782d82d9af37260a98a6e1ac78))
 ## [0.17.3](https://github.com/lucyus/actionify/compare/v0.17.2...v0.17.3) (2026-04-11)
 
 ### Miscellaneous Chores
