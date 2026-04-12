@@ -1,0 +1,54 @@
+name: 'Feature request'
+description: 'Suggest an idea'
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🔍 **Before requesting:** Please [search existing proposals](https://github.com/lucyus/actionify/issues?q=is%3Aissue%20label%3Aenhancement) or by the query `site:github.com/lucyus/actionify <keywords>` in your favorite search engine to avoid duplicates.
+
+        📝 **Please fill all required sections completely.** Incomplete reports may be closed without action. Thank you!
+
+  - type: checkboxes
+    id: viability_checklist
+    attributes:
+      label: '✅ Viability Checklist'
+      description: |
+        Suggestions that don't meet all these criteria are likely to be delayed or rejected.
+      options:
+        - label: This wouldn't be a breaking change in existing Actionify code
+          required: false
+        - label: This wouldn't change the runtime behavior of existing user code
+          required: false
+
+  - type: textarea
+    id: problem_summary
+    attributes:
+      label: '❗ Problem'
+      description: "What is currently painful or missing?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion_summary
+    attributes:
+      label: '💡 Suggestion'
+      description: "A summary of what you'd like to see added or changed"
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: '🎯 Use Case'
+      description: "What are you trying to accomplish with this feature?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: '🔁 Alternatives'
+      description: "What are you doing today instead as a workaround (if anything)?"
+    validations:
+      required: false

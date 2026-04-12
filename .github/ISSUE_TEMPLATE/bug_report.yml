@@ -1,0 +1,188 @@
+name: 'Bug report'
+description: 'Create a report to help us improve Actionify'
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🔍 **Before reporting:** Please [search existing issues](https://github.com/lucyus/actionify/issues?q=is%3Aissue%20label%3Abug) or by the query `site:github.com/lucyus/actionify <keywords>` in your favorite search engine to avoid duplicates.
+
+        📝 **Please fill all required sections completely.** Incomplete reports may be closed without action. Thank you!
+
+  - type: input
+    id: actionify_version
+    attributes:
+      label: '📦 Actionify Version'
+      description: 'Run `npm list @lucyus/actionify` or check your `package.json`'
+      placeholder: '0.17.3'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: regression_info
+    attributes:
+      label: '🕐 Regression Information'
+      description: 'When did this issue start?'
+      options:
+        - 'This is a new issue'
+        - 'This is a regression'
+        - 'This never worked before'
+        - 'I am not sure'
+        - 'Other'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation_type
+    attributes:
+      label: '⚙️ Installation Type'
+      description: 'How did you install Actionify?'
+      options:
+        - 'npm install (pre-built binary)'
+        - 'npm install (built from source)'
+        - 'Built from git clone'
+        - 'I am not sure'
+        - 'Other'
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: '🖥️ Operating System'
+      description: |
+        Press [Win] + [R], then type `winver` and press [Enter].
+      placeholder: 'Windows 10 22H2 (Build 19045.7058)'
+    validations:
+      required: true
+
+  - type: input
+    id: architecture
+    attributes:
+      label: '🖥️ Architecture'
+      description: |
+        Press [Win] + [R], then type `msinfo32` and press [Enter].
+        Look for the `Type` field.
+      placeholder: 'x64'
+    validations:
+      required: false
+
+  - type: input
+    id: node_version
+    attributes:
+      label: '📦 Node.js Version'
+      description: 'Run `node --version`'
+      placeholder: '16.15.0'
+    validations:
+      required: true
+
+  - type: input
+    id: npm_version
+    attributes:
+      label: '📦 npm Version'
+      description: |
+        ℹ️ *Only if you have built Actionify from source*
+
+        Run `npm --version`
+      placeholder: '8.19.4'
+    validations:
+      required: false
+
+  - type: input
+    id: python_version
+    attributes:
+      label: '📦 Python Version'
+      description: |
+        ℹ️ *Only if you have built Actionify from source*
+
+        Run `python --version`
+      placeholder: '3.11.0'
+    validations:
+      required: false
+
+  - type: input
+    id: visual_studio_build_tools_version
+    attributes:
+      label: '📦 Visual Studio Build Tools Version'
+      description: |
+        ℹ️ *Only if you have built Actionify from source*
+
+        Run `vswhere -latest -products * -property installationVersion`
+      placeholder: '17.9.34518.101'
+    validations:
+      required: false
+
+  - type: input
+    id: monitor_setup
+    attributes:
+      label: '🖥️ Monitor Setup'
+      description: 'e.g. Single 1080p, Dual 4K, DPI scaling'
+      placeholder: 'Single 1080p'
+    validations:
+      required: false
+
+  - type: textarea
+    id: minimal_code
+    attributes:
+      label: '💻 Minimal Reproduction'
+      description: |
+        Provide the shortest possible code or build steps that reproduces the issue.
+
+        **Tips for good reproductions:**
+        - Remove all unrelated code
+        - Don't use external libraries unless necessary
+        - Make the issue obvious from reading the code
+        - Include any required setup
+      value: |
+        1. Your reproduction steps go here
+        2. ...
+
+        ```typescript
+        // Your minimal reproduction code goes here
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: '🙁 Actual Behavior'
+      description: 'What actually happened?'
+      placeholder: |
+        Describe what happened, including:
+        - Error messages (full stack trace if available)
+        - Unexpected behavior
+        - Console output
+        - Screenshots if relevant
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: '🙂 Expected Behavior'
+      description: 'What did you expect to happen?'
+      placeholder: |
+        Describe what should have happened, including:
+        - Expected result
+        - Expected behavior
+        - Reference to documentation if applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: '📋 Additional Context'
+      description: |
+        Any other information that might help us understand the issue:
+
+        - Are you running as administrator?
+        - Is this happening in a specific application?
+        - Are there any security software involved?
+        - Any relevant Windows settings?
+        - Build logs if this is a build/installation issue
+      placeholder: |
+        Additional context, screenshots, or information
+    validations:
+      required: false

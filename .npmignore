@@ -1,3 +1,4 @@
+/.github/
 /build/*
 /build/Release/*
 !/build/Release/actionify.node
