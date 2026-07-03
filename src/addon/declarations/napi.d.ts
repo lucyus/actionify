@@ -48,7 +48,7 @@ declare module "@napi/actionify" {
     suppressInputEvents: (type: number, inputStateMap: Array<[number, Array<number>]>) => void;
     unsuppressInputEvents: (type: number, inputStateMap: Array<[number, Array<number>]>) => void;
     performOcrOnImage: (imagePath: string, language?: string) => string;
-    getPixelColorsFromImage: (imagePath: string) => Array<Array<Color>>;
+    getPixelColorsFromImage: (imagePath: string) => Uint8Array<number>; // each 6 values = x,y,r,g,b,a
     findImageTemplateMatches: (imagePath: string, subImagePath: string, minSimilarity: number) => Array<MatchRegion>;
     playSound: (audioPath: string, volume?: number, speed?: number, startTime?: number, endTime?: number) => { id: string, duration: number };
     pauseSound: (soundId: string) => void;
