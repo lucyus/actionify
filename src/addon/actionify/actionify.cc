@@ -2259,7 +2259,7 @@ Color GetPixelColor(int x, int y) {
   // Release the device context
   ReleaseDC(NULL, hdcScreen);
 
-  Color resultColor = {GetRValue(color), GetGValue(color), GetBValue(color), 0};
+  Color resultColor = {GetRValue(color), GetGValue(color), GetBValue(color), 255};
 
   // Return the color
   return resultColor;
