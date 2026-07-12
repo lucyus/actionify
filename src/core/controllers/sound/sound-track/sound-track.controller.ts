@@ -127,7 +127,7 @@ export class SoundTrackController {
   /**
    * @description Get the speed of the audio file.
    *
-   * @returns The speed of the audio file (1 is normal speed).
+   * @returns The speed of the audio file (between `0.01` and `4.0`. `1.0` is normal speed).
    *
    * ---
    * @example
@@ -143,14 +143,14 @@ export class SoundTrackController {
   /**
    * @description Set the speed of the audio file.
    *
-   * @param speed The speed of the audio file (1 is normal speed).
+   * @param speed The speed of the audio file (between `0.01` and `4.0`. `1.0` is normal speed).
    *
    * ---
    * @example
    * // Start playing an audio file
    * const soundController = Actionify.sound.play("/path/to/audio.mp3");
    * // Set the speed of the audio file
-   * soundController.speed = 2;
+   * soundController.speed = 2.0;
    */
   public set speed(speed: number) {
     const clampedSpeed = Math.max(0, speed);
@@ -177,7 +177,7 @@ export class SoundTrackController {
   /**
    * @description Get the volume of the audio file.
    *
-   * @returns The volume of the audio file (between 0 and 1).
+   * @returns The volume of the audio file (between `0.0` and `1.0`).
    *
    * ---
    * @example
@@ -187,13 +187,13 @@ export class SoundTrackController {
    * const volume = soundController.volume;
    */
   public get volume(): number {
-    return getSoundVolume();
+    return getSoundVolume(this.#id);
   }
 
   /**
    * @description Set the volume of the audio file.
    *
-   * @param volume The volume of the audio file (between 0 and 1).
+   * @param volume The volume of the audio file (between `0.0` and `1.0`).
    *
    * ---
    * @example
@@ -203,7 +203,7 @@ export class SoundTrackController {
    * soundController.volume = 0.5;
    */
   public set volume(volume: number) {
-    setSoundVolume(volume);
+    setSoundVolume(this.#id, volume);
     this.#volume = volume;
   }
 

@@ -26,11 +26,11 @@ export class SoundController {
    * // Play an audio file
    * Actionify.sound.play("/path/to/audio.mp3");
    *
-   * // Play an audio file with a custom volume (between 0 and 1)
+   * // Play an audio file with a custom volume (between `0.0` and `1.0`, defaults to `1.0`)
    * Actionify.sound.play("/path/to/audio.mp3", { volume: 0.5 });
    *
-   * // Play an audio file with a custom speed (between 0 and 4)
-   * Actionify.sound.play("/path/to/audio.mp3", { speed: 2 });
+   * // Play an audio file with a custom speed (between `0.01` and `4.0`, defaults to `1.0`)
+   * Actionify.sound.play("/path/to/audio.mp3", { speed: 2.0 });
    *
    * // Play an audio file with a custom start and end time (in milliseconds)
    * Actionify.sound.play("/path/to/audio.mp3", { time: { start: 5000, end: 10000 } });
@@ -40,8 +40,8 @@ export class SoundController {
       throw new Error(`Audio file not found: ${audioPath}`);
     }
     const absoluteAudioPath = path.resolve(audioPath);
-    const volume = options?.volume ?? 1;
-    const speed = options?.speed ?? 1;
+    const volume = Math.max(0.0, Math.min(1.0, options?.volume ?? 1.0));
+    const speed = Math.max(0.01, Math.min(4.0, options?.speed ?? 1.0));
     const startTime = options?.time?.start;
     const endTime = options?.time?.end;
     const sound = playSound(absoluteAudioPath, volume, speed, startTime, endTime);
