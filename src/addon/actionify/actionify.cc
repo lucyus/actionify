@@ -25,11 +25,11 @@
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.Storage.h>
 #include <execution>
-#include <mmsystem.h>
 #include <shellapi.h>
 #include <shellscalingapi.h>
 #include <leptonica/allheaders.h>
 #include <tesseract/baseapi.h>
+#include <miniaudio.h>
 
 
 // =============================================================================
@@ -124,6 +124,289 @@ struct SoundInfo {
 // ============================== UTILITY CLASSES ==============================
 // =============================================================================
 
+
+class AudioPlayer {
+  public:
+    explicit AudioPlayer(ma_engine* engine) noexcept: m_engine(engine) { }
+
+    // Prevent copy semantics
+    AudioPlayer(const AudioPlayer&) = delete;
+    AudioPlayer& operator=(const AudioPlayer&) = delete;
+
+    // Move constructor
+    AudioPlayer(AudioPlayer&& other) noexcept
+      : m_engine(other.m_engine),
+        m_sound(std::move(other.m_sound)),
+        m_currentFile(std::move(other.m_currentFile)),
+        m_startTimeMs(other.m_startTimeMs),
+        m_endTimeMs(other.m_endTimeMs) {
+      other.m_engine = nullptr;
+    }
+
+    // Move assignment
+    AudioPlayer& operator=(AudioPlayer&& other) noexcept {
+      if (this != &other) {
+        destroy();
+        m_engine = other.m_engine;
+        m_sound = std::move(other.m_sound);
+        m_currentFile = std::move(other.m_currentFile);
+        m_startTimeMs = other.m_startTimeMs;
+        m_endTimeMs = other.m_endTimeMs;
+
+        // Reset moved-from object
+        other.m_engine = nullptr;
+      }
+      return *this;
+    }
+
+    ~AudioPlayer() {
+      destroy();
+    }
+
+  public:
+    // Load / Change sound
+    bool load(const std::string& filepath) {
+      if (!m_engine) return false;
+
+      destroy();
+
+      auto newSound = std::make_unique<ma_sound>();
+
+      ma_result result = ma_sound_init_from_file(
+        m_engine,
+        filepath.c_str(),
+        MA_SOUND_FLAG_STREAM,
+        nullptr,
+        nullptr,
+        newSound.get()
+      );
+
+      if (result != MA_SUCCESS) {
+        return false;
+      }
+
+      m_sound = std::move(newSound);
+      m_currentFile = filepath;
+
+      return true;
+    }
+
+  public:
+    // Playback controls
+    void play() {
+      if (!isLoaded()) return;
+      relativeSeek(0);
+      ma_sound_start(m_sound.get());
+    }
+
+    void pause() {
+      if (!isLoaded()) return;
+      ma_sound_stop(m_sound.get());
+    }
+
+    void resume() {
+      if (!isLoaded()) return;
+      ma_sound_start(m_sound.get());
+    }
+
+    void stop() {
+      if (!isLoaded()) return;
+      ma_sound_stop(m_sound.get());
+      relativeSeek(0);
+    }
+
+  public:
+    // Volume
+    void setVolume(float volume) {
+      if (!isLoaded()) return;
+      volume = std::clamp(volume, 0.0f, 1.0f);
+      ma_sound_set_volume(m_sound.get(), volume);
+    }
+
+    float getVolume() const {
+      return isLoaded() ? ma_sound_get_volume(m_sound.get()) : 0.0f;
+    }
+  public:
+    // Speed
+    void setSpeed(float speed) {
+      if (!isLoaded()) return;
+      speed = std::max(speed, 0.01f);
+      ma_sound_set_pitch(m_sound.get(), speed);
+    }
+
+    float getSpeed() const {
+      return isLoaded() ? ma_sound_get_pitch(m_sound.get()) : 1.0f;
+    }
+
+  public:
+    // Time controls
+    bool absoluteSeek(int absoluteMilliseconds) const {
+      if (!isLoaded()) return false;
+      int absoluteMs = absoluteMilliseconds;
+      float absoluteSeconds = static_cast<float>(absoluteMs) / 1000.0f;
+      ma_uint64 targetFrame = static_cast<ma_uint64>(absoluteSeconds * ma_engine_get_sample_rate(m_engine));
+      return ma_sound_seek_to_pcm_frame(m_sound.get(), targetFrame) == MA_SUCCESS;
+    }
+
+    bool relativeSeek(int relativeMilliseconds) const {
+      if (!isLoaded()) return false;
+      int absoluteMs = std::clamp(m_startTimeMs.value_or(0) + relativeMilliseconds, m_startTimeMs.value_or(0), m_endTimeMs.value_or(getAbsoluteDuration()));
+      return absoluteSeek(absoluteMs);
+    }
+
+    int getCurrentRelativeTime() const {
+      if (!isLoaded()) return 0;
+      float cursorSeconds = 0.0f;
+      int absoluteTimeMs = ma_sound_get_cursor_in_seconds(m_sound.get(), &cursorSeconds) == MA_SUCCESS ? cursorSeconds * 1000.0 : 0.0;
+      int relativeTimeMs = absoluteTimeMs - m_startTimeMs.value_or(0);
+      return relativeTimeMs;
+    }
+
+    int getCurrentAbsoluteTime() const {
+      if (!isLoaded()) return 0;
+      float cursorSeconds = 0.0f;
+      int absoluteTimeMs = ma_sound_get_cursor_in_seconds(m_sound.get(), &cursorSeconds) == MA_SUCCESS ? cursorSeconds * 1000.0 : 0.0;
+      return absoluteTimeMs;
+    }
+
+    int getRelativeDuration() const {
+      if (!isLoaded()) return 0;
+      float absoluteLengthSeconds = 0.0f;
+      if (ma_sound_get_length_in_seconds(m_sound.get(), &absoluteLengthSeconds) == MA_SUCCESS) {
+        int absoluteLengthMs = absoluteLengthSeconds * 1000.0;
+        int relativeLengthMs = m_endTimeMs.value_or(absoluteLengthMs) - m_startTimeMs.value_or(0);
+        return relativeLengthMs;
+      }
+      return 0;
+    }
+
+    int getAbsoluteDuration() const {
+      if (!isLoaded()) return 0;
+      float absoluteLengthSeconds = 0.0f;
+      if (ma_sound_get_length_in_seconds(m_sound.get(), &absoluteLengthSeconds) == MA_SUCCESS) {
+        int absoluteLengthMs = absoluteLengthSeconds * 1000.0;
+        return absoluteLengthMs;
+      }
+      return 0;
+    }
+
+    void setRange(std::optional<int> startMs = std::nullopt, std::optional<int> endMs = std::nullopt) {
+      int newStartMs = startMs.has_value()
+        ? std::clamp(startMs.value(), 0, getAbsoluteDuration())
+        : m_startTimeMs.value_or(0)
+      ;
+      int newEndMs = endMs.has_value()
+        ? std::clamp(endMs.value(), 0, getAbsoluteDuration())
+        : m_endTimeMs.value_or(getAbsoluteDuration())
+      ;
+      if (newStartMs > newEndMs) {
+        newStartMs = newEndMs;
+      }
+      if (newEndMs < newStartMs) {
+        newEndMs = newStartMs;
+      }
+      m_startTimeMs = newStartMs;
+      m_endTimeMs = newEndMs;
+      relativeSeek(0);
+    }
+
+    void clearRange() {
+      m_startTimeMs = std::nullopt;
+      m_endTimeMs = std::nullopt;
+    }
+
+  public:
+    // State
+    bool isLoaded() const {
+      return m_sound != nullptr;
+    }
+
+    bool isPlaying() const {
+      return isLoaded() && ma_sound_is_playing(m_sound.get()) == MA_TRUE;
+    }
+
+    // this is called periodically by NodeJS to stop the sound as soon as this returns true
+    // see in this file: GetSoundStatus
+    // see in NodeJS: untilFinished Promise
+    bool shouldStop() const {
+      return isLoaded()
+        && (
+          ma_sound_at_end(m_sound.get()) == MA_TRUE // when the sound cursor reaches the end of the file
+          || getCurrentRelativeTime() >= getRelativeDuration() // when the sound cursor reaches or goes beyond m_endTimeMs, which can be lower than the end of the file, hence this check
+        )
+      ;
+    }
+
+    const std::string& getCurrentFile() const {
+      return m_currentFile;
+    }
+
+  private:
+    void destroy() {
+      if (m_sound) {
+        ma_sound_uninit(m_sound.get());
+        m_sound.reset();
+      }
+      m_currentFile.clear();
+    }
+
+  private:
+    ma_engine* m_engine = nullptr;
+    std::unique_ptr<ma_sound> m_sound;
+    std::string m_currentFile;
+    std::optional<int> m_startTimeMs = std::nullopt;
+    std::optional<int> m_endTimeMs = std::nullopt;
+};
+
+class AudioManager {
+  public:
+    AudioManager() {
+      if (ma_engine_init(nullptr, &m_engine) != MA_SUCCESS) {
+        throw std::runtime_error("Failed to initialize audio engine.");
+      }
+    }
+
+    ~AudioManager() {
+      m_sounds.clear();
+      ma_engine_uninit(&m_engine);
+    }
+
+    AudioManager(const AudioManager&) = delete;
+    AudioManager& operator=(const AudioManager&) = delete;
+
+  public:
+    std::string load(const std::string& path) {
+      std::string soundId = "sound_" + std::to_string(m_nextSoundId++);
+      auto audioPlayer = std::make_unique<AudioPlayer>(&m_engine);
+
+      if (!audioPlayer->load(path)) {
+        throw std::runtime_error("Failed to load audio file: " + path);
+      }
+
+      m_sounds.emplace(soundId, std::move(audioPlayer));
+      return soundId;
+    }
+
+    AudioPlayer* get(const std::string& id) {
+      auto it = m_sounds.find(id);
+      return it != m_sounds.end() ? it->second.get() : nullptr;
+    }
+
+    const AudioPlayer* get(const std::string& id) const {
+      auto it = m_sounds.find(id);
+      return it != m_sounds.end() ? it->second.get() : nullptr;
+    }
+
+    void remove(const std::string& id) {
+      m_sounds.erase(id);
+    }
+
+  private:
+    ma_engine m_engine{};
+    std::unordered_map<std::string, std::unique_ptr<AudioPlayer>> m_sounds;
+    size_t m_nextSoundId = 0;
+};
+
 template <typename T>
 class PromiseWorker : public Napi::AsyncWorker {
   public:
@@ -202,6 +485,10 @@ NOTIFYICONDATAW nid = { 0 };
 HMENU hMenu;
 std::map<int, std::function<void()>> trayIconMenuItemsCallbacks;
 std::map<int, Napi::ThreadSafeFunction> trayIconMenuItemsJsCallbacks;
+
+// Audio manager
+AudioManager* audioManager = nullptr;
+
 
 // =============================================================================
 // ============================= UTILITY FUNCTIONS =============================
@@ -286,9 +573,20 @@ std::string ToLower(const std::string& text) {
   return result;
 }
 
-uint64_t Now() {
-  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+AudioManager* GetAudioManager() {
+  if (audioManager == nullptr) {
+    audioManager = new AudioManager();
+  }
+  return audioManager;
 }
+
+void CloseAudioManager() {
+  if (audioManager != nullptr) {
+    delete audioManager;
+    audioManager = nullptr;
+  }
+}
+
 
 // =============================================================================
 // ============================= RESOURCE CLEANUP ==============================
@@ -346,6 +644,7 @@ void CleanAll() {
       trayIconCondition.wait(lock, [] { return !trayIconRunning.load(); });
     }
   }
+  CloseAudioManager();
 }
 
 Napi::Value CleanupResources(const Napi::CallbackInfo& info) {
@@ -3488,11 +3787,16 @@ Napi::Value StopWindowEventListener(const Napi::CallbackInfo& info) {
 // ============================= SOUND FUNCTIONS ==============================
 // =============================================================================
 
-void StopSound(const std::wstring& soundId) {
-  std::wstring command = L"stop " + soundId;
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
-  command = L"close " + soundId;
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
+void StopSound(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return;
+  }
+
+  audioPlayer->stop();
+  audioManager->remove(soundId);
 }
 
 Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
@@ -3507,14 +3811,20 @@ Napi::Value StopSoundWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Stop the sound
-  StopSound(soundId);
+  StopSound(ConvertToUTF8(soundId));
 
   return env.Undefined();
 }
 
-void PauseSound(const std::wstring& soundId) {
-  std::wstring command = L"pause " + soundId;
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
+void PauseSound(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return;
+  }
+
+  audioPlayer->pause();
 }
 
 Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
@@ -3529,14 +3839,20 @@ Napi::Value PauseSoundWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Pause the sound
-  PauseSound(soundId);
+  PauseSound(ConvertToUTF8(soundId));
 
   return env.Undefined();
 }
 
-void ResumeSound(const std::wstring& soundId) {
-  std::wstring command = L"resume " + soundId;
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
+void ResumeSound(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return;
+  }
+
+  audioPlayer->resume();
 }
 
 Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
@@ -3551,16 +3867,25 @@ Napi::Value ResumeSoundWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Resume the sound
-  ResumeSound(soundId);
+  ResumeSound(ConvertToUTF8(soundId));
 
   return env.Undefined();
 }
 
-std::wstring GetSoundStatus(const std::wstring& soundId) {
-  std::wstring command = L"status " + soundId + L" mode";
-  wchar_t status[256];
-  mciSendStringW(command.c_str(), status, sizeof(status) / sizeof(wchar_t), NULL);
-  return status;
+std::string GetSoundStatus(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return "closed";
+  }
+  if (audioPlayer->shouldStop()) {
+    return "stopped";
+  }
+  if (audioPlayer->isPlaying()) {
+    return "playing";
+  }
+  return "paused";
 }
 
 Napi::Value GetSoundStatusWrapper(const Napi::CallbackInfo& info) {
@@ -3575,16 +3900,20 @@ Napi::Value GetSoundStatusWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the status of the sound
-  std::wstring status = GetSoundStatus(soundId);
+  std::string status = GetSoundStatus(ConvertToUTF8(soundId));
 
-  return Napi::String::New(env, ConvertToUTF8(status));
+  return Napi::String::New(env, status);
 }
 
-int GetSoundTrackTime(const std::wstring& soundId) {
-  std::wstring command = L"status " + soundId + L" position";
-  wchar_t time[256];
-  mciSendStringW(command.c_str(), time, sizeof(time) / sizeof(wchar_t), NULL);
-  return std::stoi(time);
+int GetSoundTrackTime(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return 0;
+  }
+
+  return audioPlayer->getCurrentRelativeTime();
 }
 
 Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
@@ -3599,20 +3928,20 @@ Napi::Value GetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the track time of the sound
-  int trackTime = GetSoundTrackTime(soundId);
+  int trackTime = GetSoundTrackTime(ConvertToUTF8(soundId));
 
   return Napi::Number::New(env, trackTime);
 }
 
-void setSoundTrackTime(const std::wstring& soundId, int trackTime) {
-  std::wstring previousStatus = GetSoundStatus(soundId);
-  std::wstring command = L"seek " + soundId + L" to " + std::to_wstring(trackTime);
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
-  command = L"play " + soundId;
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
-  if (previousStatus == L"paused") {
-    PauseSound(soundId);
+void setSoundTrackTime(const std::string& soundId, int trackTime) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return;
   }
+
+  audioPlayer->relativeSeek(trackTime);
 }
 
 Napi::Value SetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
@@ -3634,69 +3963,86 @@ Napi::Value SetSoundTrackTimeWrapper(const Napi::CallbackInfo& info) {
   int trackTime = info[1].As<Napi::Number>().Int32Value();
 
   // Set the track time of the sound
-  setSoundTrackTime(soundId, trackTime);
+  setSoundTrackTime(ConvertToUTF8(soundId), trackTime);
 
   return env.Undefined();
 }
 
-float getSoundVolume() {
-  // Get the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
-  DWORD volume;
-  waveOutGetVolume(0, &volume);
+float getSoundVolume(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
 
-  // Extract left and right channel volume (0xFFFF max)
-  float leftVolume = (volume & 0xFFFF) / 65535.0f;
-  float rightVolume = ((volume >> 16) & 0xFFFF) / 65535.0f;
-  if (rightVolume == 0.0f) return leftVolume;
-  if (leftVolume == 0.0f) return rightVolume;
-  return (leftVolume + rightVolume) / 2.0f;
+  if (audioPlayer == nullptr) {
+    return 0.0f;
+  }
+
+  return audioPlayer->getVolume();
 }
 
 Napi::Value GetSoundVolumeWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
+
   // Get the volume of the sound
-  float volume = getSoundVolume();
+  float volume = getSoundVolume(ConvertToUTF8(soundId));
 
   return Napi::Number::New(env, volume);
 }
 
-void setSoundVolume(float volume) {
-  // Clamp volume between 0.0 and 1.0
-  if (volume < 0.0f) volume = 0.0f;
-  if (volume > 1.0f) volume = 1.0f;
+void setSoundVolume(const std::string& soundId, float volume) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
 
-  // Set the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
-  DWORD dwVolume = static_cast<DWORD>(volume * 0xFFFF);
-  dwVolume = (dwVolume & 0xFFFF) | (dwVolume << 16); // Set both left and right channels
-  waveOutSetVolume(0, dwVolume);
+  if (audioPlayer == nullptr) {
+    return;
+  }
+
+  // Clamp volume between 0.0 and 1.0
+  volume = std::clamp(volume, 0.0f, 1.0f);
+
+  audioPlayer->setVolume(volume);
 }
 
 Napi::Value SetSoundVolumeWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
-  // Ensure the first argument is a number
-  if (info.Length() < 1 || !info[0].IsNumber()) {
-    Napi::TypeError::New(env, "First argument must be a number (volume between 0.0 and 1.0)").ThrowAsJavaScriptException();
+  // Ensure the first argument is a string
+  if (info.Length() < 1 || !info[0].IsString()) {
+    Napi::TypeError::New(env, "First argument must be a string (sound id)").ThrowAsJavaScriptException();
     return env.Null();
   }
-  float volume = info[0].As<Napi::Number>().FloatValue();
+  std::u16string u16SoundId = info[0].As<Napi::String>().Utf16Value();
+  std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
+
+  // Ensure the second argument is a number
+  if (info.Length() < 2 || !info[1].IsNumber()) {
+    Napi::TypeError::New(env, "Second argument must be a number (volume between 0.0 and 1.0)").ThrowAsJavaScriptException();
+    return env.Null();
+  }
+  float volume = info[1].As<Napi::Number>().FloatValue();
 
   // Set the volume of the sound
-  setSoundVolume(volume);
+  setSoundVolume(ConvertToUTF8(soundId), volume);
 
   return env.Undefined();
 }
 
-float GetSoundSpeed(const std::wstring& soundId) {
-  // Get the speed of the sound
-  wchar_t buffer[128];
-  std::wstring command = L"status " + soundId + L" speed";
-  if (mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL) != 0) {
-    // Some audio formats may not support speed, then only default speed is allowed
+float GetSoundSpeed(const std::string& soundId) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
     return 1.0f;
   }
-  return std::stoi(buffer) / 1000.0f;
+
+  return audioPlayer->getSpeed();
 }
 
 Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
@@ -3711,15 +4057,23 @@ Napi::Value GetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
   std::wstring soundId = std::wstring(u16SoundId.begin(), u16SoundId.end());
 
   // Get the speed of the sound
-  float speed = GetSoundSpeed(soundId);
+  float speed = GetSoundSpeed(ConvertToUTF8(soundId));
 
   return Napi::Number::New(env, speed);
 }
 
-void SetSoundSpeed(const std::wstring& soundId, float speed) {
-  // Set the speed of the sound
-  std::wstring command = L"set " + soundId + L" speed " + std::to_wstring(static_cast<int>(std::round(speed * 1000)));
-  mciSendStringW(command.c_str(), NULL, 0, NULL);
+void SetSoundSpeed(const std::string& soundId, float speed) {
+  AudioManager* audioManager = GetAudioManager();
+  AudioPlayer* audioPlayer = audioManager->get(soundId);
+
+  if (audioPlayer == nullptr) {
+    return;
+  }
+
+  // Clamp speed between 0.0 and 4.0
+  speed = std::clamp(speed, 0.0f, 4.0f);
+
+  audioPlayer->setSpeed(speed);
 }
 
 Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
@@ -3736,12 +4090,18 @@ Napi::Value SetSoundSpeedWrapper(const Napi::CallbackInfo& info) {
   float speed = info[1].As<Napi::Number>().FloatValue();
 
   // Set the speed of the sound
-  SetSoundSpeed(soundId, speed);
+  SetSoundSpeed(ConvertToUTF8(soundId), speed);
 
   return env.Undefined();
 }
 
-SoundInfo PlaySound(const std::wstring& filePath, float volume = 1.0f, float speed = 1.0f, int startTime = -1, int endTime = -1) {
+SoundInfo PlaySound(
+  const std::string& filePath,
+  float volume = 1.0f,
+  float speed = 1.0f,
+  int startTime = -1,
+  int endTime = -1
+) {
   // Clamp volume between 0.0 and 1.0
   if (volume < 0.0f) volume = 0.0f;
   if (volume > 1.0f) volume = 1.0f;
@@ -3750,44 +4110,39 @@ SoundInfo PlaySound(const std::wstring& filePath, float volume = 1.0f, float spe
   if (speed < 0.0f) speed = 0.0f;
   if (speed > 4.0f) speed = 4.0f;
 
-  // Generate a time-based unique ID for the sound instance
-  std::wstring soundId = L"sound_" + std::to_wstring(Now());
+  // Make sure the audio manager is initialized
+  AudioManager* audioManager = GetAudioManager();
 
+  // Load the audio file
+  std::string soundId = audioManager->load(filePath);
 
-  // Open the audio file
-  std::wstring command = L"open \"" + filePath + L"\" alias " + soundId;
-  if (mciSendStringW(command.c_str(), NULL, 0, NULL) != 0) {
-    return {};
-  }
+  // Get the sound player
+  AudioPlayer* sound = audioManager->get(soundId);
 
-  // Get the total length of the audio
-  wchar_t buffer[128];
-  command = L"status " + soundId + L" length";
-  mciSendStringW(command.c_str(), buffer, sizeof(buffer) / sizeof(wchar_t), NULL);
-  int duration = std::stoi(buffer);
+  // Get sound duration
+  int duration = sound->getAbsoluteDuration();
 
   // Clamp start and end times
   if (endTime < 0 || endTime > duration) endTime = duration;
   if (startTime < 0) startTime = 0;
   if (startTime > endTime) startTime = endTime;
 
-  // Set the volume (Windows volume is from 0x00000000 to 0xFFFFFFFF)
-  DWORD dwVolume = static_cast<DWORD>(volume * 0xFFFF);
-  dwVolume = (dwVolume & 0xFFFF) | (dwVolume << 16); // Set both left and right channels
-  waveOutSetVolume(0, dwVolume);
+  // Set time range
+  sound->setRange(startTime, endTime);
+
+  // Update duration based on start and end times
+  duration = sound->getRelativeDuration();
+
+  // Set the volume
+  sound->setVolume(volume);
 
   // Set the playback speed
-  SetSoundSpeed(soundId, speed);
+  sound->setSpeed(speed);
 
   // Play the sound asynchronously
-  command = L"play " + soundId + L" from " + std::to_wstring(startTime) + L" to " + std::to_wstring(endTime);
-  if (mciSendStringW(command.c_str(), NULL, 0, NULL) != 0) {
-    command = L"close " + soundId;
-    mciSendStringW(command.c_str(), NULL, 0, NULL);
-    return {};
-  }
+  sound->play();
 
-  SoundInfo soundInfo = {soundId, static_cast<unsigned int>(endTime - startTime)};
+  SoundInfo soundInfo = {std::wstring(soundId.begin(), soundId.end()), static_cast<unsigned int>(endTime - startTime)};
   return soundInfo;
 }
 
@@ -3833,7 +4188,7 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
   int endTime = (info.Length() >= 5 && !info[4].IsUndefined()) ? info[4].As<Napi::Number>().Int32Value() : -1;
 
   // Play the sound asynchronously
-  SoundInfo soundInfo = PlaySound(filePath, volume, speed, startTime, endTime);
+  SoundInfo soundInfo = PlaySound(ConvertToUTF8(filePath), volume, speed, startTime, endTime);
   if (soundInfo.id.empty()) {
     Napi::TypeError::New(env, "Error playing sound: " + ConvertToUTF8(filePath)).ThrowAsJavaScriptException();
     return env.Null();

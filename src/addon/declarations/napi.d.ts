@@ -57,8 +57,8 @@ declare module "@napi/actionify" {
     getSoundStatus: (soundId: string) => "playing" | "paused" | "stopped";
     getSoundTrackTime: (soundId: string) => number;
     setSoundTrackTime: (soundId: string, timestamp: number) => void;
-    getSoundVolume: () => number;
-    setSoundVolume: (volume: number) => void;
+    getSoundVolume: (soundId: string) => number;
+    setSoundVolume: (soundId: string, volume: number) => void;
     getSoundSpeed: (soundId: string) => number;
     setSoundSpeed: (soundId: string, speed: number) => void;
     textToSpeech: (text: string, volume: number, speed: number, voice: string) => Promise<void>;
