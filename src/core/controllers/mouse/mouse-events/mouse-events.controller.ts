@@ -1,10 +1,12 @@
 import {
+  startInputEventListener,
   stopInputEventListener,
   suppressInputEvents,
   unsuppressInputEvents,
 } from "../../../../addon";
 import { MouseListenerScopeBuilder } from "../../../../core/builders";
-import { InputEventService } from "../../../../core/services";
+import { LifecycleController } from "../../../../core/controllers";
+import { InputEventService, OperatingSystemService } from "../../../../core/services";
 import type {
   MouseAction,
   MouseInput,
@@ -168,17 +170,46 @@ export class MouseEventsController {
       const state = parts[1] as MouseState | undefined;
       return { input, state };
     });
-    const mappedInputsStates: Array<[number, Array<number>]> = [];
+    const mouseMappedInputsStates: Array<[number, Array<number>]> = [];
     for (const mouseAction of mouseActions) {
       let mappedInput = -1;
-      switch (mouseAction.input) {
-        case "move": mappedInput = 0; break;
-        case "left": mappedInput = 1; break;
-        case "right": mappedInput = 2; break;
-        case "middle": mappedInput = 3; break;
-        case "wheel": mappedInput = 4; break;
-        case "extraButton1": mappedInput = 5; break;
-        case "extraButton2": mappedInput = 6; break;
+      switch (OperatingSystemService.platform) {
+        case "win32":{
+          switch (mouseAction.input) {
+            case "move": mappedInput = 0; break;
+            case "left": mappedInput = 1; break;
+            case "right": mappedInput = 2; break;
+            case "middle": mappedInput = 3; break;
+            case "wheel": mappedInput = 4; break;
+            case "extraButton1": mappedInput = 5; break;
+            case "extraButton2": mappedInput = 6; break;
+            default: break;
+          }
+          break;
+        }
+        case "linux": {
+          switch (mouseAction.input) {
+            case "move": mappedInput = 0; break;
+            case "left": mappedInput = 1; break;
+            case "middle": mappedInput = 2; break;
+            case "right": mappedInput = 3; break;
+            case "wheel": {
+              switch (mouseAction.state) {
+                case "down": mappedInput = 5; break;
+                case "up": mappedInput = 4; break;
+                default:
+                  mouseMappedInputsStates.push([4, [0, 1, 2]]);
+                  mappedInput = 5; // will be added to mouseMappedInputsStates the same way in the switch state below
+                  break;
+              }
+              break;
+            }
+            case "extraButton1": mappedInput = 8; break;
+            case "extraButton2": mappedInput = 9; break;
+            default: break;
+          }
+          break;
+        }
         default: break;
       }
       const mappedStates = [];
@@ -188,9 +219,33 @@ export class MouseEventsController {
         case "neutral": mappedStates.push(2); break;
         default: mappedStates.push(0, 1, 2); break;
       }
-      mappedInputsStates.push([mappedInput, mappedStates]);
+      mouseMappedInputsStates.push([mappedInput, mappedStates]);
     }
-    suppressInputEvents(0, mappedInputsStates);
+    if (mouseMappedInputsStates.length > 0) {
+      // Update global mouse suppressed input states
+      for (const mouseMappedInputStates of mouseMappedInputsStates) {
+        const mappedInput = mouseMappedInputStates[0];
+        const mappedStates = mouseMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.mouseSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          InputEventService.mouseSuppressedInputStates.set(mappedInput, new Set(mappedStates));
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            if (!existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.add(mappedState);
+            }
+          }
+        }
+      }
+      // Start input listener if not already running
+      if (InputEventService.shouldStartMainListener) {
+        LifecycleController.cleanBeforeExit();
+        startInputEventListener(InputEventService.mainListener);
+      }
+      // Suppress mouse events
+      suppressInputEvents(0, mouseMappedInputsStates);
+    }
   }
 
   /**
@@ -219,17 +274,46 @@ export class MouseEventsController {
       const state = parts[1] as MouseState | undefined;
       return { input, state };
     });
-    const mappedInputsStates: Array<[number, Array<number>]> = [];
+    const mouseMappedInputsStates: Array<[number, Array<number>]> = [];
     for (const mouseAction of mouseActions) {
       let mappedInput = -1;
-      switch (mouseAction.input) {
-        case "move": mappedInput = 0; break;
-        case "left": mappedInput = 1; break;
-        case "right": mappedInput = 2; break;
-        case "middle": mappedInput = 3; break;
-        case "wheel": mappedInput = 4; break;
-        case "extraButton1": mappedInput = 5; break;
-        case "extraButton2": mappedInput = 6; break;
+      switch (OperatingSystemService.platform) {
+        case "win32":{
+          switch (mouseAction.input) {
+            case "move": mappedInput = 0; break;
+            case "left": mappedInput = 1; break;
+            case "right": mappedInput = 2; break;
+            case "middle": mappedInput = 3; break;
+            case "wheel": mappedInput = 4; break;
+            case "extraButton1": mappedInput = 5; break;
+            case "extraButton2": mappedInput = 6; break;
+            default: break;
+          }
+          break;
+        }
+        case "linux": {
+          switch (mouseAction.input) {
+            case "move": mappedInput = 0; break;
+            case "left": mappedInput = 1; break;
+            case "middle": mappedInput = 2; break;
+            case "right": mappedInput = 3; break;
+            case "wheel": {
+              switch (mouseAction.state) {
+                case "down": mappedInput = 5; break;
+                case "up": mappedInput = 4; break;
+                default:
+                  mouseMappedInputsStates.push([4, [0, 1, 2]]);
+                  mappedInput = 5; // will be added to mouseMappedInputsStates the same way in the switch state below
+                  break;
+              }
+              break;
+            }
+            case "extraButton1": mappedInput = 8; break;
+            case "extraButton2": mappedInput = 9; break;
+            default: break;
+          }
+          break;
+        }
         default: break;
       }
       const mappedStates = [];
@@ -239,9 +323,37 @@ export class MouseEventsController {
         case "neutral": mappedStates.push(2); break;
         default: mappedStates.push(0, 1, 2); break;
       }
-      mappedInputsStates.push([mappedInput, mappedStates]);
+      mouseMappedInputsStates.push([mappedInput, mappedStates]);
     }
-    unsuppressInputEvents(0, mappedInputsStates);
+    if (mouseMappedInputsStates.length > 0) {
+      // Update global mouse suppressed input states
+      for (const mouseMappedInputStates of mouseMappedInputsStates) {
+        const mappedInput = mouseMappedInputStates[0];
+        const mappedStates = mouseMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.mouseSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          // The requested input was not suppressed, nothing to do
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            // remove mappedState if found in existingMappedInputStates
+            if (existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.delete(mappedState);
+            }
+          }
+          if (existingSuppressedInputStates.size === 0) {
+            // No more suppressed input states for the input, remove it from the map
+            InputEventService.mouseSuppressedInputStates.delete(mappedInput);
+          }
+        }
+      }
+      // Unsuppress mouse events
+      unsuppressInputEvents(0, mouseMappedInputsStates);
+      // Stop input listener if now unused
+      if (InputEventService.shouldStopMainListener) {
+        stopInputEventListener();
+      }
+    }
   }
 
   /**

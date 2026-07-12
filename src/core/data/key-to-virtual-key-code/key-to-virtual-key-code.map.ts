@@ -1,4 +1,10 @@
-export const KeyToVirtualKeyCodeMap = {
+import type { Key } from "../../types";
+
+/**
+ * @description Map of Actionify keys to Windows Virtual KeyCodes
+ * @see https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+ */
+export const KeyToVirtualKeyCodeMap: Record<Key, number> = {
   "backspace": 0x08,
   "\b": 0x08,
   "bspace": 0x08,

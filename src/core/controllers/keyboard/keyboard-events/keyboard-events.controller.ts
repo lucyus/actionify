@@ -1,9 +1,11 @@
 import {
+  startInputEventListener,
   stopInputEventListener,
   suppressInputEvents,
   unsuppressInputEvents,
 } from "../../../../addon";
 import { KeyboardListenerScopeBuilder } from "../../../../core/builders";
+import { LifecycleController } from "../../../../core/controllers";
 import { InputEventService, KeyFormatter, KeyMapper } from "../../../../core/services";
 import type {
   CaseInsensitiveKey,
@@ -165,7 +167,7 @@ export class KeyboardEventsController {
       const state = parts[1] as KeyState | undefined;
       return { input, state };
     });
-    const mappedInputsStates: Array<[number, Array<number>]> = [];
+    const keyboardMappedInputsStates: Array<[number, Array<number>]> = [];
     for (const keyboardAction of keyboardActions) {
       const mappedInput = keyboardAction.input;
       const mappedStates = [];
@@ -174,9 +176,33 @@ export class KeyboardEventsController {
         case "up": mappedStates.push(1); break;
         default: mappedStates.push(0, 1); break;
       }
-      mappedInputsStates.push([mappedInput, mappedStates]);
+      keyboardMappedInputsStates.push([mappedInput, mappedStates]);
     }
-    suppressInputEvents(1, mappedInputsStates);
+    if (keyboardMappedInputsStates.length > 0) {
+      // Update global keyboard suppressed input states
+      for (const keyboardMappedInputStates of keyboardMappedInputsStates) {
+        const mappedInput = keyboardMappedInputStates[0];
+        const mappedStates = keyboardMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.keyboardSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          InputEventService.keyboardSuppressedInputStates.set(mappedInput, new Set(mappedStates));
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            if (!existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.add(mappedState);
+            }
+          }
+        }
+      }
+      // Start input listener if not already running
+      if (InputEventService.shouldStartMainListener) {
+        LifecycleController.cleanBeforeExit();
+        startInputEventListener(InputEventService.mainListener);
+      }
+      // Suppress keyboard events
+      suppressInputEvents(1, keyboardMappedInputsStates);
+    }
   }
 
   /**
@@ -202,7 +228,7 @@ export class KeyboardEventsController {
       const state = parts[1] as KeyState | undefined;
       return { input, state };
     });
-    const mappedInputsStates: Array<[number, Array<number>]> = [];
+    const keyboardMappedInputsStates: Array<[number, Array<number>]> = [];
     for (const keyboardAction of keyboardActions) {
       const mappedInput = keyboardAction.input;
       const mappedStates = [];
@@ -211,9 +237,37 @@ export class KeyboardEventsController {
         case "up": mappedStates.push(1); break;
         default: mappedStates.push(0, 1); break;
       }
-      mappedInputsStates.push([mappedInput, mappedStates]);
+      keyboardMappedInputsStates.push([mappedInput, mappedStates]);
     }
-    unsuppressInputEvents(1, mappedInputsStates);
+    if (keyboardMappedInputsStates.length > 0) {
+      // Update global keyboard suppressed input states
+      for (const keyboardMappedInputStates of keyboardMappedInputsStates) {
+        const mappedInput = keyboardMappedInputStates[0];
+        const mappedStates = keyboardMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.keyboardSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          // The requested input was not suppressed, nothing to do
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            // remove mappedState if found in existingMappedInputStates
+            if (existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.delete(mappedState);
+            }
+          }
+          if (existingSuppressedInputStates.size === 0) {
+            // No more suppressed input states for the input, remove it from the map
+            InputEventService.keyboardSuppressedInputStates.delete(mappedInput);
+          }
+        }
+      }
+      // Unsuppress keyboard events
+      unsuppressInputEvents(1, keyboardMappedInputsStates);
+      // Stop input listener if now unused
+      if (InputEventService.shouldStopMainListener) {
+        stopInputEventListener();
+      }
+    }
   }
 
   /**

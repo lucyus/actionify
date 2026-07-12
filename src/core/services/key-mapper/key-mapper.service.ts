@@ -1,5 +1,5 @@
-import { KeyToVirtualKeyCodeMap } from "../../../core/data";
-import { KeyFormatter } from "../../../core/services";
+import { KeyToKeySymCodeMap, KeyToVirtualKeyCodeMap } from "../../../core/data";
+import { KeyFormatter, OperatingSystemService } from "../../../core/services";
 import type { CaseInsensitiveKey, KeyCode } from "../../../core/types";
 
 export class KeyMapper {
@@ -8,7 +8,14 @@ export class KeyMapper {
 
   static toKeyCode<T extends string>(key: CaseInsensitiveKey<T>): KeyCode {
     const formattedKey = KeyFormatter.format(key);
-    return KeyToVirtualKeyCodeMap[formattedKey];
+    switch (OperatingSystemService.platform) {
+      case "win32":
+        return KeyToVirtualKeyCodeMap[formattedKey];
+      case "linux":
+        return KeyToKeySymCodeMap[formattedKey];
+      default:
+        throw new Error(`Unsupported platform: ${OperatingSystemService.platform}`);
+    }
   }
 
 }

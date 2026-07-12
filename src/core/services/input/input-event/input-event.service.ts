@@ -19,8 +19,10 @@ export class InputEventService {
   static #inputRecorders: Array<InputRecorderScopeController> = [];
   static #keyboardListeners: Array<KeyboardListenerScopeController> = [];
   static #keyboardRecorders: Array<KeyboardRecorderScopeController> = [];
+  static #keyboardSuppressedInputStates: Map<number, Set<number>> = new Map();
   static #mouseListeners: Array<MouseListenerScopeController> = [];
   static #mouseRecorders: Array<MouseRecorderScopeController> = [];
+  static #mouseSuppressedInputStates: Map<number, Set<number>> = new Map();
 
   protected constructor() { }
 
@@ -465,12 +467,20 @@ export class InputEventService {
     return InputEventService.#keyboardRecorders;
   }
 
+  public static get keyboardSuppressedInputStates(): Map<number, Set<number>> {
+    return InputEventService.#keyboardSuppressedInputStates;
+  }
+
   public static get mouseListeners(): Array<MouseListenerScopeController> {
     return InputEventService.#mouseListeners;
   }
 
   public static get mouseRecorders(): Array<MouseRecorderScopeController> {
     return InputEventService.#mouseRecorders;
+  }
+
+  public static get mouseSuppressedInputStates(): Map<number, Set<number>> {
+    return InputEventService.#mouseSuppressedInputStates;
   }
 
   /**
@@ -485,8 +495,10 @@ export class InputEventService {
       InputEventService.keyboardListeners.length +
       InputEventService.keyboardRecorders.length +
       InputEventService.mouseListeners.length +
-      InputEventService.mouseRecorders.length
-    ) === 1;
+      InputEventService.mouseRecorders.length +
+      [...InputEventService.#keyboardSuppressedInputStates.entries()].reduce((accumulator, currentValue) => accumulator + (currentValue[1]?.size || 0), 0) +
+      [...InputEventService.#mouseSuppressedInputStates.entries()].reduce((accumulator, currentValue) => accumulator + (currentValue[1]?.size || 0), 0)
+    ) > 0;
   }
 
   /**
@@ -501,7 +513,9 @@ export class InputEventService {
       InputEventService.keyboardListeners.length +
       InputEventService.keyboardRecorders.length +
       InputEventService.mouseListeners.length +
-      InputEventService.mouseRecorders.length
+      InputEventService.mouseRecorders.length +
+      [...InputEventService.#keyboardSuppressedInputStates.entries()].reduce((accumulator, currentValue) => accumulator + (currentValue[1]?.size || 0), 0) +
+      [...InputEventService.#mouseSuppressedInputStates.entries()].reduce((accumulator, currentValue) => accumulator + (currentValue[1]?.size || 0), 0)
     ) === 0;
   }
 

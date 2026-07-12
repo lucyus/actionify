@@ -1,13 +1,16 @@
 import {
+  startInputEventListener,
   stopInputEventListener,
   suppressInputEvents,
   unsuppressInputEvents,
 } from "../../../../addon";
 import { InputListenerScopeBuilder } from "../../../../core/builders";
+import { LifecycleController } from "../../../../core/controllers";
 import {
   InputEventService,
   KeyFormatter,
-  KeyMapper
+  KeyMapper,
+  OperatingSystemService
 } from "../../../../core/services";
 import type {
   CaseInsensitiveKey,
@@ -197,14 +200,43 @@ export class InputEventsController {
     for (const inputAction of inputActions) {
       if (inputAction.type === "mouse") {
         let mappedInput = -1;
-        switch (inputAction.input) {
-          case "move": mappedInput = 0; break;
-          case "left": mappedInput = 1; break;
-          case "right": mappedInput = 2; break;
-          case "middle": mappedInput = 3; break;
-          case "wheel": mappedInput = 4; break;
-          case "extraButton1": mappedInput = 5; break;
-          case "extraButton2": mappedInput = 6; break;
+        switch (OperatingSystemService.platform) {
+          case "win32":{
+            switch (inputAction.input) {
+              case "move": mappedInput = 0; break;
+              case "left": mappedInput = 1; break;
+              case "right": mappedInput = 2; break;
+              case "middle": mappedInput = 3; break;
+              case "wheel": mappedInput = 4; break;
+              case "extraButton1": mappedInput = 5; break;
+              case "extraButton2": mappedInput = 6; break;
+              default: break;
+            }
+            break;
+          }
+          case "linux": {
+            switch (inputAction.input) {
+              case "move": mappedInput = 0; break;
+              case "left": mappedInput = 1; break;
+              case "middle": mappedInput = 2; break;
+              case "right": mappedInput = 3; break;
+              case "wheel": {
+                switch (inputAction.state) {
+                  case "down": mappedInput = 5; break;
+                  case "up": mappedInput = 4; break;
+                  default:
+                    mouseMappedInputsStates.push([4, [0, 1, 2]]);
+                    mappedInput = 5; // will be added to mouseMappedInputsStates the same way in the switch state below
+                    break;
+                }
+                break;
+              }
+              case "extraButton1": mappedInput = 8; break;
+              case "extraButton2": mappedInput = 9; break;
+              default: break;
+            }
+            break;
+          }
           default: break;
         }
         const mappedStates = [];
@@ -228,9 +260,53 @@ export class InputEventsController {
       }
     }
     if (mouseMappedInputsStates.length > 0) {
+      // Update global mouse suppressed input states
+      for (const mouseMappedInputStates of mouseMappedInputsStates) {
+        const mappedInput = mouseMappedInputStates[0];
+        const mappedStates = mouseMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.mouseSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          InputEventService.mouseSuppressedInputStates.set(mappedInput, new Set(mappedStates));
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            if (!existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.add(mappedState);
+            }
+          }
+        }
+      }
+      // Start input listener if not already running
+      if (InputEventService.shouldStartMainListener) {
+        LifecycleController.cleanBeforeExit();
+        startInputEventListener(InputEventService.mainListener);
+      }
+      // Suppress mouse events
       suppressInputEvents(0, mouseMappedInputsStates);
     }
     if (keyboardMappedInputsStates.length > 0) {
+      // Update global keyboard suppressed input states
+      for (const keyboardMappedInputStates of keyboardMappedInputsStates) {
+        const mappedInput = keyboardMappedInputStates[0];
+        const mappedStates = keyboardMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.keyboardSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          InputEventService.keyboardSuppressedInputStates.set(mappedInput, new Set(mappedStates));
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            if (!existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.add(mappedState);
+            }
+          }
+        }
+      }
+      // Start input listener if not already running
+      if (InputEventService.shouldStartMainListener) {
+        LifecycleController.cleanBeforeExit();
+        startInputEventListener(InputEventService.mainListener);
+      }
+      // Suppress keyboard events
       suppressInputEvents(1, keyboardMappedInputsStates);
     }
   }
@@ -268,14 +344,43 @@ export class InputEventsController {
     for (const inputAction of inputActions) {
       if (inputAction.type === "mouse") {
         let mappedInput = -1;
-        switch (inputAction.input) {
-          case "move": mappedInput = 0; break;
-          case "left": mappedInput = 1; break;
-          case "right": mappedInput = 2; break;
-          case "middle": mappedInput = 3; break;
-          case "wheel": mappedInput = 4; break;
-          case "extraButton1": mappedInput = 5; break;
-          case "extraButton2": mappedInput = 6; break;
+        switch (OperatingSystemService.platform) {
+          case "win32":{
+            switch (inputAction.input) {
+              case "move": mappedInput = 0; break;
+              case "left": mappedInput = 1; break;
+              case "right": mappedInput = 2; break;
+              case "middle": mappedInput = 3; break;
+              case "wheel": mappedInput = 4; break;
+              case "extraButton1": mappedInput = 5; break;
+              case "extraButton2": mappedInput = 6; break;
+              default: break;
+            }
+            break;
+          }
+          case "linux": {
+            switch (inputAction.input) {
+              case "move": mappedInput = 0; break;
+              case "left": mappedInput = 1; break;
+              case "middle": mappedInput = 2; break;
+              case "right": mappedInput = 3; break;
+              case "wheel": {
+                switch (inputAction.state) {
+                  case "down": mappedInput = 5; break;
+                  case "up": mappedInput = 4; break;
+                  default:
+                    mouseMappedInputsStates.push([4, [0, 1, 2]]);
+                    mappedInput = 5; // will be added to mouseMappedInputsStates the same way in the switch state below
+                    break;
+                }
+                break;
+              }
+              case "extraButton1": mappedInput = 8; break;
+              case "extraButton2": mappedInput = 9; break;
+              default: break;
+            }
+            break;
+          }
           default: break;
         }
         const mappedStates = [];
@@ -299,10 +404,62 @@ export class InputEventsController {
       }
     }
     if (mouseMappedInputsStates.length > 0) {
+      // Update global mouse suppressed input states
+      for (const mouseMappedInputStates of mouseMappedInputsStates) {
+        const mappedInput = mouseMappedInputStates[0];
+        const mappedStates = mouseMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.mouseSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          // The requested input was not suppressed, nothing to do
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            // remove mappedState if found in existingMappedInputStates
+            if (existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.delete(mappedState);
+            }
+          }
+          if (existingSuppressedInputStates.size === 0) {
+            // No more suppressed input states for the input, remove it from the map
+            InputEventService.mouseSuppressedInputStates.delete(mappedInput);
+          }
+        }
+      }
+      // Unsuppress mouse events
       unsuppressInputEvents(0, mouseMappedInputsStates);
+      // Stop input listener if now unused
+      if (InputEventService.shouldStopMainListener) {
+        stopInputEventListener();
+      }
     }
     if (keyboardMappedInputsStates.length > 0) {
+      // Update global keyboard suppressed input states
+      for (const keyboardMappedInputStates of keyboardMappedInputsStates) {
+        const mappedInput = keyboardMappedInputStates[0];
+        const mappedStates = keyboardMappedInputStates[1];
+        const existingSuppressedInputStates = InputEventService.keyboardSuppressedInputStates.get(mappedInput);
+        if (!existingSuppressedInputStates) {
+          // The requested input was not suppressed, nothing to do
+        }
+        else {
+          for (const mappedState of mappedStates) {
+            // remove mappedState if found in existingMappedInputStates
+            if (existingSuppressedInputStates.has(mappedState)) {
+              existingSuppressedInputStates.delete(mappedState);
+            }
+          }
+          if (existingSuppressedInputStates.size === 0) {
+            // No more suppressed input states for the input, remove it from the map
+            InputEventService.keyboardSuppressedInputStates.delete(mappedInput);
+          }
+        }
+      }
+      // Unsuppress keyboard events
       unsuppressInputEvents(1, keyboardMappedInputsStates);
+      // Stop input listener if now unused
+      if (InputEventService.shouldStopMainListener) {
+        stopInputEventListener();
+      }
     }
   }
 
