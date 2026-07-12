@@ -1,4 +1,6 @@
+import fs from "fs/promises";
 import path from "path";
+import { RepositoryHelper } from "../../../../cli/actionify/helpers";
 import { Actionify } from "../../../../core";
 import {
   findImageTemplateMatches,
@@ -32,40 +34,57 @@ export class ImageProcessingController {
   /**
    * @description Perform OCR (Optical Character Recognition) on an image to extract text from it.
    *
-   * @param language The language to use for OCR. If unset, the default language will be used (Windows Settings > Time and Language > Language).
-   * @returns The text extracted from the image.
+   * @param language The {@link https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions|language code} to use for OCR.
+   * If unset, it will default to the first available language installed locally.
+   * @returns A promise that resolves to the text extracted from the image.
    *
    * ---
    * @example
-   * // Extract text from an image using system default language
-   * const text = Actionify.ai.image("/path/to/image.png").text();
+   * // Extract text from an image using the first available local OCR language
+   * const text = await Actionify.ai.image("/path/to/image.png").text();
    * // Extract text from an image using English
-   * const text = Actionify.ai.image("/path/to/image.png").text("en");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("eng");
    * // Extract text from an image using French
-   * const text = Actionify.ai.image("/path/to/image.png").text("fr");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("fra");
    * // Extract text from an image using German
-   * const text = Actionify.ai.image("/path/to/image.png").text("de");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("deu");
    * // Extract text from an image using Spanish
-   * const text = Actionify.ai.image("/path/to/image.png").text("es");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("spa");
    * // Extract text from an image using Italian
-   * const text = Actionify.ai.image("/path/to/image.png").text("it");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("ita");
    * // Extract text from an image using Portuguese
-   * const text = Actionify.ai.image("/path/to/image.png").text("pt");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("por");
    * // Extract text from an image using Russian
-   * const text = Actionify.ai.image("/path/to/image.png").text("ru");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("rus");
    * // Extract text from an image using Simplified Chinese
-   * const text = Actionify.ai.image("/path/to/image.png").text("zh-CN");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("chi_sim");
    * // Extract text from an image using Traditional Chinese
-   * const text = Actionify.ai.image("/path/to/image.png").text("zh-TW");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("chi_tra");
    * // Extract text from an image using Japanese
-   * const text = Actionify.ai.image("/path/to/image.png").text("ja");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("jpn");
    * // Extract text from an image using Korean
-   * const text = Actionify.ai.image("/path/to/image.png").text("ko");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("kor");
    * // Extract text from an image using Arabic
-   * const text = Actionify.ai.image("/path/to/image.png").text("ar");
+   * const text = await Actionify.ai.image("/path/to/image.png").text("ara");
    */
-  public text(language?: string) {
-    return performOcrOnImage(this.#absoluteFilePath, language);
+  public async text(language?: string) {
+    try {
+      const ocrLanguageCode = language ?? (await this.#fetchDefaultLocalTtsModelIfExistsElseThrow());
+      return performOcrOnImage(this.#absoluteFilePath, ocrLanguageCode);
+    }
+    catch (error: any) {
+      if (error?.message?.includes("Failed to initialize Tesseract with language")) {
+        throw new Error([
+          ``,
+          `==========================================`,
+          `OCR language "${language ?? "eng"}" not found.`,
+          `Install it using the following command:`,
+          `    \x1b[96mnpx actionify ocr language add ${language ?? "eng"}\x1b[0m`,
+          `==========================================`,
+        ].join("\n"));
+      }
+      throw error;
+    }
   }
 
   /**
@@ -115,6 +134,27 @@ export class ImageProcessingController {
       });
     }
     return result;
+  }
+
+  async #fetchDefaultLocalTtsModelIfExistsElseThrow() {
+    const ocrDataFolderPath = await RepositoryHelper.resolveDataDirectory(["ocr"]);
+    const localOcrTrainedDataFileNames = (await fs.readdir(ocrDataFolderPath, { withFileTypes: true }))
+      .filter((fileOrDirectory) => fileOrDirectory.isFile())
+      .map((directory) => directory.name.replace(".traineddata", ""));
+    ;
+    if (localOcrTrainedDataFileNames.length > 0) {
+      return localOcrTrainedDataFileNames[0];
+    }
+    throw new Error([
+      ``,
+      `==========================================`,
+      `No OCR languages installed locally.`,
+      `Browse the list of available languages using the following command:`,
+      `    \x1b[96mnpx actionify ocr language list\x1b[0m`,
+      `Then install one using the following command:`,
+      `    \x1b[96mnpx actionify ocr language add <language>\x1b[0m`,
+      `==========================================`,
+    ].join("\n"));
   }
 
   /**
