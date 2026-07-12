@@ -2,6 +2,7 @@
 /build/*
 /build/Release/*
 !/build/Release/actionify.node
+/data/
 /docs/media/
 /node_modules/
 /src/

@@ -4,6 +4,9 @@
   "description": "Actionify is a lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, windows and sound, with additional features like OCR and more.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "bin": {
+    "actionify": "./bin/actionify"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:build:image": "docker build -t actionify-windows .",
