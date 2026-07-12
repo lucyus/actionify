@@ -46,7 +46,7 @@ struct MonitorInfo {
 
 // Structure to hold window information
 struct WindowInfo {
-  HWND hwnd;                     // Handle to the window
+  HWND id;                       // Handle to the window (window ID)
   DWORD pid;                     // Process ID associated with the window
   std::wstring title;            // Window title
   std::wstring executableFile;    // Executable name (path to the program)
@@ -61,7 +61,7 @@ struct WindowInfo {
 
 // Structure to hold window event data
 struct RawWindowEvent {
-  HWND hwnd;
+  HWND id;
   std::string type;
 };
 
@@ -2669,7 +2669,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
   bool isFocused = (hwnd == focusedWindow);
 
   WindowInfo info;
-  info.hwnd = hwnd;
+  info.id = hwnd;
   info.pid = pid;
   info.title = title;
   info.executableFile = executableFile;
@@ -2698,7 +2698,7 @@ Napi::Value ListWindows(const Napi::CallbackInfo& info) {
   for (size_t i = 0; i < windows.size(); ++i) {
     const WindowInfo& win = windows[i];
     Napi::Object winObj = Napi::Object::New(env);
-    winObj.Set("id", reinterpret_cast<uintptr_t>(win.hwnd));
+    winObj.Set("id", reinterpret_cast<uintptr_t>(win.id));
     winObj.Set("pid", Napi::Number::New(env, win.pid));
     winObj.Set("title", Napi::String::New(env, ConvertToUTF8(win.title)));
     winObj.Set("executableFile", Napi::String::New(env, ConvertToUTF8(win.executableFile)));
@@ -2808,7 +2808,7 @@ std::optional<WindowInfo> GetWindowById(HWND hwnd) {
   bool isFocused = (hwnd == focusedWindow);
 
   WindowInfo windowInfo;
-  windowInfo.hwnd = hwnd;
+  windowInfo.id = hwnd;
   windowInfo.pid = pid;
   windowInfo.title = title;
   windowInfo.executableFile = executableFile;
@@ -2847,7 +2847,7 @@ Napi::Value GetWindowByIdWrapper(const Napi::CallbackInfo& info) {
 
   // Create a JavaScript object to hold the window information
   Napi::Object windowObject = Napi::Object::New(env);
-  windowObject.Set("id", Napi::Number::New(env, reinterpret_cast<uintptr_t>(windowInfo.hwnd)));
+  windowObject.Set("id", Napi::Number::New(env, reinterpret_cast<uintptr_t>(windowInfo.id)));
   windowObject.Set("pid", Napi::Number::New(env, windowInfo.pid));
   windowObject.Set("title", Napi::String::New(env, ConvertToUTF8(windowInfo.title)));
   windowObject.Set("executableFile", Napi::String::New(env, ConvertToUTF8(windowInfo.executableFile)));
@@ -3264,7 +3264,7 @@ void CALLBACK WindowEventProc(
 // Function to convert window event data to a JavaScript object
 Napi::Object BuildWindowEventObject(const Napi::Env& env, const RawWindowEvent& rawWindowEvent) {
   Napi::Object windowEventObj = Napi::Object::New(env);
-  windowEventObj.Set(Napi::String::New(env, "hwnd"), Napi::Number::New(env, reinterpret_cast<uintptr_t>(rawWindowEvent.hwnd)));
+  windowEventObj.Set(Napi::String::New(env, "id"), Napi::Number::New(env, reinterpret_cast<uintptr_t>(rawWindowEvent.id)));
   windowEventObj.Set(Napi::String::New(env, "type"), Napi::String::New(env, rawWindowEvent.type));
   return windowEventObj;
 }
