@@ -30,6 +30,10 @@
 #include <leptonica/allheaders.h>
 #include <tesseract/baseapi.h>
 #include <miniaudio.h>
+#pragma warning(push)                  // ignore "warning C4305: 'initializer' :
+#pragma warning(disable:4305)          // truncation from 'double' to 'float'"
+#include <sherpa-onnx/c-api/cxx-api.h> // remove pragma if warn fixed in
+#pragma warning(pop)                   // a later sherpa-onnx version
 
 
 // =============================================================================
@@ -532,7 +536,7 @@ std::filesystem::path GetUserDataAbsoluteDirectoryPath() {
   std::filesystem::path userDataAbsoluteDirectoryPath = (GetModuleAbsoluteDirectoryPath() / "../../data").lexically_normal();
   std::filesystem::create_directories(userDataAbsoluteDirectoryPath);
   return userDataAbsoluteDirectoryPath;
-      }
+}
 
 std::filesystem::path GetUserDataTtsAbsoluteDirectoryPath() {
   std::filesystem::path userDataTtsAbsoluteDirectoryPath = (GetUserDataAbsoluteDirectoryPath() / "tts").lexically_normal();
@@ -544,7 +548,7 @@ std::filesystem::path GetUserDataTmpAbsoluteDirectoryPath() {
   std::filesystem::path userDataTmpAbsoluteDirectoryPath = (GetUserDataAbsoluteDirectoryPath() / "tmp").lexically_normal();
   std::filesystem::create_directories(userDataTmpAbsoluteDirectoryPath);
   return userDataTmpAbsoluteDirectoryPath;
-    }
+}
 
 std::optional<std::filesystem::path> FindFile(
   const std::filesystem::path& directoryPath,
@@ -4201,94 +4205,173 @@ Napi::Value PlaySoundWrapper(const Napi::CallbackInfo& info) {
 }
 
 bool TextToSpeech(
-  const std::wstring& text,
-  float volume = 100.0f,
-  float rate = 0.0f,
-  const std::wstring& voiceName = L""
+  const std::string& text,
+  float volume = 1.0f,
+  float rate = 1.0f,
+  const std::string& modelName = ""
 ) {
-  HRESULT hr = CoInitialize(nullptr);
-  if (FAILED(hr)) {
-    std::wcerr << L"COM initialization failed.\n";
-    return false;
-  }
-
-  ISpVoice* pVoice = nullptr;
-  hr = CoCreateInstance(CLSID_SpVoice, nullptr, CLSCTX_ALL, IID_ISpVoice, (void**)&pVoice);
-  if (FAILED(hr)) {
-    std::wcerr << L"Failed to create SAPI voice.\n";
-    CoUninitialize();
-    return false;
-  }
-
-  // Enumerate installed voices (tokens)
-  ISpObjectTokenCategory* pCategory = nullptr;
-  hr = CoCreateInstance(
-    CLSID_SpObjectTokenCategory,
-    nullptr,
-    CLSCTX_ALL,
-    IID_ISpObjectTokenCategory,
-    (void**)&pCategory
-  );
-  if (SUCCEEDED(hr)) {
-    hr = pCategory->SetId(SPCAT_VOICES, FALSE);
-    if (SUCCEEDED(hr)) {
-      IEnumSpObjectTokens* pEnum = nullptr;
-      hr = pCategory->EnumTokens(nullptr, nullptr, &pEnum);
-      if (SUCCEEDED(hr)) {
-        ISpObjectToken* pToken = nullptr;
-        ULONG fetched = 0;
-
-        bool voiceSet = false;
-
-        while (pEnum->Next(1, &pToken, &fetched) == S_OK) {
-          // Get the voice name
-          WCHAR* name = nullptr;
-          ISpDataKey* pDataKey = nullptr;
-          hr = pToken->OpenKey(L"Attributes", &pDataKey);
-          if (SUCCEEDED(hr)) {
-            hr = pDataKey->GetStringValue(L"Name", &name);
-            if (SUCCEEDED(hr) && voiceName == name) {
-              // Set the matching voice
-              hr = pVoice->SetVoice(pToken);
-              if (SUCCEEDED(hr)) {
-                voiceSet = true;
-              }
-            }
-            CoTaskMemFree(name);
-            pDataKey->Release();
-          }
-          pToken->Release();
-        }
-        pEnum->Release();
-
-        if (!voiceName.empty() && !voiceSet) {
-          std::wcerr << L"Voice not found: " << voiceName << std::endl;
-        }
+  std::filesystem::path ttsBaseModelPath = GetUserDataTtsAbsoluteDirectoryPath();
+  std::string fullModelName = ExpectOrThrow(
+    FindFile(
+      ttsBaseModelPath,
+      [modelName](const std::filesystem::directory_entry& entry) {
+        return entry.is_directory() && ToLower(entry.path().filename().string()).find(ToLower(modelName)) != std::string::npos;
       }
-    }
-    pCategory->Release();
+    ),
+    "TTS model not found: " + (ttsBaseModelPath / modelName).lexically_normal().string()
+  ).lexically_normal().filename().string();
+  std::filesystem::path ttsUserModelPath = (ttsBaseModelPath / fullModelName).lexically_normal();
+
+  if (!std::filesystem::exists(ttsUserModelPath)) {
+    throw std::runtime_error("TTS model not found: " + (ttsUserModelPath).lexically_normal().string());
   }
 
-  // Set volume (0-100)
-  pVoice->SetVolume(static_cast<USHORT>(volume));
+  sherpa_onnx::cxx::OfflineTtsConfig ttsConfiguration;
 
-  // Set rate (-10 to 10)
-  pVoice->SetRate(static_cast<LONG>(rate));
-
-  // Speak
-  hr = pVoice->Speak(text.c_str(), SPF_DEFAULT, nullptr);
-  if (FAILED(hr)) {
-    std::wcerr << L"Failed to speak text.\n";
+  if (ToLower(fullModelName).find("kokoro") != std::string::npos) {
+    ttsConfiguration.model.kokoro.model = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".onnx";
+        }
+      ),
+      "TTS model (kokoro) not found: " + (ttsUserModelPath / "*.onnx").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kokoro.voices = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".bin";
+        }
+      ),
+      "TTS model (kokoro) voices not found: " + (ttsUserModelPath / "*.bin").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kokoro.tokens = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".txt";
+        }
+      ),
+      "TTS model (kokoro) tokens not found: " + (ttsUserModelPath / "*.txt").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kokoro.data_dir = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.is_directory();
+        }
+      ),
+      "TTS model (kokoro) data dir not found: " + (ttsUserModelPath / "*").lexically_normal().string()
+    ).lexically_normal().generic_string();
+  }
+  else if (ToLower(fullModelName).find("vits") != std::string::npos) {
+    ttsConfiguration.model.vits.model = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".onnx";
+        }
+      ),
+      "TTS model (vits) not found: " + (ttsUserModelPath / "*.onnx").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.vits.tokens = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".txt";
+        }
+      ),
+      "TTS model (vits) tokens not found: " + (ttsUserModelPath / "*.txt").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.vits.data_dir = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.is_directory();
+        }
+      ),
+      "TTS model (vits) data dir not found: " + (ttsUserModelPath / "*").lexically_normal().string()
+    ).lexically_normal().generic_string();
+  }
+  else if (ToLower(fullModelName).find("kitten") != std::string::npos) {
+    ttsConfiguration.model.kitten.model = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".onnx";
+        }
+      ),
+      "TTS model (kitten) not found: " + (ttsUserModelPath / "*.onnx").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kitten.voices = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".bin";
+        }
+      ),
+      "TTS model (kitten) voices not found: " + (ttsUserModelPath / "*.bin").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kitten.tokens = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.path().extension() == ".txt";
+        }
+      ),
+      "TTS model (kitten) tokens not found: " + (ttsUserModelPath / "*.txt").lexically_normal().string()
+    ).lexically_normal().string();
+    ttsConfiguration.model.kitten.data_dir = ExpectOrThrow(
+      FindFile(
+        ttsUserModelPath,
+        [](const std::filesystem::directory_entry& entry) {
+          return entry.is_directory();
+        }
+      ),
+      "TTS model (kitten) data dir not found: " + (ttsUserModelPath / "*").lexically_normal().string()
+    ).lexically_normal().generic_string();
+  }
+  else {
+    throw std::runtime_error("Unsupported TTS model: " + fullModelName);
   }
 
-  pVoice->Release();
-  CoUninitialize();
-  return SUCCEEDED(hr);
+  ttsConfiguration.model.num_threads = std::max(2u, std::thread::hardware_concurrency() / 2);
+
+  ttsConfiguration.model.debug = false; // false = off, true = on
+
+  std::filesystem::path tmpBaseModelPath = GetUserDataTmpAbsoluteDirectoryPath();
+  std::string outputFilePath = (tmpBaseModelPath / ("tts_" + fullModelName + "_" + std::to_string(Now()) + ".wav")).lexically_normal().string();
+
+  auto tts = sherpa_onnx::cxx::OfflineTts::Create(ttsConfiguration);
+
+  sherpa_onnx::cxx::GenerationConfig generationConfiguration;
+
+  generationConfiguration.sid = 0;
+  generationConfiguration.speed = 1.0f;
+  generationConfiguration.silence_scale = 0.2f;
+
+  sherpa_onnx::cxx::GeneratedAudio audio = tts.Generate(text, generationConfiguration);
+
+  sherpa_onnx::cxx::WriteWave(outputFilePath, {audio.samples, audio.sample_rate});
+  const SoundInfo& soundInfo = PlaySound(outputFilePath);
+  setSoundVolume(ConvertToUTF8(soundInfo.id), volume);
+  SetSoundSpeed(ConvertToUTF8(soundInfo.id), rate);
+  std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<unsigned int>(std::round(soundInfo.duration / rate))));
+  StopSound(ConvertToUTF8(soundInfo.id));
+
+  std::error_code errorCode;
+  std::filesystem::remove(outputFilePath, errorCode);
+  if (errorCode) {
+    throw std::runtime_error("Failed to remove temporary file \"" + outputFilePath + "\". Reason: " + errorCode.message());
+  }
+  return true;
 }
 
 Napi::Value TextToSpeechWrapper(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
-  // Ensure there are four arguments: text (string), volume (number), rate (number), voiceName (string)
+  // Ensure there are four arguments: text (string), volume (number), rate (number), modelName (string)
   if (
     info.Length() < 4 ||
     !info[0].IsString() ||
@@ -4296,7 +4379,7 @@ Napi::Value TextToSpeechWrapper(const Napi::CallbackInfo& info) {
     !info[2].IsNumber() ||
     !info[3].IsString()
   ) {
-    Napi::TypeError::New(env, "Arguments must be: (text: string, volume: number, rate: number, voiceName: string)").ThrowAsJavaScriptException();
+    Napi::TypeError::New(env, "Arguments must be: (text: string, volume: number, rate: number, modelName: string)").ThrowAsJavaScriptException();
     return env.Null();
   }
 
@@ -4307,22 +4390,22 @@ Napi::Value TextToSpeechWrapper(const Napi::CallbackInfo& info) {
   float volume = info[1].As<Napi::Number>().FloatValue();
   // Get the rate from the third argument
   float rate = info[2].As<Napi::Number>().FloatValue();
-  // Get the voice name from the fourth argument
-  std::u16string u16VoiceName = info[3].As<Napi::String>().Utf16Value();
-  std::wstring voiceName = std::wstring(u16VoiceName.begin(), u16VoiceName.end());
+  // Get the model name from the fourth argument
+  std::u16string u16ModelName = info[3].As<Napi::String>().Utf16Value();
+  std::wstring modelName = std::wstring(u16ModelName.begin(), u16ModelName.end());
 
   // Create a deferred Promise
   Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
 
   // Run Text-to-Speech asynchronously
-  PromiseWorker* asyncWorker = new PromiseWorker(
+  auto asyncWorker = new PromiseWorker<bool>(
     env,
     deferred,
-    [text, volume, rate, voiceName]() {
-      bool success = TextToSpeech(text, volume, rate, voiceName);
-      if (!success) {
-        throw std::runtime_error("Text-to-Speech failed.");
-      }
+    [text, volume, rate, modelName]() -> bool {
+      return TextToSpeech(ConvertToUTF8(text), volume, rate, ConvertToUTF8(modelName));
+    },
+    [](Napi::Env env, const bool& resolveValue) {
+      return Napi::Boolean::New(env, resolveValue);
     }
   );
   asyncWorker->Queue();

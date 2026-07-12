@@ -61,7 +61,7 @@ declare module "@napi/actionify" {
     setSoundVolume: (soundId: string, volume: number) => void;
     getSoundSpeed: (soundId: string) => number;
     setSoundSpeed: (soundId: string, speed: number) => void;
-    textToSpeech: (text: string, volume: number, speed: number, voice: string) => Promise<void>;
+    textToSpeech: (text: string, volume: number, speed: number, model: string) => Promise<boolean>;
     createTrayIcon: (tooltip: string, iconPath: string) => number;
     removeTrayIcon: (windowId: number) => void;
     updateTrayIcon: (windowId: number, iconPath: string) => void;
