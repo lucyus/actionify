@@ -1,4 +1,6 @@
+import fs from "fs/promises";
 import path from "path";
+import { RepositoryHelper } from "../../../cli/actionify/helpers";
 import { Actionify } from "../../../core";
 import {
   playSound,
@@ -52,12 +54,13 @@ export class SoundController {
    * @description Convert text to speech (TTS) and play it.
    *
    * @param text The text to speak.
-   * @param options.volume The volume of the speech (0 to 100). Default is 100.
-   * @param options.speed The speed of the speech (-10 to 10). Default is 0 (normal speed).
-   * @param options.voice The voice to use for the speech. Default is your system's default voice. You can:
-   *   - Get the list of available voices by running this PowerShell command:
-   *     `Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | ForEach-Object { $_.VoiceInfo | Select-Object Name, Culture, Gender, Age, Description }`
-   *   - Install additional voices on Windows by going to Settings > Time & Language > Speech > Manage voices > Add voices.
+   * @param options.volume The volume of the speech (between `0.0` and `1.0`). Default is `1.0`.
+   * @param options.speed The speed of the speech (between `0.01` and `4.0`). Default is `1.0` (normal speed).
+   * @param options.model The model to use for the speech. Default is the first available model locally. You can:
+   *   - Get the list of available models by running this Terminal command:
+   *     `npx actionify tts model list`
+   *   - Install additional models by running this Terminal command:
+   *     `npx actionify tts model add <model_name>`
    * @returns A promise that resolves when the speech has finished playing.
    *
    * ---
@@ -65,17 +68,54 @@ export class SoundController {
    * // Speak text with default options
    * Actionify.sound.say("Hello, world!");
    * // Speak text with custom volume
-   * Actionify.sound.say("Hello, world!", { volume: 80 });
+   * Actionify.sound.say("Hello, world!", { volume: 0.8 });
    * // Speak text with custom speed
-   * Actionify.sound.say("Hello, world!", { speed: -2 });
-   * // Speak text with a specific voice
-   * Actionify.sound.say("Hello, world!", { voice: "Microsoft Zira Desktop" });
+   * Actionify.sound.say("Hello, world!", { speed: 0.5 });
+   * // Speak text with a specific TTS model
+   * Actionify.sound.say("Hello, world!", { model: "kokoro-en-v0_19" });
    */
-  public async say(text: string, options?: { volume?: number, speed?: number, voice?: string }) {
-    const volume = options?.volume ?? 100;
-    const speed = options?.speed ?? 0;
-    const voice = options?.voice ?? "";
-    return textToSpeech(text, volume, speed, voice);
+  public async say(text: string, options?: { volume?: number, speed?: number, model?: string }) {
+    const volume = Math.max(0.0, Math.min(1.0, options?.volume ?? 1.0));
+    const speed = Math.max(0.01, Math.min(4.0, options?.speed ?? 1.0));
+    const modelName = options?.model ?? (await this.#fetchDefaultLocalTtsModelIfExistsElseThrow());
+    try {
+      await textToSpeech(text, volume, speed, modelName);
+      return;
+    }
+    catch (error: any) {
+      if (error?.message?.includes("TTS model not found")) {
+        throw new Error([
+          ``,
+          `==========================================`,
+          `TTS model "${modelName}" not found.`,
+          `Install it using the following command:`,
+          `    \x1b[96mnpx actionify tts model add ${modelName}\x1b[0m`,
+          `==========================================`,
+        ].join("\n"));
+      }
+      throw error;
+    }
+  }
+
+  async #fetchDefaultLocalTtsModelIfExistsElseThrow() {
+    const ttsDataFolderPath = await RepositoryHelper.resolveDataDirectory(["tts"]);
+    const localTtsModelsNames = (await fs.readdir(ttsDataFolderPath, { withFileTypes: true }))
+      .filter((fileOrDirectory) => fileOrDirectory.isDirectory())
+      .map((directory) => directory.name);
+    ;
+    if (localTtsModelsNames.length > 0) {
+      return localTtsModelsNames[0];
+    }
+    throw new Error([
+      ``,
+      `==========================================`,
+      `No local TTS model found.`,
+      `Browse the list of available models using the following command:`,
+      `    \x1b[96mnpx actionify tts model list\x1b[0m`,
+      `Then install one using the following command:`,
+      `    \x1b[96mnpx actionify tts model add <model_name>\x1b[0m`,
+      `==========================================`,
+    ].join("\n"));
   }
 
   /**
