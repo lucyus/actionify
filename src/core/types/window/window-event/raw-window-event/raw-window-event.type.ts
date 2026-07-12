@@ -1,6 +1,6 @@
 import type { RawWindowEventType } from "../../../../../core/types";
 
 export type RawWindowEvent = {
-  hwnd: number;
+  id: number;
   type: RawWindowEventType;
 };

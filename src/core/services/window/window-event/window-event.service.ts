@@ -27,7 +27,7 @@ export class WindowEventService {
         // initialize list of runners
         const windowListenersToRun: WindowListenerScopeController[] = [];
         // Get window info from history as the window no longer exists
-        const previousWindowState = WindowEventService.#windowsHistory.get(currentRawWindowEvent.hwnd);
+        const previousWindowState = WindowEventService.#windowsHistory.get(currentRawWindowEvent.id);
         if (!previousWindowState) {
           // Should happen only for windows we are not interested in
           // (e.g. the ones that won't show in ALT + TAB)
@@ -71,7 +71,7 @@ export class WindowEventService {
         // initialize list of runners
         const windowListenersToRun: WindowListenerScopeController[] = [];
         // Get window linked to the event
-        const targetWindow = Actionify.window.get(currentRawWindowEvent.hwnd);
+        const targetWindow = Actionify.window.get(currentRawWindowEvent.id);
         if (!targetWindow) {
           // Should never happen as C++ hook filters events
           return;
@@ -84,7 +84,7 @@ export class WindowEventService {
             previousStateWindow.id !== currentFocusedWindow.id
           ) {
             const blurRawWindowEvent: RawWindowEvent = {
-              hwnd: previousStateWindow.id,
+              id: previousStateWindow.id,
               type: "blur",
             };
             WindowEventService.#mainWindowEventListener(blurRawWindowEvent);
@@ -99,13 +99,13 @@ export class WindowEventService {
         ) {
           if (currentFocusedWindow.isMaximized) {
             WindowEventService.#mainWindowEventListener({
-              hwnd: currentFocusedWindow.id,
+              id: currentFocusedWindow.id,
               type: "maximize",
             });
           }
           else if (currentFocusedWindow.isRestored) {
             WindowEventService.#mainWindowEventListener({
-              hwnd: currentFocusedWindow.id,
+              id: currentFocusedWindow.id,
               type: "restore",
             });
           }
@@ -149,7 +149,7 @@ export class WindowEventService {
       }
       case "locationchange": {
         // Get window linked to the event
-        const targetWindow = Actionify.window.get(currentRawWindowEvent.hwnd);
+        const targetWindow = Actionify.window.get(currentRawWindowEvent.id);
         if (!targetWindow) {
           // Should never happen as C++ hook filters events
           return;
@@ -164,14 +164,14 @@ export class WindowEventService {
         if (!previousWindowState.isMaximized && targetWindow.isMaximized) {
           const currentWindowEvent: RawWindowEvent = {
             type: "maximize",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           };
           return WindowEventService.#mainWindowEventListener(currentWindowEvent);
         }
         if (!previousWindowState.isMinimized && targetWindow.isMinimized) {
           const currentWindowEvent: RawWindowEvent = {
             type: "minimize",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           };
           return WindowEventService.#mainWindowEventListener(currentWindowEvent);
         }
@@ -181,7 +181,7 @@ export class WindowEventService {
           // which is why it will be handled in the "focus" case and not here
           const currentWindowEvent: RawWindowEvent = {
             type: "restore",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           };
           return WindowEventService.#mainWindowEventListener(currentWindowEvent);
         }
@@ -191,7 +191,7 @@ export class WindowEventService {
         ) {
           const currentWindowEvent: RawWindowEvent = {
             type: "resize",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           };
           WindowEventService.#mainWindowEventListener(currentWindowEvent);
         }
@@ -201,7 +201,7 @@ export class WindowEventService {
         ) {
           const currentWindowEvent: RawWindowEvent = {
             type: "move",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           };
           WindowEventService.#mainWindowEventListener(currentWindowEvent);
         }
@@ -212,7 +212,7 @@ export class WindowEventService {
         // initialize list of runners
         const windowListenersToRun: WindowListenerScopeController[] = [];
         // Get target window
-        const targetWindow = Actionify.window.get(currentRawWindowEvent.hwnd);
+        const targetWindow = Actionify.window.get(currentRawWindowEvent.id);
         if (!targetWindow) {
           // Should never happen as C++ hook filters events
           return;
@@ -221,7 +221,7 @@ export class WindowEventService {
         if (!targetWindow.isFocused) {
           WindowEventService.#mainWindowEventListener({
             type: "blur",
-            hwnd: targetWindow.id,
+            id: targetWindow.id,
           });
         }
         // Update current window history
@@ -267,7 +267,7 @@ export class WindowEventService {
         // initialize list of runners
         const windowListenersToRun: WindowListenerScopeController[] = [];
         // Get target window
-        const targetWindow = Actionify.window.get(currentRawWindowEvent.hwnd);
+        const targetWindow = Actionify.window.get(currentRawWindowEvent.id);
         if (!targetWindow) {
           // Should never happen as C++ hook filters events
           return;

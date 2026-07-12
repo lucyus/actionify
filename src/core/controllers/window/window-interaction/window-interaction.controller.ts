@@ -43,7 +43,7 @@ export class WindowInteractionController {
   }
 
   /**
-   * @description The window handle number identifier (HWND).
+   * @description The window identifier.
    */
   public get id() {
     return this.#windowInfo.id;
