@@ -28,6 +28,8 @@
 #include <mmsystem.h>
 #include <shellapi.h>
 #include <shellscalingapi.h>
+#include <leptonica/allheaders.h>
+#include <tesseract/baseapi.h>
 
 
 // =============================================================================
@@ -1206,51 +1208,49 @@ Napi::Value SleepWrapper(const Napi::CallbackInfo& info) {
 // =============================== OCR FUNCTIONS ===============================
 // =============================================================================
 
-std::wstring PerformOcrOnImage(const std::wstring& imagePath, const std::wstring& language) {
-  winrt::init_apartment(); // Initialize the Windows Runtime.
+std::string PerformOcrOnImage(const std::string& imagePath, const std::string& language = "") {
+  // Load image
+  PIX* image = pixRead(imagePath.c_str());
 
-  try {
-    // Open the image file.
-    winrt::Windows::Storage::StorageFile imageFile = winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(imagePath).get();
-
-    // Open a stream for the image file.
-    winrt::Windows::Storage::Streams::IRandomAccessStream stream = imageFile.OpenAsync(winrt::Windows::Storage::FileAccessMode::Read).get();
-
-    // Create a BitmapDecoder to read the image.
-    winrt::Windows::Graphics::Imaging::BitmapDecoder decoder = winrt::Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream).get();
-
-    // Get the image's software bitmap representation.
-    winrt::Windows::Graphics::Imaging::SoftwareBitmap softwareBitmap = decoder.GetSoftwareBitmapAsync().get();
-
-    // Convert the software bitmap to a compatible format if necessary.
-    winrt::Windows::Graphics::Imaging::SoftwareBitmap ocrCompatibleBitmap = winrt::Windows::Graphics::Imaging::SoftwareBitmap::Convert(softwareBitmap, winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Gray8, winrt::Windows::Graphics::Imaging::BitmapAlphaMode::Ignore);
-
-    bool isValidLanguage = winrt::Windows::Globalization::Language::IsWellFormed(language);
-    // Create the OCR engine.
-    winrt::Windows::Media::Ocr::OcrEngine ocrEngine = !isValidLanguage ?
-      winrt::Windows::Media::Ocr::OcrEngine::TryCreateFromUserProfileLanguages()
-      :
-      winrt::Windows::Media::Ocr::OcrEngine::TryCreateFromLanguage(winrt::Windows::Globalization::Language(language))
-    ;
-
-    if (!ocrEngine) {
-      if (language.empty()) {
-        throw std::runtime_error("OCR engine could not be created.");
-      }
-      throw std::runtime_error("OCR engine could not be created. Language '" + std::string(language.begin(), language.end()) + "' is not supported. Make sure it is installed on the system (Windows Settings > Time & Language > Language).");
-    }
-
-    // Perform OCR on the bitmap.
-    winrt::Windows::Media::Ocr::OcrResult ocrResult = ocrEngine.RecognizeAsync(ocrCompatibleBitmap).get();
-
-    // Retrieve the recognized text.
-    std::wstring extractedText = ocrResult.Text().c_str();
-
-    return extractedText;
-  } catch (const std::exception& ex) {
-    std::wcerr << L"Error: " << ex.what() << std::endl;
-    return L"";
+  if (!image) {
+    throw std::runtime_error("Failed to load image " + imagePath);
   }
+
+  // Create Tesseract API instance
+  tesseract::TessBaseAPI tesseract;
+
+  // Get trained data assets folder
+  std::string trainedDataAbsolutePath = (GetUserDataAbsoluteDirectoryPath() / "ocr")
+    .lexically_normal()
+    .generic_string();
+
+  // Initialize Tesseract
+  if (tesseract.Init(trainedDataAbsolutePath.c_str(), !language.empty() ? language.c_str() : "eng") != 0) {
+    pixDestroy(&image);
+    throw std::runtime_error("Failed to initialize Tesseract with language: " + (!language.empty() ? language : "eng"));
+  }
+
+  // Set image
+  tesseract.SetImage(image);
+
+  // Perform OCR
+  char* text = tesseract.GetUTF8Text();
+
+  if (!text) {
+    tesseract.End();
+    pixDestroy(&image);
+    throw std::runtime_error("Failed to perform OCR on image " + imagePath);
+  }
+
+  // Copy result
+  std::string result(text);
+
+  // Cleanup
+  delete[] text;
+  tesseract.End();
+  pixDestroy(&image);
+
+  return result;
 }
 
 //
@@ -1278,7 +1278,7 @@ Napi::Value PerformOcrOnImageWrapper(const Napi::CallbackInfo& info) {
   std::wstring language = std::wstring(u16Language.begin(), u16Language.end());
   // Perform OCR on the image
   try {
-    std::wstring extractedText = PerformOcrOnImage(imagePath, language);
+    std::string extractedText = PerformOcrOnImage(ConvertToUTF8(imagePath), ConvertToUTF8(language));
     std::u16string u16extractedText = std::u16string(extractedText.begin(), extractedText.end());
 
     // Return the extracted text
