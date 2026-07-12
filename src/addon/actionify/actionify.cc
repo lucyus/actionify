@@ -7,6 +7,7 @@
 #include <atomic>
 #include <mutex>
 #include <queue>
+#include <filesystem>
 #include <functional>
 #include <cmath>
 #include <iostream>
@@ -116,6 +117,50 @@ struct SoundInfo {
   unsigned int duration;
 };
 
+
+// =============================================================================
+// ============================== UTILITY CLASSES ==============================
+// =============================================================================
+
+template <typename T>
+class PromiseWorker : public Napi::AsyncWorker {
+  public:
+
+    PromiseWorker(
+      Napi::Env env,
+      Napi::Promise::Deferred deferred,
+      std::function<T()> executeCallback,
+      std::function<Napi::Value(Napi::Env, const T&)> resolveConverter
+    ) : Napi::AsyncWorker(env), deferred(deferred), executeCallback(executeCallback), resolveConverter(resolveConverter) { }
+
+    ~PromiseWorker() override { }
+
+    void Execute() override {
+      try {
+        promiseResolveResult = executeCallback();
+      } catch (const std::exception& e) {
+        SetError(e.what());
+      } catch (...) {
+        SetError("Unknown error occurred");
+      }
+    }
+
+    void OnOK() override {
+      deferred.Resolve(resolveConverter(Env(), promiseResolveResult));
+    }
+
+    void OnError(const Napi::Error& error) override {
+      deferred.Reject(error.Value());
+    }
+
+  private:
+    Napi::Promise::Deferred deferred;
+    std::function<T()> executeCallback;
+    std::function<Napi::Value(Napi::Env, const T&)> resolveConverter;
+    T promiseResolveResult;
+};
+
+
 // =============================================================================
 // ============================== GLOBAL VARIABLES =============================
 // =============================================================================
@@ -157,45 +202,6 @@ std::map<int, std::function<void()>> trayIconMenuItemsCallbacks;
 std::map<int, Napi::ThreadSafeFunction> trayIconMenuItemsJsCallbacks;
 
 // =============================================================================
-// ============================== UTILITY CLASSES ==============================
-// =============================================================================
-
-class PromiseWorker : public Napi::AsyncWorker {
-  public:
-
-    PromiseWorker(
-      Napi::Env env,
-      Napi::Promise::Deferred deferred,
-      std::function<void()> executeCallback
-    ) : Napi::AsyncWorker(env), deferred(deferred), executeCallback(executeCallback) { }
-
-    ~PromiseWorker() override { }
-
-    void Execute() override {
-      try {
-        executeCallback();
-      } catch (const std::exception& e) {
-        SetError(e.what());
-      } catch (...) {
-        SetError("Unknown error occurred");
-      }
-    }
-
-    void OnOK() override {
-      deferred.Resolve(Env().Undefined());
-    }
-
-    void OnError(const Napi::Error& error) override {
-      deferred.Reject(error.Value());
-    }
-
-  private:
-    Napi::Promise::Deferred deferred;
-    std::function<void()> executeCallback;
-};
-
-
-// =============================================================================
 // ============================= UTILITY FUNCTIONS =============================
 // =============================================================================
 
@@ -204,6 +210,78 @@ std::string ConvertToUTF8(const std::wstring& wideStr) {
   std::string utf8Str(bufferSize, 0);
   WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), wideStr.size(), &utf8Str[0], bufferSize, NULL, NULL);
   return utf8Str;
+}
+
+uint64_t Now() {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+// Return this dynamic library's absolute directory path (/path/to/build/Release/actionify.node)
+std::filesystem::path GetModuleAbsoluteDirectoryPath() {
+  HMODULE hModule = nullptr;
+
+  // Get handle of the DLL that contains this function
+  if (
+    !GetModuleHandleExW(
+      GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+      reinterpret_cast<LPCWSTR>(&GetModuleAbsoluteDirectoryPath),
+      &hModule
+    )
+  ) {
+    return {};
+  }
+
+  wchar_t path[MAX_PATH];
+  if (!GetModuleFileNameW(hModule, path, MAX_PATH)) {
+    return {};
+  }
+
+  return std::filesystem::path(path).parent_path();
+}
+
+std::filesystem::path GetUserDataAbsoluteDirectoryPath() {
+  std::filesystem::path userDataAbsoluteDirectoryPath = (GetModuleAbsoluteDirectoryPath() / "../../data").lexically_normal();
+  std::filesystem::create_directories(userDataAbsoluteDirectoryPath);
+  return userDataAbsoluteDirectoryPath;
+      }
+
+std::filesystem::path GetUserDataTtsAbsoluteDirectoryPath() {
+  std::filesystem::path userDataTtsAbsoluteDirectoryPath = (GetUserDataAbsoluteDirectoryPath() / "tts").lexically_normal();
+  std::filesystem::create_directories(userDataTtsAbsoluteDirectoryPath);
+  return userDataTtsAbsoluteDirectoryPath;
+}
+
+std::filesystem::path GetUserDataTmpAbsoluteDirectoryPath() {
+  std::filesystem::path userDataTmpAbsoluteDirectoryPath = (GetUserDataAbsoluteDirectoryPath() / "tmp").lexically_normal();
+  std::filesystem::create_directories(userDataTmpAbsoluteDirectoryPath);
+  return userDataTmpAbsoluteDirectoryPath;
+    }
+
+std::optional<std::filesystem::path> FindFile(
+  const std::filesystem::path& directoryPath,
+  const std::function<bool(const std::filesystem::directory_entry&)>& predicate
+) {
+  for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
+    if (predicate(entry)) {
+      return entry.path();
+    }
+  }
+  return std::nullopt;
+}
+
+template<typename T>
+T ExpectOrThrow(std::optional<T> value, std::string_view errorMessage) {
+  if (!value) {
+    throw std::runtime_error(std::string(errorMessage));
+  }
+
+  return std::move(*value);
+}
+
+std::string ToLower(const std::string& text) {
+  std::string result = text;
+  std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
+  return result;
 }
 
 uint64_t Now() {
