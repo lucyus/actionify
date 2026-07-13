@@ -1,5 +1,6 @@
 build/
 /data/
+/deps/
 lib/
 node_modules/
 TODO.md
