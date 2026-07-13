@@ -175,43 +175,39 @@ await Actionify.mouse.right.click({ delay: 1000 });
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll down immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
+// Scroll down once immediately
 Actionify.mouse.scroll.down();
 
-// Scroll down immediately 240 wheel deltas (commonly 2 scrolls)
-Actionify.mouse.scroll.down(240);
+// Scroll down twice immediately
+Actionify.mouse.scroll.down(2);
 ```
-
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
 ##### 1.5.1.2. Simulate delayed scroll down events
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll down in 1 second with system default's wheel deltas (commonly 120)
+// Scroll down once after 1 second
 await Actionify.mouse.scroll.down(undefined, { delay: 1000 });
 
-// Scroll down in 1 second 240 wheel deltas (commonly 2 scrolls)
-await Actionify.mouse.scroll.down(240, { delay: 1000 });
+// Scroll down twice after 1 second
+await Actionify.mouse.scroll.down(2, { delay: 1000 });
 ```
-
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
 ##### 1.5.1.3. Simulate delayed linear motion scroll down events
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll down linearly over 1 second with system default's wheel deltas (commonly 120)
+// Scroll down linearly over 1 second the length of one scroll
 await Actionify.mouse.scroll.down(undefined, {
   motion: "linear",
   delay: 1000,
   steps: "auto"
 });
 
-// Scroll down linearly over 1 second 240 wheel deltas (commonly 2 scrolls)
-await Actionify.mouse.scroll.down(240, {
+// Scroll down linearly over 1 second the length of two scrolls
+await Actionify.mouse.scroll.down(2, {
   motion: "linear",
   delay: 1000,
   steps: "auto"
@@ -219,8 +215,9 @@ await Actionify.mouse.scroll.down(240, {
 ```
 
 * `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay / 16.6`, whichever is smallest. `16.6` resizes per second (60Hz) prevent system overload from excessive window repaints.
+  * 🪟 Windows scroll inputs have a default delta of `120`, which can be divided into smaller increments. Therefore, the number of scroll `steps` is also limited to `numberOfScrolls * 120`.
+  * 🐧 Linux scroll inputs cannot be divided into smaller increments. Therefore, the number of scroll `steps` is also limited to `numberOfScrolls`.
 
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
 #### 1.5.2. Simulate mouse scroll up events
 
@@ -229,43 +226,39 @@ await Actionify.mouse.scroll.down(240, {
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll up immediately with system default's wheel deltas (commonly 120, i.e. 1 scroll)
+// Scroll up once immediately
 Actionify.mouse.scroll.up();
 
-// Scroll up immediately 240 wheel deltas (commonly 2 scrolls)
-Actionify.mouse.scroll.up(240);
+// Scroll up twice immediately
+Actionify.mouse.scroll.up(2);
 ```
-
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
 ##### 1.5.2.2. Simulate delayed scroll up events
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll up in 1 second with system default's wheel deltas (commonly 120)
+// Scroll up once after 1 second
 await Actionify.mouse.scroll.up(undefined, { delay: 1000 });
 
-// Scroll up in 1 second 240 wheel deltas (commonly 2 scrolls)
-await Actionify.mouse.scroll.up(240, { delay: 1000 });
+// Scroll up twice after 1 second
+await Actionify.mouse.scroll.up(2, { delay: 1000 });
 ```
-
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
 
 ##### 1.5.2.3. Simulate delayed linear motion scroll up events
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Scroll up linearly over 1 second with system default's wheel deltas (commonly 120)
+// Scroll up linearly over 1 second the length of one scroll
 await Actionify.mouse.scroll.up(undefined, {
   motion: "linear",
   delay: 1000,
   steps: "auto"
 });
 
-// Scroll up linearly over 1 second 240 wheel deltas (commonly 2 scrolls)
-await Actionify.mouse.scroll.up(240, {
+// Scroll up linearly over 1 second the length of two scrolls
+await Actionify.mouse.scroll.up(2, {
   motion: "linear",
   delay: 1000,
   steps: "auto"
@@ -273,8 +266,8 @@ await Actionify.mouse.scroll.up(240, {
 ```
 
 * `steps` represent the number of intermediate positions between the start (current) and end positions. If unset or set to `"auto"`, `steps` default to the pixel distance between these positions or `delay / 16.6`, whichever is smallest. `16.6` resizes per second (60Hz) prevent system overload from excessive window repaints.
-
-> See also: [Mouse Scroll Wheel Movement](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput)
+  * 🪟 Windows scroll inputs have a default delta of `120`, which can be divided into smaller increments. Therefore, the number of scroll `steps` is also limited to `numberOfScrolls * 120`.
+  * 🐧 Linux scroll inputs cannot be divided into smaller increments. Therefore, the number of scroll `steps` is also limited to `numberOfScrolls`.
 
 ### 1.6. Simulate mouse extra button events
 
