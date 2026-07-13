@@ -9,7 +9,7 @@
         [
           "OS == 'win'",
           {
-            "sources": ["src/addon/actionify/actionify.cc"],
+            "sources": ["src/addon/actionify/actionify-windows.cc"],
             "include_dirs": [
               "node_modules/node-addon-api",
               "<(module_root_dir)/deps/windows/include"
