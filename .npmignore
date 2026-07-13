@@ -7,10 +7,12 @@
 /docs/media/
 /node_modules/
 /src/
+/.dockerignore
 /binding.gyp
 /CODE_OF_CONDUCT.md
 /CONTRIBUTING.md
-/Dockerfile
+/Dockerfile.linux
+/Dockerfile.windows
 /package-lock.json
 /TODO.md
 /tsconfig.json
