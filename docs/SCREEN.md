@@ -8,7 +8,9 @@
 
 ### 1.0. Screen Coordinates System
 
-![Screen Coordinates System](./media/images/screen-coordinates-system.png)
+#### 1.0.1. Windows Screen Coordinates System
+
+![Windows Screen Coordinates System](./media/images/windows-screen-coordinates-system.png)
 
 All screen-related positions are relative to the top-left corner of the main screen, which is the origin with the position (0, 0).
 
@@ -20,6 +22,19 @@ All screen-related positions are relative to the top-left corner of the main scr
 * Every Y position above the origin is negative.
 
 > You can edit your screen layout in Windows Settings → System → Display.
+
+#### 1.0.2. Linux Screen Coordinates System
+
+![Linux Screen Coordinates System](./media/images/linux-screen-coordinates-system.png)
+
+All screen-related positions are relative to the top-left corner of the top-left screen, which is the origin with the position (0, 0).
+
+> The main screen is always the first one.
+
+* Every X position right to the origin is positive.
+* Every X position left to the origin is negative.
+* Every Y position below the origin is positive.
+* Every Y position above the origin is negative.
 
 ### 1.1. List all active screens
 
