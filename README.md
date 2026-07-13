@@ -20,11 +20,14 @@ Make sure you have [npm](https://nodejs.org/en/download) installed.
 
 Then run in your favorite Terminal:
 
-```bash
-npm install @lucyus/actionify
-```
+1.  ```bash
+    npm install @lucyus/actionify
+    ```
+2.  ```bash
+    npx actionify postinstall
+    ```
 
-You're ready to go! 🚀
+You are now ready to use Actionify! 🎉
 
 ## Features
 
