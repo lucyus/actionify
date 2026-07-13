@@ -67,14 +67,22 @@ Help us maintain a welcoming and inclusive community by following our [Code of C
 
 ### 3.1. Prerequisites
 
-* 20+ GB of free disk space
-* [Windows 10](https://www.microsoft.com/software-download) or higher
+* 35+ GB of free disk space
+* One of:
+  * [Windows 10](https://www.microsoft.com/software-download) or higher
+  * Linux with [glibc ≥ 2.38](https://glandium.github.io/firefox-linux-compat-matrix/), such as:
+    * Ubuntu 24.04 and above
+    * Debian 13 and above
+    * Fedora 39 and above
+    * OpenSUSE Leap 15.6 and above
 * [Node.js](https://nodejs.org/en/download) 16 or higher
 * [Docker](https://docs.docker.com/get-docker)
 * [Git](https://git-scm.com/install)
 
 
 ### 3.2. Installation
+
+#### 3.2.1. Windows installation
 
 1. Configure [Docker Desktop](https://www.docker.com/products/docker-desktop):
     * Go to `Settings` > `Docker Engine`
@@ -86,23 +94,49 @@ Help us maintain a welcoming and inclusive community by following our [Code of C
     * Open your favorite [Terminal](https://aka.ms/terminal)
     * Clone the repository: `git clone https://github.com/lucyus/actionify.git`
     * Navigate to the project directory: `cd actionify`
-    * Build the project image: `npm run docker:build:image`
-    * Create the project container: `npm run docker:build:container`
+    * Build the project image: `npm run docker:windows:build:image`
+    * Create the project container: `npm run docker:windows:build:container`
+
+#### 3.2.2. Linux installation
+
+1. Open your favorite Terminal
+2. Clone the repository: `git clone https://github.com/lucyus/actionify.git`
+3. Navigate to the project directory: `cd actionify`
+4. Build the project image: `npm run docker:linux:build:image`
+5. Create the project container: `npm run docker:linux:build:container`
 
 ### 3.3. Running the Project
 
+#### 3.3.1. Run the Project on Windows
+
 * To build project files:
-  1. Start container: `npm run docker:start:container`
-  2. Attach to container: `npm run docker:attach:container`
+  1. Start container: `npm run docker:windows:start:container`
+  2. Attach to container: `npm run docker:windows:attach:container`
   3. Build project files: `npm run build`
   4. Exit from container: `exit`
 
 * To run locally:
-  1. Make sure container is not running: `npm run docker:stop:container`
-  2. Copy build files to the host: `npm run docker:copy:project-build`
+  1. Make sure container is not running: `npm run docker:windows:stop:container`
+  2. Copy build files to the host: `npm run docker:windows:copy:project-build`
   3. Import the built version of Actionify in your JavaScript test file: `const { Actionify } = require("./lib");`
   4. Write your test script as you would normally use Actionify
   5. Run your test file: `node test.js`
+
+> Note: Actionify features are not fully available inside containers due to OS security restrictions, which is why we recommend running Actionify locally.
+
+#### 3.3.2. Run the Project on Linux
+
+* To build project files:
+  1. Start container: `npm run docker:linux:start:container`
+  2. Attach to container: `npm run docker:linux:attach:container`
+  3. Build project files: `npm run build`
+  4. Exit from container: `exit`
+
+* To run locally:
+  1. Copy build files to the host: `npm run docker:linux:copy:project-build`
+  2. Import the built version of Actionify in your JavaScript test file: `const { Actionify } = require("./lib");`
+  3. Write your test script as you would normally use Actionify
+  4. Run your test file: `node test.js`
 
 > Note: Actionify features are not fully available inside containers due to OS security restrictions, which is why we recommend running Actionify locally.
 
