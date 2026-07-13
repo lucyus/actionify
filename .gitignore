@@ -1,6 +1,6 @@
-build/
+/build/
 /data/
 /deps/
-lib/
-node_modules/
-TODO.md
+/lib/
+/node_modules/
+/TODO.md
