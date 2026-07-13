@@ -1,0 +1,275 @@
+FROM debian:trixie
+
+################################
+## Install build dependencies ##
+################################
+
+# Update system packages store
+RUN apt update
+
+# Install curl
+RUN apt install -y curl
+
+# Install Node.js
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+RUN \. "$HOME/.nvm/nvm.sh" && \
+    nvm install 24 && \
+    ln -s $NVM_DIR/versions/node/$(nvm version)/bin/node /usr/local/bin/node && \
+    ln -s $NVM_DIR/versions/node/$(nvm version)/bin/npm /usr/local/bin/npm && \
+    ln -s $NVM_DIR/versions/node/$(nvm version)/bin/npx /usr/local/bin/npx
+
+# Update NPM
+RUN npm install -g npm@11.18.0
+
+# Install Python
+RUN apt install -y python3 python3-pip
+
+# Install Git
+RUN apt install -y git-all
+
+# Verify installation
+RUN node -v && npm -v && npx -v && git --version && python3 --version && pip --version
+
+# Create and move to workspace directory
+WORKDIR /workspace/actionify
+
+##############################
+## Install C++ dependencies ##
+##############################
+
+# Create project library dependencies folder
+RUN mkdir -p ./deps/linux/lib/
+
+# Create project header dependencies folder
+RUN mkdir -p ./deps/linux/include/
+
+# Install C++ build tools
+RUN apt install -y build-essential
+
+# Install X11 dependencies
+RUN apt install -y libx11-dev
+RUN apt install -y libxtst-dev
+RUN apt install -y libxinerama-dev
+RUN apt install -y libxkbcommon-dev
+RUN apt install -y libxft-dev
+RUN apt install -y libxfixes-dev
+RUN apt install -y libxrandr-dev
+RUN apt install -y libxi-dev
+
+#################
+# Install vcpkg #
+#################
+
+# Create vcpkg folder
+RUN mkdir -p /opt/vcpkg/
+
+# Download vcpkg
+RUN git clone --branch 2026.06.24 --single-branch --depth 1 https://github.com/microsoft/vcpkg /opt/vcpkg/
+
+# Install vcpkg dependencies
+RUN apt install -y zip
+RUN apt install -y unzip
+RUN apt install -y tar
+RUN apt install -y pkg-config
+# vcpkg dependencies to build FLTK
+RUN apt install -y autoconf
+RUN apt install -y autoconf-archive
+RUN apt install -y automake
+RUN apt install -y libtool
+
+# Bootstrap vcpkg
+RUN /opt/vcpkg/bootstrap-vcpkg.sh
+
+#####################
+# Install tesseract #
+#####################
+
+# Install tesseract and its dependencies
+RUN /opt/vcpkg/vcpkg install tesseract:x64-linux
+
+# Copy tesseract binaries and headers in project folder
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libtesseract.a ./deps/linux/lib/libtesseract.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libarchive.a ./deps/linux/lib/libarchive.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libbz2.a ./deps/linux/lib/libbz2.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/liblz4.a ./deps/linux/lib/liblz4.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libzstd.a ./deps/linux/lib/libzstd.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libcurl.a ./deps/linux/lib/libcurl.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libleptonica.a ./deps/linux/lib/libleptonica.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libpng.a ./deps/linux/lib/libpng.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libjpeg.a ./deps/linux/lib/libjpeg.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libtiff.a ./deps/linux/lib/libtiff.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libwebp.a ./deps/linux/lib/libwebp.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libgif.a ./deps/linux/lib/libgif.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libopenjp2.a ./deps/linux/lib/libopenjp2.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/liblzma.a ./deps/linux/lib/liblzma.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libsharpyuv.a ./deps/linux/lib/libsharpyuv.a
+RUN cp -r /opt/vcpkg/installed/x64-linux/include/tesseract/ ./deps/linux/include/
+RUN cp -r /opt/vcpkg/installed/x64-linux/include/leptonica/ ./deps/linux/include/
+
+#####################
+# Install FreeImage #
+#####################
+
+# Install FreeImage and its dependencies
+RUN /opt/vcpkg/vcpkg install freeimage:x64-linux
+
+# Copy FreeImage binaries and headers in project folder
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libFreeImage.a ./deps/linux/lib/libfreeimage.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libraw_r.a ./deps/linux/lib/libraw_r.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libOpenEXR-3_4.a ./deps/linux/lib/libopenexr.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libOpenEXRCore-3_4.a ./deps/linux/lib/libopenexrcore.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libOpenEXRUtil-3_4.a ./deps/linux/lib/libopenexrutil.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libIex-3_4.a ./deps/linux/lib/libiex.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libIlmThread-3_4.a ./deps/linux/lib/libilmthread.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libImath-3_2.a ./deps/linux/lib/libimath.a
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libopenjph.a ./deps/linux/lib/libopenjph.a
+RUN cp /opt/vcpkg/installed/x64-linux/include/FreeImage.h ./deps/linux/include/FreeImage.h
+RUN cp /opt/vcpkg/installed/x64-linux/include/FreeImageConfig.h ./deps/linux/include/FreeImageConfig.h
+
+################
+# Install FLTK #
+################
+
+# Install FLTK required build dependencies
+RUN apt install -y libgl1-mesa-dev
+RUN apt install -y libglu1-mesa-dev
+RUN apt install -y mesa-common-dev
+
+# Install FLTK and its dependencies
+RUN /opt/vcpkg/vcpkg install fltk:x64-linux
+
+# Copy FLTK binaries and headers in project folder
+RUN cp /opt/vcpkg/installed/x64-linux/lib/libfltk.a ./deps/linux/lib/libfltk.a
+RUN cp -r /opt/vcpkg/installed/x64-linux/include/FL/ ./deps/linux/include/
+
+###################
+# Install xdotool #
+###################
+
+# Create xdotool temporary build folder
+RUN mkdir -p /tmp/xdotool-build/
+
+# Download xdotool source code
+RUN git clone --branch v4.20260303.1 --single-branch --depth 1 https://github.com/jordansissel/xdotool.git /tmp/xdotool-build/
+
+# Build xdotool statically
+RUN make libxdo.a -C /tmp/xdotool-build/
+
+# Copy xdotool binaries and headers in project folder
+RUN cp /tmp/xdotool-build/libxdo.a ./deps/linux/lib/libxdo.a
+RUN cp /tmp/xdotool-build/xdo.h ./deps/linux/include/xdo.h
+
+# Clean xdotool temporary build folder
+RUN rm -rf /tmp/xdotool-build/
+
+#####################
+# Install miniaudio #
+#####################
+
+# Create miniaudio temporary build folder
+RUN mkdir -p /tmp/miniaudio-build/
+
+# Download miniaudio header
+RUN curl -L -o /tmp/miniaudio-build/miniaudio.h https://raw.githubusercontent.com/mackron/miniaudio/refs/tags/0.11.25/miniaudio.h
+
+# Download miniaudio source
+RUN curl -L -o /tmp/miniaudio-build/miniaudio.c https://raw.githubusercontent.com/mackron/miniaudio/refs/tags/0.11.25/miniaudio.c
+
+# Build miniaudio's dynamic library (not used in project for now)
+RUN g++ -fPIC -shared /tmp/miniaudio-build/miniaudio.c -o /tmp/miniaudio-build/libminiaudio.so -lpthread -lm
+
+# Build miniaudio's static library
+RUN g++ -fPIC -c /tmp/miniaudio-build/miniaudio.c -o /tmp/miniaudio-build/miniaudio.o -lpthread -lm
+RUN ar rcs /tmp/miniaudio-build/libminiaudio.a /tmp/miniaudio-build/miniaudio.o
+
+# Copy miniaudio binaries and headers in project folder
+# RUN cp /tmp/miniaudio-build/libminiaudio.so ./deps/linux/lib/libminiaudio.so
+RUN cp /tmp/miniaudio-build/libminiaudio.a ./deps/linux/lib/libminiaudio.a
+RUN cp /tmp/miniaudio-build/miniaudio.h ./deps/linux/include/miniaudio.h
+
+# Clean miniaudio temporary build folder
+RUN rm -rf /tmp/miniaudio-build/
+
+#######################
+# Install onnxruntime #
+#######################
+
+# Create onnxruntime temporary build folder
+RUN mkdir -p /tmp/onnxruntime-build/
+
+# Download onnxruntime prebuilt binaries
+RUN curl -L -o /tmp/onnxruntime-build/onnxruntime-linux-x64-static_lib-1.24.4-glibc2_28.zip https://github.com/csukuangfj/onnxruntime-libs/releases/download/v1.24.4/onnxruntime-linux-x64-static_lib-1.24.4-glibc2_28.zip
+
+# Extract onnxruntime prebuilt binaries
+RUN unzip /tmp/onnxruntime-build/onnxruntime-linux-x64-static_lib-1.24.4-glibc2_28.zip -d /tmp/onnxruntime-build/
+
+# Copy onnxruntime binaries in project folder
+RUN cp /tmp/onnxruntime-build/onnxruntime-linux-x64-static_lib-1.24.4-glibc2_28/lib/libonnxruntime.a ./deps/linux/lib/libonnxruntime.a
+
+# Clean onnxruntime temporary build folder
+RUN rm -rf /tmp/onnxruntime-build/
+
+#######################
+# Install sherpa-onnx #
+#######################
+
+# Install sherpa-onnx build dependencies
+RUN apt install -y cmake
+RUN apt install -y alsa-utils
+RUN apt install -y libasound2-dev
+
+# Create sherpa-onnx temporary build folder
+RUN mkdir -p /tmp/sherpa-onnx-build/
+
+# Download sherpa-onnx source code
+RUN git clone --branch v1.13.2 --single-branch --depth 1 https://github.com/k2-fsa/sherpa-onnx.git /tmp/sherpa-onnx-build/
+
+# Create sherpa-onnx build folder
+RUN mkdir -p /tmp/sherpa-onnx-build/build
+
+# Build sherpa-onnx statically
+RUN cmake -B /tmp/sherpa-onnx-build/build/ -DCMAKE_BUILD_TYPE=Release /tmp/sherpa-onnx-build/
+RUN make -C /tmp/sherpa-onnx-build/build/ -j$(nproc)
+
+# Copy sherpa-onnx binaries in project folder
+RUN cp /tmp/sherpa-onnx-build/build/lib/*.a ./deps/linux/lib/
+
+# Create sherpa-onnx header dependencies folder
+RUN mkdir -p ./deps/linux/include/sherpa-onnx/c-api/
+
+# Copy sherpa-onnx headers in project folder
+RUN cp /tmp/sherpa-onnx-build/sherpa-onnx/c-api/*.h ./deps/linux/include/sherpa-onnx/c-api/
+
+# Clean sherpa-onnx temporary build folder
+RUN rm -rf /tmp/sherpa-onnx-build/
+
+#############################
+# Clean vcpkg build folders #
+#############################
+
+# Clean vcpkg build folders and cache
+RUN rm -rf /opt/vcpkg/installed/
+RUN rm -rf /opt/vcpkg/buildtrees/
+RUN rm -rf /opt/vcpkg/packages/
+RUN rm -rf /opt/vcpkg/downloads/
+RUN rm -rf /tmp/vcpkg/
+
+#####################################
+## Install JavaScript dependencies ##
+#####################################
+
+# Copy project files
+COPY . .
+
+# Install dependencies
+RUN npm ci
+
+###################
+## Build project ##
+###################
+
+# Build project C++ NAPI addon and TypeScript project source code
+RUN npm run build
+
+# Open shell in container
+CMD ["bash"]
