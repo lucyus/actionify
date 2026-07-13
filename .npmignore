@@ -7,6 +7,7 @@
 /docs/media/
 /node_modules/
 /src/
+/binding.gyp
 /CODE_OF_CONDUCT.md
 /CONTRIBUTING.md
 /Dockerfile

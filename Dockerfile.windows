@@ -188,7 +188,7 @@ RUN "rm -rf /tmp/miniaudio-build/"
 COPY . .
 
 # Install dependencies
-RUN "npm ci"
+RUN "npm ci --ignore-scripts"
 
 ###################
 ## Build project ##

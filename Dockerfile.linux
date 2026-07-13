@@ -262,7 +262,7 @@ RUN rm -rf /tmp/vcpkg/
 COPY . .
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 ###################
 ## Build project ##
