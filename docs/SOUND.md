@@ -172,7 +172,7 @@ await Actionify.sound.say("Hello, world!");
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Speak a text with a custom volume (range: 0 to 100, default: 100)
+// Speak a text with a custom volume (range: 0.0 to 1.0, default: 1.0)
 await Actionify.sound.say("Hello, world!", { volume: 75 });
 ```
 
@@ -181,7 +181,7 @@ await Actionify.sound.say("Hello, world!", { volume: 75 });
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Speak a text with a custom speed (range: -10 to 10, default: 0)
+// Speak a text with a custom speed (range: 0.01 to 4.0, default: 1.0)
 await Actionify.sound.say("Hello, world!", { speed: 8 });
 ```
 
@@ -191,16 +191,19 @@ await Actionify.sound.say("Hello, world!", { speed: 8 });
 const { Actionify } = require("@lucyus/actionify");
 
 // Speak a text with a custom voice
-await Actionify.sound.say("Hello, world!", { voice: "Microsoft Zira Desktop" });
+await Actionify.sound.say("Hello, world!", { model: "kokoro-en-v0_19" });
 ```
 
-> 🌐 You can list all available voices on your system using the Powershell command (`Name` field):
+⚙️ Manage your TTS models by running this Terminal command:
 
-```powershell
-Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | ForEach-Object { $_.VoiceInfo | Select-Object Name, Culture, Gender, Age, Description }
+```bash
+npx actionify tts model list
 ```
 
-> Note: You may download additional voices in `Windows Settings > Time and Language > Speech > Manage voices > Add voices`.
+ℹ️ View all available commands by running:
+```bash
+npx actionify help
+```
 
 
 ---
