@@ -58,6 +58,7 @@
     "color",
     "recognition",
     "sound",
+    "tts",
     "windows",
     "linux",
     "actionify",
