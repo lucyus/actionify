@@ -44,7 +44,7 @@ Actionify.keyboard.tap(0x41);
 await Actionify.keyboard.tap(0x41, { delay: 1000 });
 ```
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🪟 Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [🐧 Linux Key Symbols](https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/include/X11/keysymdef.h)
 
 ### 1.2. Type Unicode-compatible text
 
@@ -147,7 +147,7 @@ const keyboardListenerControl = Actionify.keyboard.events
 
 > 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardListenerOptions](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener-options/keyboard-listener-options.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardListener](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener.type.ts), [KeyboardListenerOptions](../src/core/types/event/keyboard/keyboard-listener/keyboard-listener-options/keyboard-listener-options.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IKeyboardListenerController](../src/core/interfaces/keyboard/keyboard-listener-controller/keyboard-listener-controller.interface.ts)
 
 #### 2.1.2. Pause a keyboard listener
 
@@ -217,7 +217,7 @@ Actionify.keyboard.events.suppress("lctrl down", "a down");
 
 > ⚠️ Use Suppress Keyboard Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [Start a Keyboard Listener](#211-start-a-keyboard-listener)
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [Start a Keyboard Listener](#211-start-a-keyboard-listener)
 
 #### 2.2.2. Unsuppress keyboard events
 
@@ -237,7 +237,7 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.keyboard.events.unsuppress("a down", "b down");
 ```
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
 
 ## 3. Keyboard Recorder
 
@@ -305,7 +305,7 @@ const keyboardRecorderControl = Actionify.keyboard.track
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
 
 ### 3.2. Pause a keyboard recorder
 

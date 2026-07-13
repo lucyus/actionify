@@ -83,7 +83,7 @@ const inputListenerControl = Actionify.input.events
 
 > 💡 Tip: If you're simulating inputs from within a listener, set `ignoreInjected` to `true` to prevent the listener from recursively triggering itself.
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [InputListenerOptions](../src/core/types/event/input/input-listener/input-listener-options/input-listener-options.type.ts) [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputListener](../src/core/types/event/input/input-listener/input-listener.type.ts), [InputListenerOptions](../src/core/types/event/input/input-listener/input-listener-options/input-listener-options.type.ts), [MouseEvent](../src/core/types/event/mouse/mouse-event/mouse-event.type.ts), [KeyboardEvent](../src/core/types/event/keyboard/keyboard-event/keyboard-event.type.ts), [IInputListenerController](../src/core/interfaces/input/input-listener-controller/input-listener-controller.interface.ts)
 
 #### 1.1.2. Pause an input listener
 
@@ -153,7 +153,7 @@ Actionify.input.events.suppress("a down", "left down");
 
 > ⚠️ Use Suppress Input Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [Start an Input Listener](#111-start-an-input-listener)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [Start an Input Listener](#111-start-an-input-listener)
 
 #### 1.2.2. Unsuppress input events
 
@@ -173,7 +173,7 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.input.events.unsuppress("a down", "left down");
 ```
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts)
 
 ## 2. Input Recorder
 
@@ -241,7 +241,7 @@ const inputRecorderControl = Actionify.input.track
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [Key](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
 
 ### 2.2. Pause an input recorder
 

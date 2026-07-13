@@ -309,7 +309,7 @@ await Actionify.mouse.extraButton(1).click({ delay: 1000 });
 await Actionify.mouse.extraButton(2).click({ delay: 1000 });
 ```
 
-> Note: Windows only supports two extra mouse buttons ([see XBUTTON1 and XBUTTON2 documentation here](https://learn.microsoft.com/en-us/windows/win32/learnwin32/mouse-clicks)). For mice with more extra buttons, those might be mapped to [supported mouse](#31-listening-to-mouse-events) or [keyboard inputs](./KEYBOARD.md#21-listening-to-keyboard-events) via manufacturer's driver and/or software.
+> Note: 🪟 Windows only supports two extra mouse buttons ([see XBUTTON1 and XBUTTON2 documentation here](https://learn.microsoft.com/en-us/windows/win32/learnwin32/mouse-clicks)). For mice with more extra buttons, those might be mapped to [supported mouse](#31-listening-to-mouse-events) or [keyboard inputs](./KEYBOARD.md#21-listening-to-keyboard-events) via manufacturer's driver and/or software.
 
 ## 2. Mouse Coordinates
 
@@ -472,6 +472,8 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.mouse.events.suppress("left", "right");
 ```
 
+> 🐧 Linux does not support suppressing mouse movement or extra buttons. Attempts to do so are ignored and result in a no-op.
+
 You can also **suppress specific mouse states**:
 ```js
 const { Actionify } = require("@lucyus/actionify");
@@ -479,6 +481,9 @@ const { Actionify } = require("@lucyus/actionify");
 // Block all [Left Mouse Button] and [Right Mouse Button] press events only
 Actionify.mouse.events.suppress("left down", "right down");
 ```
+
+> 🐧 Linux does not support suppressing individual states. Suppressing one state suppresses all states.
+
 
 > Note: Even when mouse inputs are suppressed, listeners will continue to trigger normally. To pause or stop a mouse listener, you can use [mouse.events.pause()](#312-pause-a-mouse-listener) or [mouse.events.stop()](#314-stop-a-mouse-listener).
 

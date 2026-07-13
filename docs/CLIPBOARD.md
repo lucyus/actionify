@@ -32,7 +32,7 @@ const absoluteFilePath = Actionify.clipboard.copy("/path/to/file.extension");
 const absoluteDirectoryPath = Actionify.clipboard.copy("/path/to/directory/");
 ```
 
-> See also: [Clipboard File Reference](https://learn.microsoft.com/en-us/windows/win32/shell/clipboard#cf_hdrop)
+> See also: [🪟 Windows Clipboard File Reference](https://learn.microsoft.com/en-us/windows/win32/shell/clipboard#cf_hdrop)
 
 ## 2. Paste from Clipboard
 

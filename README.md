@@ -3,7 +3,7 @@
 <p align="center">
   <img src="./docs/media/images/actionify_logo_circle.png" alt="Actionify logo" width="120px" height="120px" />
   <br />
-  <em><strong>Actionify</strong> is a lightweight Node.js automation library for Windows, enabling seamless control of the mouse, keyboard, clipboard, screen, windows and sound, with additional features like OCR and more.</em>
+  <em><strong>Actionify</strong> is a cross-platform Node.js automation library for Windows and Linux, enabling seamless control of the mouse, keyboard, clipboard, screen, windows and sound, with additional features like OCR and more.</em>
 </p>
 
 <p align="center">
@@ -193,6 +193,11 @@ You are now ready to use Actionify! 🎉
 
 * Node.js 16 and above
 * Windows 10 and above
+* Linux with [glibc ≥ 2.38](https://glandium.github.io/firefox-linux-compat-matrix/), such as:
+  * Ubuntu 24.04 and above
+  * Debian 13 and above
+  * Fedora 39 and above
+  * OpenSUSE Leap 15.6 and above
 
 ## License
 
