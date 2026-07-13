@@ -1,3 +1,22 @@
+import path from "node:path";
+let nativeAddon: typeof import("@napi/actionify");
+
+try {
+  nativeAddon = require('../../../build/Release/actionify.node');
+} catch (error: any) {
+  throw new Error([
+    ``,
+    `==========================================`,
+    `\x1b[31mFailed to load Actionify's native addon module.\x1b[0m`,
+    ``,
+    `Run \x1b[96mnpx actionify postinstall\x1b[0m in your terminal and try again.`,
+    `==========================================`,
+    `\x1b[90mDetails:\x1b[0m`,
+    `  \x1b[90m• Required native addon module is missing or corrupted at: ${path.join(__dirname, "../../../build/Release/actionify.node")}\x1b[0m`,
+    `  \x1b[90m• Raw error: ${(error?.message || String(error)).split("\n")[0]}\x1b[0m`,
+  ].join("\n"));
+}
+
 const {
   getCursorPos,
   setCursorPos,
@@ -63,7 +82,7 @@ const {
   updateTrayIconMenuItemLabel,
   updateTrayIconMenuItemCallback,
   removeTrayIconMenuItem,
-} = require('../../../build/Release/actionify.node') as typeof import("@napi/actionify");
+} = nativeAddon;
 
 export {
   getCursorPos,
