@@ -1,7 +1,5 @@
 /.github/
-/build/*
-/build/Release/*
-!/build/Release/actionify.node
+/build/
 /data/
 /deps/
 /docs/media/
