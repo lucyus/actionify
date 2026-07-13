@@ -10,12 +10,7 @@ Play and manage any audio files natively in the following formats:
 
 * MP3 (`.mp3`)
 * WAV (`.wav`)
-* MIDI (`.mid`, `.midi`, `.rmi`)
-* CD Audio (`.cda`)
-
-Other formats may require external codecs.
-
-> See also: [Windows Multimedia Control Interface - Device Types](https://learn.microsoft.com/en-us/windows/win32/multimedia/device-types)
+* FLAC (`.flac`)
 
 
 ### 1.1. Start Playback
@@ -26,7 +21,7 @@ const { Actionify } = require("@lucyus/actionify");
 // Play an audio file
 const soundController = Actionify.sound.play("/path/to/audio.mp3");
 
-// Play an audio file with a custom volume (range: 0 to 1)
+// Play an audio file with a custom volume (range: 0.0 to 1.0)
 const soundController = Actionify.sound.play(
     "/path/to/audio.mp3",
     {
@@ -34,7 +29,7 @@ const soundController = Actionify.sound.play(
     }
 );
 
-// Play an audio file with a custom speed (range: 0 to 4)
+// Play an audio file with a custom speed (range: 0.01 to 4.0)
 const soundController = Actionify.sound.play(
     "/path/to/audio.mp3",
     {
@@ -108,7 +103,7 @@ Once you have [started playback](#11-start-playback), you can manage the volume 
 // Get current volume
 const currentVolume = soundController.volume;
 
-// Set current volume (range: 0 to 1)
+// Set current volume (range: 0.0 to 1.0)
 soundController.volume = 0.5;
 ```
 
@@ -121,7 +116,7 @@ Once you have [started playback](#11-start-playback), you can manage the speed w
 // Get current speed
 const currentSpeed = soundController.speed;
 
-// Set current speed (range: 0 to 4)
+// Set current speed (range: 0.01 to 4.0)
 soundController.speed = 2;
 ```
 
