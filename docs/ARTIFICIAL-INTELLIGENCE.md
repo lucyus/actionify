@@ -12,38 +12,46 @@
 const { Actionify } = require("@lucyus/actionify");
 
 // Extract text from an image using system default language
-const text = Actionify.ai.image("/path/to/image.png").text();
+const text = await Actionify.ai.image("/path/to/image.png").text();
 // Extract text from an image using English
-const text = Actionify.ai.image("/path/to/image.png").text("en");
+const text = await Actionify.ai.image("/path/to/image.png").text("eng");
 // Extract text from an image using French
-const text = Actionify.ai.image("/path/to/image.png").text("fr");
+const text = await Actionify.ai.image("/path/to/image.png").text("fra");
 // Extract text from an image using German
-const text = Actionify.ai.image("/path/to/image.png").text("de");
+const text = await Actionify.ai.image("/path/to/image.png").text("deu");
 // Extract text from an image using Spanish
-const text = Actionify.ai.image("/path/to/image.png").text("es");
+const text = await Actionify.ai.image("/path/to/image.png").text("spa");
 // Extract text from an image using Italian
-const text = Actionify.ai.image("/path/to/image.png").text("it");
+const text = await Actionify.ai.image("/path/to/image.png").text("ita");
 // Extract text from an image using Portuguese
-const text = Actionify.ai.image("/path/to/image.png").text("pt");
+const text = await Actionify.ai.image("/path/to/image.png").text("por");
 // Extract text from an image using Russian
-const text = Actionify.ai.image("/path/to/image.png").text("ru");
+const text = await Actionify.ai.image("/path/to/image.png").text("rus");
 // Extract text from an image using Simplified Chinese
-const text = Actionify.ai.image("/path/to/image.png").text("zh-CN");
+const text = await Actionify.ai.image("/path/to/image.png").text("chi_sim");
 // Extract text from an image using Traditional Chinese
-const text = Actionify.ai.image("/path/to/image.png").text("zh-TW");
+const text = await Actionify.ai.image("/path/to/image.png").text("chi_tra");
 // Extract text from an image using Japanese
-const text = Actionify.ai.image("/path/to/image.png").text("ja");
+const text = await Actionify.ai.image("/path/to/image.png").text("jpn");
 // Extract text from an image using Korean
-const text = Actionify.ai.image("/path/to/image.png").text("ko");
+const text = await Actionify.ai.image("/path/to/image.png").text("kor");
 // Extract text from an image using Arabic
-const text = Actionify.ai.image("/path/to/image.png").text("ar");
+const text = await Actionify.ai.image("/path/to/image.png").text("ara");
 ```
 
 * If no text has been found, return an empty string `""`.
 
-> You can manage your system languages in Windows Settings → Time and Language → Language.
+⚙️ Manage your OCR languages by running this Terminal command:
+```bash
+npx actionify ocr language list
+```
 
-> See also: [IETF BCP 47 Language Tags](https://en.wikipedia.org/wiki/IETF_language_tag#List_of_common_primary_language_subtags)
+ℹ️ View all available commands by running:
+```bash
+npx actionify help
+```
+
+> See also: [Tesseract OCR Languages Supported](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions)
 
 ## 2. Image Detection
 
