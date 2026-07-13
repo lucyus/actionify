@@ -1,3 +1,69 @@
+## [0.18.0](https://github.com/lucyus/actionify/compare/v0.17.4...v0.18.0) (2026-07-13)
+
+### ⚠ BREAKING CHANGES
+
+* **@core/controllers:** use mouse scroll counts instead of wheel deltas
+* **@config:** the native addon is no longer included in the npm
+package tarball and is no longer available immediately after npm install.
+* **@core/controllers:** replace Windows SAPI TTS with cross-platform sherpa-onnx
+* **@addon:** replace Windows SAPI TTS with cross-platform sherpa-onnx
+* **@core/controllers:** replace Windows MCI audio with cross-platform miniaudio
+* **@addon:** replace Windows MCI audio with cross-platform miniaudio
+* **@core/controllers:** replace Windows OCR with cross-platform Tesseract OCR
+* **@addon/windows:** replace Windows OCR with cross-platform Tesseract OCR
+
+### Features
+
+* **@addon/windows:** add utilities and filesystem path helpers ([564bb89](https://github.com/lucyus/actionify/commit/564bb890b13c4a97a947e2b4616e8972be3505e0))
+* **@addon/windows:** replace Windows OCR with cross-platform Tesseract OCR ([1db09f5](https://github.com/lucyus/actionify/commit/1db09f55d556a3bd66d34cf8fa8f02575878b72f))
+* **@addon:** replace Windows MCI audio with cross-platform miniaudio ([42977e2](https://github.com/lucyus/actionify/commit/42977e222efa1ae0333321a780ddd1e5ece89e57))
+* **@addon:** replace Windows SAPI TTS with cross-platform sherpa-onnx ([857591b](https://github.com/lucyus/actionify/commit/857591badf1c7b36eff924a84362ecdc384ce2c2))
+* **@config:** move native addon installation to postinstall command ([93517e9](https://github.com/lucyus/actionify/commit/93517e9aca4b8a5dcdf96a08291e9bc1be2365fd))
+* **@core/controllers:** replace Windows MCI audio with cross-platform miniaudio ([e10a12c](https://github.com/lucyus/actionify/commit/e10a12c38ef54416e038131ae2d7555660dc70ac))
+* **@core/controllers:** replace Windows OCR with cross-platform Tesseract OCR ([aeae383](https://github.com/lucyus/actionify/commit/aeae38357c4897123eff22bbe7fe82bfdb11cbc7))
+* **@core/controllers:** replace Windows SAPI TTS with cross-platform sherpa-onnx ([24cffd3](https://github.com/lucyus/actionify/commit/24cffd3dc136e073f68eaf7ed9b48c2e839723a1))
+* **@core/controllers:** use mouse scroll counts instead of wheel deltas ([98d92f2](https://github.com/lucyus/actionify/commit/98d92f248194cf306996f39c922a91b6320896e5))
+* **global:** add  CLI ([a0dea5e](https://github.com/lucyus/actionify/commit/a0dea5ed423400a0a277886de61bd91df5ea946d))
+* **global:** add Linux native addon implementation ([56a6052](https://github.com/lucyus/actionify/commit/56a60526fce72bf1420cf04d0f05013c8255dce2))
+
+### Bug Fixes
+
+* **@addon/declarations:** correct 'getPixelColorsFromImage()' TypeScript return type declaration ([dacc991](https://github.com/lucyus/actionify/commit/dacc991249981ab7a490b140fd9f73efc5040036))
+* **@addon:** return opaque alpha for 'screen.pixel.color()' ([6b0cb87](https://github.com/lucyus/actionify/commit/6b0cb87f9e3ba4da8b6f0973cb085acee024440e))
+
+### Documentation
+
+* **@config:** add sound keyword to package metadata ([7560845](https://github.com/lucyus/actionify/commit/75608456adeda753b57af3f62ca7b93de92f46c5))
+* **@config:** add TTS keyword to package metadata ([1ef4ca6](https://github.com/lucyus/actionify/commit/1ef4ca65b93f46cd85f5590e7fadf5edeca273b5))
+* **@docs/ai:** update OCR language examples and CLI instructions ([276421d](https://github.com/lucyus/actionify/commit/276421d6406065f1c3473d7b62ecfb529b574a96))
+* **@docs/mouse:** update mouse scroll API examples for scroll counts ([a9641b7](https://github.com/lucyus/actionify/commit/a9641b744b3ef0ca3094752fed480916f0ef9a7f))
+* **@docs/sound:** update sound format support and parameter ranges ([af9fa3d](https://github.com/lucyus/actionify/commit/af9fa3d56a91d8bdc32c5fb3ac37e711a4012961))
+* **@docs/sound:** update TTS examples and model management instructions ([a5ad2a0](https://github.com/lucyus/actionify/commit/a5ad2a0a444a4e10f7034ab258213315506280a7))
+* **@docs:** add Linux platform support details ([aa284f2](https://github.com/lucyus/actionify/commit/aa284f28968a5ed4302db1b0c97d2a3ddaeddea4))
+* **@docs:** add Linux screen coordinate documentation ([6a7ec6c](https://github.com/lucyus/actionify/commit/6a7ec6c7c69f04b06d8fd90ab6af7f912955374a))
+* **@docs:** update contributing guide for Windows and Linux development environments ([8768a5e](https://github.com/lucyus/actionify/commit/8768a5e8af3f38f3f5d90b685c301229cfb9b3b0))
+* **@docs:** update installation instructions for native addon setup ([456c23f](https://github.com/lucyus/actionify/commit/456c23fc96b7b2a40c0f90bc4f5a247e288a0cdd))
+
+### Miscellaneous Chores
+
+* **@config:** anchor ignored paths to repository root ([cc1de42](https://github.com/lucyus/actionify/commit/cc1de420903cb0184092f79ac0da244d2faa607f))
+* **@config:** exclude Docker build files from published package ([824e0ab](https://github.com/lucyus/actionify/commit/824e0ab262aef43f82272f1df426ed540f836a9d))
+* **@config:** prevent install-time build execution in published package ([1699347](https://github.com/lucyus/actionify/commit/16993470aa8b59e6cc34f8a3b1b6f4efaecdbd55))
+
+### Code Refactoring
+
+* **@addon:** improve native addon loading error message ([bb14c83](https://github.com/lucyus/actionify/commit/bb14c83413642338ef6e999aa0db0ed94f631cf6))
+* **@addon:** replace platform-specific window handles with window IDs ([319512f](https://github.com/lucyus/actionify/commit/319512f065d7911f499a03ee3ebfec29ecf9a95e))
+* **@config:** add dedicated TypeScript build and clean workflows ([b31a36b](https://github.com/lucyus/actionify/commit/b31a36b51f75d1c6ac73745d8f81140bf989d586))
+* **@core:** replace platform-specific window handles with window IDs ([ea348dd](https://github.com/lucyus/actionify/commit/ea348ddee9099b4bc6da8e1cc708e511d7a56c78))
+* **global:** rename Windows native addon entrypoint ([395638f](https://github.com/lucyus/actionify/commit/395638fe410b2c00d06e4b212a2d1907dd854571))
+
+### Build System
+
+* **@config:** add cross-platform native build configuration ([f329659](https://github.com/lucyus/actionify/commit/f329659286d44743b28270982f0490f43e9eb9a3))
+* **@docker:** update Windows build container for cross-platform dependencies ([aeb11a8](https://github.com/lucyus/actionify/commit/aeb11a8b5ffb313a74c54e5ae8e78d15c8027595))
+* **global:** add Linux build container ([99c261f](https://github.com/lucyus/actionify/commit/99c261f28ae89f097bdc86a898570d05dbb2061b))
+* **global:** standardize Windows Docker workflows ([93e4aee](https://github.com/lucyus/actionify/commit/93e4aeee174396e73aaa46d8f9a08870d44c2907))
 ## [0.17.4](https://github.com/lucyus/actionify/compare/v0.17.3...v0.17.4) (2026-04-12)
 
 ### Miscellaneous Chores
