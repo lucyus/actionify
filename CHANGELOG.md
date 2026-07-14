@@ -1,3 +1,8 @@
+## [0.18.1](https://github.com/lucyus/actionify/compare/v0.18.0...v0.18.1) (2026-07-14)
+
+### Miscellaneous Chores
+
+* **@config:** prevent npm from automatically building node-gyp module ([545f4f0](https://github.com/lucyus/actionify/commit/545f4f0c52b4a82cf2aaa984d417959efec7c8bf))
 ## [0.18.0](https://github.com/lucyus/actionify/compare/v0.17.4...v0.18.0) (2026-07-13)
 
 ### ⚠ BREAKING CHANGES
