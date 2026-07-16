@@ -38,7 +38,7 @@
     "release:minor": "bash -c \"version=$(npm version minor --no-git-tag-version) && git add package.json package-lock.json && git commit -m \\\"[WIP] release(global): release $version\\\" && git tag \\\"$version\\\" && changes=$(npx conventional-changelog -p conventionalcommits -r 2) && changes=$(echo \\\"$changes\\\" | sed '1,2d') && npm run changelog && git add CHANGELOG.md && git commit --amend -m \\\"release(global): release $version\\\" -m \\\"$changes\\\" && git tag -d \\\"$version\\\" && git tag \\\"$version\\\" && git push origin master && git push --tags\"",
     "release:patch": "bash -c \"version=$(npm version patch --no-git-tag-version) && git add package.json package-lock.json && git commit -m \\\"[WIP] release(global): release $version\\\" && git tag \\\"$version\\\" && changes=$(npx conventional-changelog -p conventionalcommits -r 2) && changes=$(echo \\\"$changes\\\" | sed '1,2d') && npm run changelog && git add CHANGELOG.md && git commit --amend -m \\\"release(global): release $version\\\" -m \\\"$changes\\\" && git tag -d \\\"$version\\\" && git tag \\\"$version\\\" && git push origin master && git push --tags\"",
     "deploy": "npm run fastbuild:prod && npm publish --access public",
-    "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [process.argv[1].replace('src', 'lib').replace('.ts', '.js')], { stdio: 'inherit', shell: true });\"",
+    "execute": "node -e \"const { spawn } = require('child_process'); spawn('node', [process.argv[1].replace('src', 'lib').replace('.ts', '.js')], { stdio: 'inherit' });\"",
     "build:execute": "npm run build && npm run execute",
     "fastbuild:execute": "npm run fastbuild && npm run execute"
   },
