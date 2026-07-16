@@ -1,3 +1,9 @@
+## [0.18.2](https://github.com/lucyus/actionify/compare/v0.18.1...v0.18.2) (2026-07-16)
+
+### Bug Fixes
+
+* **@cli:** remove unsafe shell usage from child processes ([d5fa1f4](https://github.com/lucyus/actionify/commit/d5fa1f456464a0f4caed1712fe5b8df1da82add6))
+* **@config:** remove unsafe shell usage from child processes ([3d6ceae](https://github.com/lucyus/actionify/commit/3d6ceae33ae4ac2eeefdb31dc1b36ec8dfda3c09))
 ## [0.18.1](https://github.com/lucyus/actionify/compare/v0.18.0...v0.18.1) (2026-07-14)
 
 ### Miscellaneous Chores
