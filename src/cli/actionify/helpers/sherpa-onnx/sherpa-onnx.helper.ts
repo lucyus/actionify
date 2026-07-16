@@ -110,7 +110,7 @@ export class SherpaOnnxHelper {
     const fileContent = await (await fetch(githubAssetFile.browser_download_url)).arrayBuffer();
     const downloadLocation = path.join(pathToDownloadTo, githubAssetFile.name);
     fs.writeFileSync(downloadLocation, Buffer.from(fileContent));
-    const childProcess = spawn("tar", ["-xjvf", downloadLocation.replace(/\\/g, "/"), "-C", pathToDownloadTo.replace(/\\/g, "/"), "--force-local"], { shell: true });
+    const childProcess = spawn("tar", ["-xjvf", downloadLocation.replace(/\\/g, "/"), "-C", pathToDownloadTo.replace(/\\/g, "/"), "--force-local"]);
     let commandStdOuput = "";
     childProcess.stdout.on("data", (data) => commandStdOuput += data.toString());
     childProcess.stderr.on("data", (data) => commandStdOuput += data.toString());
