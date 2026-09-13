@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import stream from "stream";
+import zlib from "zlib";
 import { Inspectable } from "../../../core/utilities";
 
 /**
@@ -7,7 +9,7 @@ import { Inspectable } from "../../../core/utilities";
  */
 export class FilesystemController {
 
-  static readonly #fileWriters: Map<string, fs.WriteStream> = new Map<string, fs.WriteStream>();
+  static readonly #fileWriters: Map<string, stream.Writable> = new Map<string, stream.Writable>();
 
   public constructor() { }
 
@@ -136,6 +138,7 @@ export class FilesystemController {
    * @description Read a readable file chunk by chunk and return a {@link https://nodejs.org/api/stream.html#readable-streams ReadableStream}.
    *
    * @param filePath Path to a readable file.
+   * @param options Input file {@link https://nodejs.org/api/fs.html#fscreatereadstreampath-options ReadStreamOptions}, with optional gzip `decompress`.
    * @returns A {@link https://nodejs.org/api/stream.html#readable-streams ReadableStream} to the file.
    *
    * ---
@@ -143,8 +146,29 @@ export class FilesystemController {
    * const readStream = Actionify.filesystem.readStream("path/to/file.extension");
    * readStream.on("data", (chunk) => console.log(chunk));
    */
-  public readStream(filePath: string) {
-    return fs.createReadStream(filePath, { encoding: "utf-8" });
+  public readStream(
+    filePath: string,
+    options?: Parameters<typeof fs.createReadStream>[1] & { decompress?: boolean }
+  ): stream.Readable {
+    const safeOptions: Parameters<typeof fs.createReadStream>[1] = {
+      ...(typeof options === "object" ? ((({ decompress: _, ...rest }) => rest)(options)) : {}),
+      encoding: (typeof options === "string")
+        ? options
+        : (options?.encoding !== undefined ? options.encoding : "utf-8")
+      ,
+    };
+    const shouldDecompress = (typeof options === "object" && options.decompress !== undefined)
+      ? options.decompress
+      : this.isCompressed(filePath)
+    ;
+    if (shouldDecompress) {
+      const encoding = safeOptions.encoding !== undefined ? safeOptions.encoding : "utf-8";
+      delete safeOptions.encoding;
+      const decompressReadStream = fs.createReadStream(filePath, safeOptions).pipe(zlib.createGunzip());
+      decompressReadStream.setEncoding(encoding);
+      return decompressReadStream;
+    }
+    return fs.createReadStream(filePath, safeOptions);
   }
 
   /**
@@ -169,25 +193,47 @@ export class FilesystemController {
    * @description Create a {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to a writable file.
    *
    * @param filePath Path to a writable file.
+   * @param options Output file {@link https://nodejs.org/api/fs.html#fscreatewritestreampath-options WriteStreamOptions}, with optional gzip `compress`.
    * @returns A {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to the file.
    *
    * ---
    * @example
+   * // Asynchronously write to a file
    * const writeStream = Actionify.filesystem.writeStream("path/to/file.extension");
    * writeStream.write("Hello, world!");
    * writeStream.end();
+   *
+   * // Asynchronously write to a file and compress it
+   * const writeStream = Actionify.filesystem.writeStream("path/to/file.extension", { compress: true });
+   * writeStream.write("Hello, world!");
+   * writeStream.end();
    */
-  public writeStream(filePath: string) {
+  public writeStream(
+    filePath: string,
+    options?: Parameters<typeof fs.createWriteStream>[1] & { compress?: boolean },
+  ): stream.Writable {
     const absoluteFilePath = path.resolve(filePath);
     if (FilesystemController.#fileWriters.has(absoluteFilePath)) {
       return FilesystemController.#fileWriters.get(absoluteFilePath)!;
     }
-    const writeStream = fs.createWriteStream(absoluteFilePath, { encoding: "utf-8" });
-    FilesystemController.#fileWriters.set(absoluteFilePath, writeStream);
-    writeStream.on("close", () => {
+    const shouldCompress = typeof options === "object" && options.compress === true;
+    const safeOptions: Parameters<typeof fs.createWriteStream>[1] = {
+      ...(typeof options === "object" ? ((({ compress: _, ...rest }) => rest)(options)) : {}),
+      encoding: (typeof options === "string")
+        ? options
+        : (options?.encoding !== undefined ? options.encoding : "utf-8")
+      ,
+    };
+    const simpleWriteStream = fs.createWriteStream(absoluteFilePath, safeOptions);
+    const selectedWriteStream = shouldCompress ? zlib.createGzip() : simpleWriteStream;
+    if (shouldCompress) {
+      selectedWriteStream.pipe(simpleWriteStream);
+    }
+    FilesystemController.#fileWriters.set(absoluteFilePath, selectedWriteStream);
+    selectedWriteStream.on("close", () => {
       FilesystemController.#fileWriters.delete(absoluteFilePath);
     });
-    return writeStream;
+    return selectedWriteStream;
   }
 
   /**
@@ -208,6 +254,7 @@ export class FilesystemController {
    * @description Create a {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to an appendable file.
    *
    * @param filePath Path to an appendable file.
+   * @param options Output file {@link https://nodejs.org/api/fs.html#fscreatewritestreampath-options WriteStreamOptions}.
    * @returns A {@link https://nodejs.org/api/stream.html#writable-streams WritableStream} to the file.
    *
    * ---
@@ -216,12 +263,23 @@ export class FilesystemController {
    * appendStream.write("Hello, world!");
    * appendStream.end();
    */
-  public appendStream(filePath: string) {
+  public appendStream(
+    filePath: string,
+    options?: Parameters<typeof fs.createWriteStream>[1],
+  ) {
     const absoluteFilePath = path.resolve(filePath);
     if (FilesystemController.#fileWriters.has(absoluteFilePath)) {
       return FilesystemController.#fileWriters.get(absoluteFilePath)!;
     }
-    const appendStream = fs.createWriteStream(absoluteFilePath, { encoding: "utf-8", flags: "a" });
+    const safeOptions: Parameters<typeof fs.createWriteStream>[1] = {
+      ...(typeof options === "object" ? options : {}),
+      encoding: (typeof options === "string")
+        ? options
+        : (options?.encoding !== undefined ? options.encoding : "utf-8")
+      ,
+      flags: (typeof options === "object") ? options.flags ?? "a" : "a",
+    };
+    const appendStream = fs.createWriteStream(absoluteFilePath, safeOptions);
     FilesystemController.#fileWriters.set(absoluteFilePath, appendStream);
     appendStream.on("close", () => {
       FilesystemController.#fileWriters.delete(absoluteFilePath);
