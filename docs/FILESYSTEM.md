@@ -132,6 +132,14 @@ const { Actionify } = require("@lucyus/actionify");
 const isExecutable = Actionify.filesystem.canExecute("path/to/file.extension");
 ```
 
+### 2.5. Check if a file is compressed
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+const isCompressed = Actionify.filesystem.isCompressed("path/to/file.extension");
+```
+
 ---
 
 [← Home](../README.md#features)
