@@ -1,4 +1,4 @@
-import { WriteStream } from "fs";
+import type { Writable } from "stream";
 import {
   startInputEventListener,
 } from "../../../../../addon";
@@ -10,14 +10,14 @@ import { Inspectable } from "../../../../../core/utilities";
 export class InputRecorderScopeController {
 
   #inputActions: InputAction[];
-  #writeStream: WriteStream;
+  #writeStream: Writable;
   #isPaused: boolean;
   #inputRecorderController: InputRecorderController;
   #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     inputActions: InputAction[],
-    writeStream: WriteStream,
+    writeStream: Writable,
     inputRecorderOptions?: InputRecorderOptions,
   ) {
     this.#inputActions = inputActions;

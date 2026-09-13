@@ -1,4 +1,4 @@
-import { WriteStream } from "fs";
+import type { Writable } from "stream";
 import {
   startInputEventListener,
 } from "../../../../../addon";
@@ -10,14 +10,14 @@ import { Inspectable } from "../../../../../core/utilities";
 export class MouseRecorderScopeController {
 
   #mouseActions: MouseAction[];
-  #writeStream: WriteStream;
+  #writeStream: Writable;
   #isPaused: boolean;
   #mouseRecorderController: MouseRecorderController;
   #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     mouseActions: MouseAction[],
-    writeStream: WriteStream,
+    writeStream: Writable,
     mouseRecorderOptions?: MouseRecorderOptions,
   ) {
     this.#mouseActions = mouseActions;

@@ -1,4 +1,4 @@
-import { WriteStream } from "fs";
+import type { Writable } from "stream";
 import {
   startInputEventListener,
 } from "../../../../../addon";
@@ -10,14 +10,14 @@ import { Inspectable } from "../../../../../core/utilities";
 export class KeyboardRecorderScopeController {
 
   #keyboardActions: KeyAction[];
-  #writeStream: WriteStream;
+  #writeStream: Writable;
   #isPaused: boolean;
   #keyboardRecorderController: KeyboardRecorderController;
   #shouldIgnoreInjectedInputEvents: boolean;
 
   public constructor(
     keyboardActions: KeyAction[],
-    writeStream: WriteStream,
+    writeStream: Writable,
     keyboardRecorderOptions?: KeyboardRecorderOptions,
   ) {
     this.#keyboardActions = keyboardActions;
