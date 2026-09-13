@@ -44,7 +44,7 @@ export class MouseRecorderSettingsBuilder {
    */
   public into(filepath: string, mouseRecorderFileOptions?: MouseRecorderFileOptions) {
     const safeMouseRecorderFileOptions: Required<MouseRecorderFileOptions> = {
-      compress: mouseRecorderFileOptions?.compress ?? false,
+      compress: mouseRecorderFileOptions?.compress ?? true,
     };
     return new MouseRecorderScopeBuilder(this.#mouseActions, filepath, safeMouseRecorderFileOptions);
   }

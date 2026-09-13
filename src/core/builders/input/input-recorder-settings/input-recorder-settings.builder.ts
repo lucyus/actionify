@@ -44,7 +44,7 @@ export class InputRecorderSettingsBuilder {
    */
   public into(filepath: string, inputRecorderFileOptions?: InputRecorderFileOptions) {
     const safeInputRecorderFileOptions: Required<InputRecorderFileOptions> = {
-      compress: inputRecorderFileOptions?.compress ?? false,
+      compress: inputRecorderFileOptions?.compress ?? true,
     };
     return new InputRecorderScopeBuilder(this.#inputActions, filepath, safeInputRecorderFileOptions);
   }

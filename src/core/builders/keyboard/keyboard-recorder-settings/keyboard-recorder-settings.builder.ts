@@ -44,7 +44,7 @@ export class KeyboardRecorderSettingsBuilder {
    */
   public into(filepath: string, keyboardRecorderFileOptions?: KeyboardRecorderFileOptions) {
     const safeKeyboardRecorderFileOptions: Required<KeyboardRecorderFileOptions> = {
-      compress: keyboardRecorderFileOptions?.compress ?? false,
+      compress: keyboardRecorderFileOptions?.compress ?? true,
     };
     return new KeyboardRecorderScopeBuilder(this.#keyboardActions, filepath, safeKeyboardRecorderFileOptions);
   }
