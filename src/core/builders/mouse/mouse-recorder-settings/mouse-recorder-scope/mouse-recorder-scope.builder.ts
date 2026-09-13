@@ -2,6 +2,7 @@ import { Actionify } from "../../../../../core";
 import { MouseRecorderScopeController } from "../../../../../core/controllers";
 import type {
   MouseAction,
+  MouseRecorderFileOptions,
   MouseRecorderOptions,
 } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
@@ -10,13 +11,16 @@ export class MouseRecorderScopeBuilder {
 
   #mouseActions: MouseAction[];
   #filepath: string;
+  #mouseRecorderFileOptions: Required<MouseRecorderFileOptions>;
 
   public constructor(
     mouseActions: MouseAction[],
-    filepath: string
+    filepath: string,
+    mouseRecorderFileOptions: Required<MouseRecorderFileOptions>,
   ) {
     this.#mouseActions = mouseActions;
     this.#filepath = filepath;
+    this.#mouseRecorderFileOptions = mouseRecorderFileOptions;
   }
 
   /**
@@ -51,7 +55,7 @@ export class MouseRecorderScopeBuilder {
   public start(mouseRecorderOptions?: MouseRecorderOptions) {
     const mouseRecorderScopeController = new MouseRecorderScopeController(
       this.#mouseActions,
-      Actionify.filesystem.writeStream(this.#filepath),
+      Actionify.filesystem.writeStream(this.#filepath, this.#mouseRecorderFileOptions),
       mouseRecorderOptions,
     );
     return mouseRecorderScopeController.recorderController;

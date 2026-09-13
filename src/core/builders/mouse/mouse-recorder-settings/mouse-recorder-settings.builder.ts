@@ -1,5 +1,5 @@
 import { MouseRecorderScopeBuilder } from "../../../../core/builders";
-import type { MouseAction } from "../../../../core/types";
+import type { MouseAction, MouseRecorderFileOptions } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
 
 export class MouseRecorderSettingsBuilder {
@@ -42,8 +42,11 @@ export class MouseRecorderSettingsBuilder {
    *   .into("/path/to/mouse-record.act")
    *   .start({ ignoreInjected: true });
    */
-  public into(filepath: string) {
-    return new MouseRecorderScopeBuilder(this.#mouseActions, filepath);
+  public into(filepath: string, mouseRecorderFileOptions?: MouseRecorderFileOptions) {
+    const safeMouseRecorderFileOptions: Required<MouseRecorderFileOptions> = {
+      compress: mouseRecorderFileOptions?.compress ?? false,
+    };
+    return new MouseRecorderScopeBuilder(this.#mouseActions, filepath, safeMouseRecorderFileOptions);
   }
 
   /**

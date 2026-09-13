@@ -1,5 +1,5 @@
 import { KeyboardRecorderScopeBuilder } from "../../../../core/builders";
-import type { KeyAction } from "../../../../core/types";
+import type { KeyAction, KeyboardRecorderFileOptions } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
 
 export class KeyboardRecorderSettingsBuilder {
@@ -42,8 +42,11 @@ export class KeyboardRecorderSettingsBuilder {
    *   .into("/path/to/keyboard-record.act")
    *   .start({ ignoreInjected: true });
    */
-  public into(filepath: string) {
-    return new KeyboardRecorderScopeBuilder(this.#keyboardActions, filepath);
+  public into(filepath: string, keyboardRecorderFileOptions?: KeyboardRecorderFileOptions) {
+    const safeKeyboardRecorderFileOptions: Required<KeyboardRecorderFileOptions> = {
+      compress: keyboardRecorderFileOptions?.compress ?? false,
+    };
+    return new KeyboardRecorderScopeBuilder(this.#keyboardActions, filepath, safeKeyboardRecorderFileOptions);
   }
 
   /**

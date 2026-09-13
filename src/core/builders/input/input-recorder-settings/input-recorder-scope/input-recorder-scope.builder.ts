@@ -2,6 +2,7 @@ import { Actionify } from "../../../../../core";
 import { InputRecorderScopeController } from "../../../../../core/controllers";
 import type {
   InputAction,
+  InputRecorderFileOptions,
   InputRecorderOptions,
 } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
@@ -10,13 +11,16 @@ export class InputRecorderScopeBuilder {
 
   #inputActions: InputAction[];
   #filepath: string;
+  #inputRecorderFileOptions: Required<InputRecorderFileOptions>;
 
   public constructor(
     inputActions: InputAction[],
-    filepath: string
+    filepath: string,
+    inputRecorderFileOptions: Required<InputRecorderFileOptions>,
   ) {
     this.#inputActions = inputActions;
     this.#filepath = filepath;
+    this.#inputRecorderFileOptions = inputRecorderFileOptions;
   }
 
   /**
@@ -51,7 +55,7 @@ export class InputRecorderScopeBuilder {
   public start(inputRecorderOptions?: InputRecorderOptions) {
     const inputRecorderScopeController = new InputRecorderScopeController(
       this.#inputActions,
-      Actionify.filesystem.writeStream(this.#filepath),
+      Actionify.filesystem.writeStream(this.#filepath, this.#inputRecorderFileOptions),
       inputRecorderOptions,
     );
     return inputRecorderScopeController.recorderController;

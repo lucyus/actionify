@@ -1,5 +1,5 @@
 import { InputRecorderScopeBuilder } from "../../../../core/builders";
-import type { InputAction } from "../../../../core/types";
+import type { InputAction, InputRecorderFileOptions } from "../../../../core/types";
 import { Inspectable } from "../../../../core/utilities";
 
 export class InputRecorderSettingsBuilder {
@@ -42,8 +42,11 @@ export class InputRecorderSettingsBuilder {
    *   .into("/path/to/input-record.act")
    *   .start({ ignoreInjected: true });
    */
-  public into(filepath: string) {
-    return new InputRecorderScopeBuilder(this.#inputActions, filepath);
+  public into(filepath: string, inputRecorderFileOptions?: InputRecorderFileOptions) {
+    const safeInputRecorderFileOptions: Required<InputRecorderFileOptions> = {
+      compress: inputRecorderFileOptions?.compress ?? false,
+    };
+    return new InputRecorderScopeBuilder(this.#inputActions, filepath, safeInputRecorderFileOptions);
   }
 
   /**

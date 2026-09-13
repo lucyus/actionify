@@ -2,6 +2,7 @@ import { Actionify } from "../../../../../core";
 import { KeyboardRecorderScopeController } from "../../../../../core/controllers";
 import type {
   KeyAction,
+  KeyboardRecorderFileOptions,
   KeyboardRecorderOptions,
 } from "../../../../../core/types";
 import { Inspectable } from "../../../../../core/utilities";
@@ -10,13 +11,16 @@ export class KeyboardRecorderScopeBuilder {
 
   #keyboardActions: KeyAction[];
   #filepath: string;
+  #keyboardRecorderFileOptions: Required<KeyboardRecorderFileOptions>;
 
   public constructor(
     keyboardActions: KeyAction[],
-    filepath: string
+    filepath: string,
+    keyboardRecorderFileOptions: Required<KeyboardRecorderFileOptions>,
   ) {
     this.#keyboardActions = keyboardActions;
     this.#filepath = filepath;
+    this.#keyboardRecorderFileOptions = keyboardRecorderFileOptions;
   }
 
   /**
@@ -51,7 +55,7 @@ export class KeyboardRecorderScopeBuilder {
   public start(keyboardRecorderOptions?: KeyboardRecorderOptions) {
     const keyboardRecorderScopeController = new KeyboardRecorderScopeController(
       this.#keyboardActions,
-      Actionify.filesystem.writeStream(this.#filepath),
+      Actionify.filesystem.writeStream(this.#filepath, this.#keyboardRecorderFileOptions),
       keyboardRecorderOptions,
     );
     return keyboardRecorderScopeController.recorderController;
