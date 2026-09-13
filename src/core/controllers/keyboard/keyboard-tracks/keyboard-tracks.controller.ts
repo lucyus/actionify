@@ -59,6 +59,8 @@ export class KeyboardTracksController {
    * @description Replay all input events from a previous `track.record` file.
    *
    * @param filepath The file path of a previous `track.record` file.
+   * @param options.speed The speed at which to replay the input events. Defaults to `1`.
+   * @param options.decompress Whether to decompress `filepath` content. If unset, automatically detects whether the file is compressed.
    * @returns A promise that resolves when all the input events have been replayed.
    *
    * ---
@@ -72,7 +74,7 @@ export class KeyboardTracksController {
    * // Replay all keyboard events twice slower
    * await Actionify.keyboard.track.replay("/path/to/keyboard-record.act", { speed: 0.5 });
    */
-  public async replay(filepath: string, options?: { speed?: number }) {
+  public async replay(filepath: string, options?: { speed?: number, decompress?: boolean }) {
     await Actionify.input.track.replay(filepath, options);
   }
 

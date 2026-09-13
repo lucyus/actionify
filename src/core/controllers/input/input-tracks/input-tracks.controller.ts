@@ -70,6 +70,8 @@ export class InputTracksController {
    * @description Replay all input events from a previous `track.record` file.
    *
    * @param filepath The file path of a previous `track.record` file.
+   * @param options.speed The speed at which to replay the input events. Defaults to `1`.
+   * @param options.decompress Whether to decompress `filepath` content. If unset, automatically detects whether the file is compressed.
    * @returns A promise that resolves when all the input events have been replayed.
    *
    * ---
@@ -83,11 +85,12 @@ export class InputTracksController {
    * // Replay all keyboard and mouse events twice slower
    * await Actionify.input.track.replay("/path/to/input-record.act", { speed: 0.5 });
    */
-  public async replay(filepath: string, options?: { speed?: number }) {
+  public async replay(filepath: string, options?: { speed?: number, decompress?: boolean }) {
     if (!Actionify.filesystem.exists(filepath)) {
       throw new Error(`File does not exist: ${filepath}`);
     }
-    const readStream = Actionify.filesystem.readStream(filepath);
+    const shouldDecompress = options?.decompress ?? Actionify.filesystem.isCompressed(filepath);
+    const readStream = Actionify.filesystem.readStream(filepath, { decompress: shouldDecompress });
     let previousIncompleteLine = "";
     let previousTimestamp = Infinity;
     let accumulatedDelay = 0;
