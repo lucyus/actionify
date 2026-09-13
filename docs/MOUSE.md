@@ -526,11 +526,19 @@ const mouseRecorderControl = Actionify.mouse.track
   .record()
   .into("/path/to/mouse-record.act")
   .start({ ignoreInjected: true });
+
+// Record all mouse events into a decompressed Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record()
+  .into("/path/to/mouse-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts), [MouseRecorderFileOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-file-options/mouse-recorder-file-options.type.ts)
 
 #### 4.1.2. Start recording specific mouse events
 
@@ -549,6 +557,12 @@ const mouseRecorderControl = Actionify.mouse.track
   .record("left", "move")
   .into("/path/to/mouse-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [Left Mouse Button] and [Mouse Movement] mouse events into a decompressed Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record("left", "move")
+  .into("/path/to/mouse-record.act", { compress: false })
+  .start();
 ```
 
 You can also **only record mouse input combinations**:
@@ -566,11 +580,19 @@ const mouseRecorderControl = Actionify.mouse.track
   .record("left down", "right down")
   .into("/path/to/mouse-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [Left Mouse Button] and [Right Mouse Button] combined press events into a decompressed Actionify Track (.act) file.
+const mouseRecorderControl = Actionify.mouse.track
+  .record("left down", "right down")
+  .into("/path/to/mouse-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [MouseRecorderOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-options.type.ts), [MouseRecorderFileOptions](../src/core/types/event/mouse/mouse-recorder/mouse-recorder-options/mouse-recorder-file-options/mouse-recorder-file-options.type.ts)
 
 ### 4.2. Pause a mouse recorder
 
