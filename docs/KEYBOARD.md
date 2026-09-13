@@ -261,11 +261,19 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record()
   .into("/path/to/keyboard-record.act")
   .start({ ignoreInjected: true });
+
+// Record all keyboard events into a decompressed Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record()
+  .into("/path/to/keyboard-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts), [KeyboardRecorderFileOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-file-options/keyboard-recorder-file-options.type.ts)
 
 #### 3.1.2. Start recording specific keyboard events
 
@@ -284,6 +292,12 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record("a", "b")
   .into("/path/to/keyboard-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [A], [B] keyboard events into a decompressed Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record("a", "b")
+  .into("/path/to/keyboard-record.act", { compress: false })
+  .start();
 ```
 
 You can also **only record key combinations**:
@@ -301,11 +315,19 @@ const keyboardRecorderControl = Actionify.keyboard.track
   .record("lctrl down", "a down")
   .into("/path/to/keyboard-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [Left Control] and [A] combined press events into a decompressed Actionify Track (.act) file.
+const keyboardRecorderControl = Actionify.keyboard.track
+  .record("lctrl down", "a down")
+  .into("/path/to/keyboard-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [KeyboardRecorderOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-options.type.ts), [KeyboardRecorderFileOptions](../src/core/types/event/keyboard/keyboard-recorder/keyboard-recorder-options/keyboard-recorder-file-options/keyboard-recorder-file-options.type.ts)
 
 ### 3.2. Pause a keyboard recorder
 
