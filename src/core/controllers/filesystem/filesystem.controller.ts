@@ -92,6 +92,32 @@ export class FilesystemController {
   }
 
   /**
+   * @description Check if a file is GZIP-compressed.
+   * This only checks the magic bytes in the file header.
+   *
+   * @param filePath Path to the file.
+   * @returns Whether the file is GZIP-compressed.
+   *
+   * ---
+   * @example
+   * const isCompressed = Actionify.filesystem.isCompressed("path/to/file.extension");
+   */
+  public isCompressed(filePath: string): boolean {
+    const fileDescriptor = fs.openSync(filePath, "r");
+    try {
+      const buffer = Buffer.alloc(2);
+      const bytesRead = fs.readSync(fileDescriptor, buffer, 0, 2, 0);
+      return bytesRead === 2
+        && buffer[0] === 0x1f
+        && buffer[1] === 0x8b
+      ;
+    }
+    finally {
+      fs.closeSync(fileDescriptor);
+    }
+  }
+
+  /**
    * @description Read the whole content of a readable file and return it.
    * If the file is too large, use `readStream` instead.
    *
