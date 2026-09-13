@@ -1,3 +1,28 @@
+## [0.19.0](https://github.com/lucyus/actionify/compare/v0.18.2...v0.19.0) (2026-09-13)
+
+### ⚠ BREAKING CHANGES
+
+* **@core:** compress input recorder files by default
+
+### Features
+
+* **@core/controllers:** add GZIP decompression support for input replays ([c295432](https://github.com/lucyus/actionify/commit/c295432d23fcb734632bd9fab64330eb89275459))
+* **@core/controllers:** add GZIP detection to filesystem::isCompressed ([1301e1d](https://github.com/lucyus/actionify/commit/1301e1d013776e9329d467617bf29449c8b3dd6d))
+* **@core/controllers:** add GZIP support to filesystem read/write streams ([acf6b34](https://github.com/lucyus/actionify/commit/acf6b34447233352618e7dd4dd77310fbd918604))
+* **@core:** add GZIP compression support for input recorders ([5b460ad](https://github.com/lucyus/actionify/commit/5b460ad89359c81695d136cef9eb7580b123b2f8))
+* **@core:** compress input recorder files by default ([9aff948](https://github.com/lucyus/actionify/commit/9aff948204a769ad2d6caa858178bff4616d7f2c))
+
+### Documentation
+
+* **@docs/filesystem:** specify compressed file check usage ([19ec39b](https://github.com/lucyus/actionify/commit/19ec39b467718bed2b39a8051e4c0f0271871ef5))
+* **@docs/filesystem:** specify write stream compression usage ([cfbec24](https://github.com/lucyus/actionify/commit/cfbec24f412b7ad395c7a8d9b669fe3eda8a8753))
+* **@docs/input:** specify input record file compression usage ([56fbc92](https://github.com/lucyus/actionify/commit/56fbc92e1f5e0651d1f395e8e16e6a8de4f0fe53))
+* **@docs/keyboard:** specify keyboard record file compression usage ([4fc7e39](https://github.com/lucyus/actionify/commit/4fc7e3989635468b44dc9d341c8057e04700d7aa))
+* **@docs/mouse:** specify mouse record file compression usage ([2274552](https://github.com/lucyus/actionify/commit/22745521a45ac46eef6800f1b9a798b3a786dcfb))
+
+### Code Refactoring
+
+* **@core/controllers:** use Writable streams for recorder scopes ([7a081f1](https://github.com/lucyus/actionify/commit/7a081f1fdbad825bac2e08c3950daa708113efcd))
 ## [0.18.2](https://github.com/lucyus/actionify/compare/v0.18.1...v0.18.2) (2026-07-16)
 
 ### Bug Fixes
