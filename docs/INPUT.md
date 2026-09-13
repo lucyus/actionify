@@ -197,11 +197,19 @@ const inputRecorderControl = Actionify.input.track
   .record()
   .into("/path/to/input-record.act")
   .start({ ignoreInjected: true });
+
+// Record all input events into a decompressed Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record()
+  .into("/path/to/input-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts), [InputRecorderFileOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-file-options/input-recorder-file-options.type.ts)
 
 #### 2.1.2. Start recording specific mouse/keyboard events
 
@@ -220,6 +228,12 @@ const inputRecorderControl = Actionify.input.track
   .record("a", "b", "left", "right")
   .into("/path/to/input-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [A], [B], [Left Mouse Button], [Right Mouse Button] input events into a decompressed Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record("a", "b", "left", "right")
+  .into("/path/to/input-record.act", { compress: false })
+  .start();
 ```
 
 You can also **only record input combinations**:
@@ -237,11 +251,19 @@ const inputRecorderControl = Actionify.input.track
   .record("lctrl down", "left down")
   .into("/path/to/input-record.act")
   .start({ ignoreInjected: true });
+
+// Record all [Left Control] and [Left Mouse Button] combined press events into a decompressed Actionify Track (.act) file.
+const inputRecorderControl = Actionify.input.track
+  .record("lctrl down", "left down")
+  .into("/path/to/input-record.act", { compress: false })
+  .start();
 ```
 
 > 💡 Tip: Set `ignoreInjected` to `true` to prevent simulated inputs from being recorded.
 
-> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts)
+> 📦 Note: Record files are GZIP-compressed by default. Set the `compress` option to `false` to disable compression.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [MouseState](../src/core/types/event/mouse/mouse-state/mouse-state.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [KeyState](../src/core/types/event/keyboard/key-state/key-state.type.ts), [InputRecorderOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-options.type.ts), [InputRecorderFileOptions](../src/core/types/event/input/input-recorder/input-recorder-options/input-recorder-file-options/input-recorder-file-options.type.ts)
 
 ### 2.2. Pause an input recorder
 
