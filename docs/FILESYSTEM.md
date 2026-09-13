@@ -45,6 +45,11 @@ Actionify.filesystem.write("path/to/file.extension", "Hello, world!");
 const writeStream = Actionify.filesystem.writeStream("path/to/file.extension");
 writeStream.write("Hello, world!");
 writeStream.end();
+
+// Asynchronously write to a file and compress it
+const writeStream = Actionify.filesystem.writeStream("path/to/file.extension", { compress: true });
+writeStream.write("Hello, world!");
+writeStream.end();
 ```
 
 > See also: [WriteStream](https://nodejs.org/api/stream.html#writable-streams)
