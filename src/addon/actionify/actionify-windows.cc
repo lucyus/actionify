@@ -486,6 +486,7 @@ std::condition_variable trayIconCondition;
 std::atomic<bool> trayIconRunning(false);
 HWND trayIconWindowHwnd;
 NOTIFYICONDATAW nid = { 0 };
+UINT taskbarCreatedMessage = 0;
 HMENU hMenu;
 std::map<int, std::function<void()>> trayIconMenuItemsCallbacks;
 std::map<int, Napi::ThreadSafeFunction> trayIconMenuItemsJsCallbacks;
@@ -1126,6 +1127,12 @@ Napi::Value UnsuppressInputEventsWrapper(const Napi::CallbackInfo& info) {
 
 // This process' window's tray icon event callback
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  if (taskbarCreatedMessage != 0 && uMsg == taskbarCreatedMessage) {
+    // Explorer restarted (e.g. crashed or killed): its tray was recreated empty, so re-add the icon
+    Shell_NotifyIconW(NIM_ADD, &nid);
+    return 0;
+  }
+
   switch (uMsg) {
     case WM_COMMAND: {
       // Handle menu item clicks
@@ -1186,8 +1193,14 @@ HWND CreateTrayIcon(const std::wstring& name, const std::wstring& iconPath) {
       wc.lpszClassName = L"TrayIconClass";
       RegisterClassW(&wc);
 
+      taskbarCreatedMessage = RegisterWindowMessageW(L"TaskbarCreated");
+
       HWND hwnd = CreateWindowW(L"TrayIconClass", name.c_str(), 0, 0, 0, 0, 0, NULL, NULL, hInstance, NULL);
       trayIconWindowHwnd = hwnd;
+
+      // Allow the "TaskbarCreated" message broadcast through even when this process is elevated
+      // Otherwise Windows will discard it if this process is running as administrator
+      ChangeWindowMessageFilterEx(hwnd, taskbarCreatedMessage, MSGFLT_ALLOW, NULL);
 
       hMenu = CreatePopupMenu();
 
