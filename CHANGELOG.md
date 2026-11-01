@@ -1,3 +1,13 @@
+## [0.19.2](https://github.com/lucyus/actionify/compare/v0.19.1...v0.19.2) (2026-11-01)
+
+### Bug Fixes
+
+* **@addon/windows:** keep keyboard key down/up suppression paired ([a29e5b1](https://github.com/lucyus/actionify/commit/a29e5b17f28f5f7a0e1d8a3c0eaf7a9be4c7afdb))
+* **@addon/windows:** keep mouse button down/up suppression paired ([e763bc1](https://github.com/lucyus/actionify/commit/e763bc1c3bfc4f4bcfcdec80a055432bb442a95e))
+
+### Documentation
+
+* **@docs:** document Linux suppression limitations in keyboard and input docs ([b7c2b6f](https://github.com/lucyus/actionify/commit/b7c2b6ff7e150f5e7d96e3f4b6bf4bebb60f12cf))
 ## [0.19.1](https://github.com/lucyus/actionify/compare/v0.19.0...v0.19.1) (2026-11-01)
 
 ### Bug Fixes
