@@ -400,7 +400,7 @@ inputRecorderControl.stop();
 
 > The Input Replay allows you to flawlessly recreate recorded keyboard and mouse actions. It’s perfect for automating workflows, testing scenarios, or replicating user behavior with ease and accuracy.
 
-### 4.1 Replay recorded inputs
+### 4.1. Replay recorded inputs
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
