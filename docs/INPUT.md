@@ -256,7 +256,7 @@ Actionify.input.events.suppress("a down", "left down");
 
 > 🐧 Linux does not support suppressing individual states. Suppressing one state suppresses all states.
 
-> Note: Even when inputs are suppressed, listeners will continue to trigger normally. To pause or stop an input listener, you can use [input.events.pause()](#212-pause-an-input-listener) or [input.events.stop()](#214-stop-an-input-listener).
+> Note: Even when inputs are suppressed, listeners will continue to trigger normally. To pause or stop an input listener, you can use [input.events.pause()](#212-pause-an-input-listener) or [input.events.off()](#214-stop-an-input-listener).
 
 > ⚠️ Use Suppress Input Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 

@@ -478,7 +478,7 @@ Actionify.mouse.events.suppress("left down", "right down");
 > 🐧 Linux does not support suppressing individual states. Suppressing one state suppresses all states.
 
 
-> Note: Even when mouse inputs are suppressed, listeners will continue to trigger normally. To pause or stop a mouse listener, you can use [mouse.events.pause()](#312-pause-a-mouse-listener) or [mouse.events.stop()](#314-stop-a-mouse-listener).
+> Note: Even when mouse inputs are suppressed, listeners will continue to trigger normally. To pause or stop a mouse listener, you can use [mouse.events.pause()](#312-pause-a-mouse-listener) or [mouse.events.off()](#314-stop-a-mouse-listener).
 
 > ⚠️ Use Suppress Mouse Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.
 
