@@ -213,6 +213,8 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.keyboard.events.suppress("lctrl down", "a down");
 ```
 
+> 🐧 Linux does not support suppressing individual states. Suppressing one state suppresses all states.
+
 > Note: Even when inputs are suppressed, listeners will continue to trigger normally. To pause or stop a keyboard listener, you can use [keyboard.events.pause()](#212-pause-a-keyboard-listener) or [keyboard.events.stop()](#214-stop-a-keyboard-listener).
 
 > ⚠️ Use Suppress Keyboard Events wisely, as improper use could lead to being soft-locked. It's highly recommended to dedicate a specific input event to unsuppress inputs or stop the program as a failsafe.

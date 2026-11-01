@@ -141,6 +141,8 @@ const { Actionify } = require("@lucyus/actionify");
 Actionify.input.events.suppress("a", "left");
 ```
 
+> 🐧 Linux does not support suppressing mouse movement or extra buttons. Attempts to do so are ignored and result in a no-op.
+
 You can also **suppress specific input states**:
 ```js
 const { Actionify } = require("@lucyus/actionify");
@@ -148,6 +150,8 @@ const { Actionify } = require("@lucyus/actionify");
 // Block all [A] and [Left Mouse Button] press events only
 Actionify.input.events.suppress("a down", "left down");
 ```
+
+> 🐧 Linux does not support suppressing individual states. Suppressing one state suppresses all states.
 
 > Note: Even when inputs are suppressed, listeners will continue to trigger normally. To pause or stop an input listener, you can use [input.events.pause()](#112-pause-an-input-listener) or [input.events.stop()](#114-stop-an-input-listener).
 
