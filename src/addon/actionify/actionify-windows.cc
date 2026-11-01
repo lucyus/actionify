@@ -470,6 +470,7 @@ std::map<int, std::set<int>> suppressedMouseKeys;
 std::map<int, std::set<int>> suppressedKeyboardKeys;
 std::mutex suppressedKeysMutex;
 std::map<int, bool> lastMouseButtonDownSuppressed;
+std::map<int, bool> lastKeyboardKeyDownSuppressed;
 
 // Window events variables
 std::vector<HWINEVENTHOOK> windowEventHooks;
@@ -838,9 +839,45 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         bool isInputInjected = (kbStruct->flags & LLKHF_INJECTED) != 0;
         int vkCode = static_cast<int>(kbStruct->vkCode);
         bool isInputSuppressed = false;
+        bool isDownStateSuppressed = false;
         {
           std::lock_guard<std::mutex> lock(suppressedKeysMutex);
           isInputSuppressed = suppressedKeyboardKeys.find(vkCode) != suppressedKeyboardKeys.end() && suppressedKeyboardKeys[vkCode].find(mappedState) != suppressedKeyboardKeys[vkCode].end();
+          isDownStateSuppressed = suppressedKeyboardKeys.find(vkCode) != suppressedKeyboardKeys.end() && suppressedKeyboardKeys[vkCode].find(0) != suppressedKeyboardKeys[vkCode].end();
+        }
+        // Keep key down/up pairs consistent when suppression changes between them.
+        // An unpaired down or up leaves the key logically stuck down for the system and the focused application.
+        if (mappedState == 0) {
+          // Key pressed (or auto-repeated): remember whether ALL the downs of this press were swallowed so far.
+          // While a key is held, Windows keeps sending downs (auto-repeat), and suppression may change in the meantime,
+          // so repeats of the same press can get different decisions. For example:
+          //   - 1st down delivered, then the key gets suppressed: the repeats are swallowed, but the system already saw the key go down
+          //   - 1st down swallowed, then the key gets unsuppressed: the repeats are delivered, the system sees the key go down late
+          // Once a down is delivered, the record must stay "not all swallowed", so a later swallowed repeat cannot overwrite it.
+          // That way, the matching up is still delivered on release instead of leaving the key stuck down.
+          auto previousKeyboardKeyDown = lastKeyboardKeyDownSuppressed.find(vkCode);
+          bool wereAllPreviousDownsSuppressed = previousKeyboardKeyDown == lastKeyboardKeyDownSuppressed.end() || previousKeyboardKeyDown->second;
+          lastKeyboardKeyDownSuppressed[vkCode] = wereAllPreviousDownsSuppressed && isInputSuppressed;
+        }
+        else if (mappedState == 1) {
+          // Key released: look up the decision taken for the matching down
+          auto pendingKeyboardKeyDown = lastKeyboardKeyDownSuppressed.find(vkCode);
+          if (pendingKeyboardKeyDown != lastKeyboardKeyDownSuppressed.end()) {
+            // A down was recorded for this key (it may be missing if it was pressed before the hook started)
+            if (pendingKeyboardKeyDown->second) {
+              // All the downs were suppressed, the system never saw the key go down.
+              // We still let the up pass through (unless it is suppressed itself).
+              // To always pair the up with its suppressed downs, uncomment the line below.
+              // isInputSuppressed = true;
+            }
+            else if (isDownStateSuppressed) {
+              // At least one down was delivered, so the system saw the key go down.
+              // Even though the key is now suppressed (e.g. suppressed while held), it must see the up
+              isInputSuppressed = false;
+            }
+            // The pair is complete, forget it
+            lastKeyboardKeyDownSuppressed.erase(pendingKeyboardKeyDown);
+          }
         }
         {
           RawInputEvent event = { "keyboard", "", state, 0, 0, vkCode, Now(), isInputSuppressed, isInputInjected };
