@@ -1,3 +1,20 @@
+## [0.20.0](https://github.com/lucyus/actionify/compare/v0.19.2...v0.20.0) (2026-11-01)
+
+### Features
+
+* **@core/controllers:** add 'Actionify.input.down()' for keys and mouse buttons ([7d9acef](https://github.com/lucyus/actionify/commit/7d9acef727fd43e345ba6523bd5040aa344ddb4b))
+* **@core/controllers:** add 'Actionify.input.tap()' for keys and mouse buttons ([acd698c](https://github.com/lucyus/actionify/commit/acd698c0b7c6315e2018341ce5486d15ef9feae5))
+* **@core/controllers:** add 'Actionify.input.up()' for keys and mouse buttons ([a86ae5e](https://github.com/lucyus/actionify/commit/a86ae5e6b3f5bd19e861a01c613df7044c9582f3))
+
+### Documentation
+
+* **@docs/input:** specify 'Actionify.input.down()' usage ([6f9db6f](https://github.com/lucyus/actionify/commit/6f9db6fc66d54aa27d07e286658b6b6e6ed0a062))
+* **@docs/input:** specify 'Actionify.input.tap()' usage ([cfcb015](https://github.com/lucyus/actionify/commit/cfcb015bace01874b0506cc85d84eb774de68abb))
+* **@docs/input:** specify 'Actionify.input.up()' usage ([43655d9](https://github.com/lucyus/actionify/commit/43655d9ed54ea0fa90c49bb834c9096063526688))
+* **@docs:** add input event simulation to features table of contents ([c519bc5](https://github.com/lucyus/actionify/commit/c519bc5c550af3910f94c9e6848807ae8f8f5716))
+* **@docs:** align heading numbering with README table of contents ([717b1ff](https://github.com/lucyus/actionify/commit/717b1ffb4e3d43b7947349a07f89196fbcf14a71))
+* **@docs:** fix events listener 'stop()' link text to 'off()' ([b805783](https://github.com/lucyus/actionify/commit/b805783809c0be928d84e60839dbaf7cec810341))
+* **@docs:** move input event simulation to section 1 ([423bc21](https://github.com/lucyus/actionify/commit/423bc2106593dcf8702ecbe4ff4df85ad114077f))
 ## [0.19.2](https://github.com/lucyus/actionify/compare/v0.19.1...v0.19.2) (2026-11-01)
 
 ### Bug Fixes
