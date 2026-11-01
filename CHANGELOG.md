@@ -1,3 +1,8 @@
+## [0.19.1](https://github.com/lucyus/actionify/compare/v0.19.0...v0.19.1) (2026-11-01)
+
+### Bug Fixes
+
+* **@addon/windows:** re-add tray icon when explorer.exe restarts ([fd8709d](https://github.com/lucyus/actionify/commit/fd8709d69e84384809d88e4a072ff63189f4d669))
 ## [0.19.0](https://github.com/lucyus/actionify/compare/v0.18.2...v0.19.0) (2026-09-13)
 
 ### ⚠ BREAKING CHANGES
