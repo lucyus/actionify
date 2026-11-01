@@ -82,6 +82,54 @@ export class InputController {
   }
 
   /**
+   * @description Release a single keyboard key or mouse button.
+   *
+   * @param keyOrMouseInput The keyboard key or the mouse button to release.
+   * `wheel` scrolls the mouse wheel up by one scroll.
+   * @param options.delay Delay in milliseconds before the input is released.
+   * @returns A promise which resolves after the input is released.
+   * @throws Will throw an error if the mouse input cannot be released (mouse `move`).
+   *
+   * ---
+   * @example
+   * // Release the "A" key immediately
+   * Actionify.input.up("a");
+   *
+   * // Release the "A" key immediately using its Windows virtual key code
+   * Actionify.input.up(0x41);
+   *
+   * // Release the "A" key immediately using its Linux key symbol
+   * Actionify.input.up(0x61);
+   *
+   * // Release the mouse left button in 1 second
+   * await Actionify.input.up("left", { delay: 1000 });
+   */
+  public async up<T extends string>(
+    keyOrMouseInput: Exclude<MouseInput, "move"> | CaseInsensitiveKey<T> | number,
+    options?: { delay?: number }
+  ): Promise<void> {
+    switch (keyOrMouseInput) {
+      case "left":
+        return Actionify.mouse.left.up(options);
+      case "middle":
+        return Actionify.mouse.middle.up(options);
+      case "right":
+        return Actionify.mouse.right.up(options);
+      case "extraButton1":
+        return Actionify.mouse.extraButton(1).up(options);
+      case "extraButton2":
+        return Actionify.mouse.extraButton(2).up(options);
+      case "wheel":
+        await Actionify.mouse.scroll.up(undefined, options);
+        return;
+      case "move":
+        throw new Error(`Cannot release mouse input: "${keyOrMouseInput}".`);
+      default:
+        return Actionify.keyboard.up(keyOrMouseInput, options);
+    }
+  }
+
+  /**
    * @description Customize the default inspect output (with `console.log`) of a
    * class instance.
    */
