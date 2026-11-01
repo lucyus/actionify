@@ -130,6 +130,38 @@ export class InputController {
   }
 
   /**
+   * @description Tap (press then release) a single keyboard key or mouse button.
+   *
+   * @param keyOrMouseInput The keyboard key or the mouse button to tap.
+   * `wheel` scrolls the mouse wheel down by one scroll then up by one scroll.
+   * @param options.delay Delay in milliseconds before the input is tapped.
+   * @returns A promise which resolves after the input is tapped.
+   * @throws Will throw an error if the mouse input cannot be tapped (mouse `move`).
+   *
+   * ---
+   * @example
+   * // Tap the "A" key immediately
+   * Actionify.input.tap("a");
+   *
+   * // Tap the "A" key immediately using its Windows virtual key code
+   * Actionify.input.tap(0x41);
+   *
+   * // Tap the "A" key immediately using its Linux key symbol
+   * Actionify.input.tap(0x61);
+   *
+   * // Tap the mouse left button in 1 second
+   * await Actionify.input.tap("left", { delay: 1000 });
+   */
+  public async tap<T extends string>(
+    keyOrMouseInput: Exclude<MouseInput, "move"> | CaseInsensitiveKey<T> | number,
+    options?: { delay?: number }
+  ): Promise<void> {
+    const delay = Math.max(0, Math.floor(options?.delay ?? 0)) / 2;
+    await this.down(keyOrMouseInput, { delay });
+    await this.up(keyOrMouseInput, { delay });
+  }
+
+  /**
    * @description Customize the default inspect output (with `console.log`) of a
    * class instance.
    */
