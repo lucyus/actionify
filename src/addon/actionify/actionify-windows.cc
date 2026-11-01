@@ -469,6 +469,7 @@ std::condition_variable inputEventQueueCondition;
 std::map<int, std::set<int>> suppressedMouseKeys;
 std::map<int, std::set<int>> suppressedKeyboardKeys;
 std::mutex suppressedKeysMutex;
+std::map<int, bool> lastMouseButtonDownSuppressed;
 
 // Window events variables
 std::vector<HWINEVENTHOOK> windowEventHooks;
@@ -764,9 +765,39 @@ LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
       if (!input.empty()) {
         bool isInputInjected = (mouseStruct->flags & LLMHF_INJECTED) != 0;
         bool isInputSuppressed = false;
+        bool isDownStateSuppressed = false;
         {
           std::lock_guard<std::mutex> lock(suppressedKeysMutex);
           isInputSuppressed = suppressedMouseKeys.find(mappedInput) != suppressedMouseKeys.end() && suppressedMouseKeys[mappedInput].find(mappedState) != suppressedMouseKeys[mappedInput].end();
+          isDownStateSuppressed = suppressedMouseKeys.find(mappedInput) != suppressedMouseKeys.end() && suppressedMouseKeys[mappedInput].find(0) != suppressedMouseKeys[mappedInput].end();
+        }
+        // Keep button down/up pairs consistent when suppression changes between them.
+        // An unpaired down or up leaves the button logically stuck down for the system and the focused application.
+        bool isMouseButton = mappedInput != 0 && mappedInput != 4; // not move nor wheel
+        if (isMouseButton && mappedState == 0) {
+          // Button pressed: remember whether this down is swallowed, so its matching up can follow the same decision.
+          // Unlike keyboard keys, mouse buttons are not auto-repeated by Windows: there is exactly one down per press,
+          // so overwriting the previous decision is intended (it also recovers from an up that the hook never saw).
+          // If mouse buttons were ever auto-repeated, use the keyboard "all previous downs suppressed" logic instead.
+          lastMouseButtonDownSuppressed[mappedInput] = isInputSuppressed;
+        }
+        else if (isMouseButton && mappedState == 1) {
+          // Button released: look up the decision taken for the matching down
+          auto pendingMouseButtonDown = lastMouseButtonDownSuppressed.find(mappedInput);
+          if (pendingMouseButtonDown != lastMouseButtonDownSuppressed.end()) {
+            // A down was recorded for this button (it may be missing if it was pressed before the hook started)
+            if (pendingMouseButtonDown->second) {
+              // The down was suppressed, but we still let the up pass through (unless it is suppressed itself).
+              // To always pair the up with its suppressed down, uncomment the line below.
+              // isInputSuppressed = true;
+            }
+            else if (isDownStateSuppressed) {
+              // The system saw the down and the button is now suppressed: it must see the up
+              isInputSuppressed = false;
+            }
+            // The pair is complete, forget it
+            lastMouseButtonDownSuppressed.erase(pendingMouseButtonDown);
+          }
         }
         {
           RawInputEvent event = { "mouse", input, state, mouseStruct->pt.x, mouseStruct->pt.y, 0, Now(), isInputSuppressed, isInputInjected };
