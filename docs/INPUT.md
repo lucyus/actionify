@@ -316,40 +316,76 @@ await Actionify.input.track.replay("/path/to/input-record.act", { speed: 0.5 });
 
 > The Input Event Simulation lets you trigger keyboard and mouse inputs through a single, unified entry point, without having to pick the right manager yourself.
 
-### 4.1. Press an input
+### 4.1. Simulate input events
 
 ```js
 const { Actionify } = require("@lucyus/actionify");
 
-// Press [A] immediately
+// Press [A] key immediately
 Actionify.input.down("a");
+// Press [A] key in 1 second
+await Actionify.input.down("a", { delay: 1000 });
 
-// Press [A] immediately using its Windows virtual key code
+// Press [A] key immediately using its Windows virtual key code
 Actionify.input.down(0x41);
+// Press [A] key in 1 second using its Windows virtual key code
+await Actionify.input.down(0x41, { delay: 1000 });
 
-// Press [A] immediately using its Linux key symbol
+// Press [A] key immediately using its Linux key symbol
 Actionify.input.down(0x61);
+// Press [A] key in 1 second using its Linux key symbol
+await Actionify.input.down(0x61, { delay: 1000 });
 
+// Press [Left Mouse Button] immediately
+Actionify.input.down("left");
 // Press [Left Mouse Button] in 1 second
 await Actionify.input.down("left", { delay: 1000 });
 
-// Scroll the mouse wheel down by one scroll
+// Scroll the mouse wheel down by one scroll immediately
 Actionify.input.down("wheel");
+// Scroll the mouse wheel down by one scroll in 1 second
+await Actionify.input.down("wheel", { delay: 1000 });
+
+
+// Release [A] key immediately
+Actionify.input.up("a");
+// Release [A] key in 1 second
+await Actionify.input.up("a", { delay: 1000 });
+
+// Release [A] key immediately using its Windows virtual key code
+Actionify.input.up(0x41);
+// Release [A] key in 1 second using its Windows virtual key code
+await Actionify.input.up(0x41, { delay: 1000 });
+
+// Release [A] key immediately using its Linux key symbol
+Actionify.input.up(0x61);
+// Release [A] key in 1 second using its Linux key symbol
+await Actionify.input.up(0x61, { delay: 1000 });
+
+// Release [Left Mouse Button] immediately
+Actionify.input.up("left");
+// Release [Left Mouse Button] in 1 second
+await Actionify.input.up("left", { delay: 1000 });
+
+// Scroll the mouse wheel up by one scroll immediately
+Actionify.input.up("wheel");
+// Scroll the mouse wheel up by one scroll in 1 second
+await Actionify.input.up("wheel", { delay: 1000 });
 ```
 
-Mouse inputs are forwarded to their dedicated manager:
+Inputs are forwarded to their dedicated manager:
 
-| Input | Equivalent |
-| --- | --- |
-| `"left"` | [`Actionify.mouse.left.down()`](./MOUSE.md#12-simulate-mouse-left-button-events) |
-| `"middle"` | [`Actionify.mouse.middle.down()`](./MOUSE.md#13-simulate-mouse-middle-button-events) |
-| `"right"` | [`Actionify.mouse.right.down()`](./MOUSE.md#14-simulate-mouse-right-button-events) |
-| `"extraButton1"` | [`Actionify.mouse.extraButton(1).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
-| `"extraButton2"` | [`Actionify.mouse.extraButton(2).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
-| `"wheel"` | [`Actionify.mouse.scroll.down()`](./MOUSE.md#15-simulate-mouse-scroll-events) |
-| any other key name or key code | [`Actionify.keyboard.down()`](./KEYBOARD.md#11-simulate-keyboard-events) |
+| Input | `down()` equivalent | `up()` equivalent |
+| --- | --- | --- |
+| `"left"` | [`Actionify.mouse.left.down()`](./MOUSE.md#12-simulate-mouse-left-button-events) | [`Actionify.mouse.left.up()`](./MOUSE.md#12-simulate-mouse-left-button-events) |
+| `"middle"` | [`Actionify.mouse.middle.down()`](./MOUSE.md#13-simulate-mouse-middle-button-events) | [`Actionify.mouse.middle.up()`](./MOUSE.md#13-simulate-mouse-middle-button-events) |
+| `"right"` | [`Actionify.mouse.right.down()`](./MOUSE.md#14-simulate-mouse-right-button-events) | [`Actionify.mouse.right.up()`](./MOUSE.md#14-simulate-mouse-right-button-events) |
+| `"extraButton1"` | [`Actionify.mouse.extraButton(1).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(1).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"extraButton2"` | [`Actionify.mouse.extraButton(2).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(2).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"wheel"` | [`Actionify.mouse.scroll.down()`](./MOUSE.md#151-simulate-mouse-scroll-down-events) | [`Actionify.mouse.scroll.up()`](./MOUSE.md#152-simulate-mouse-scroll-up-events) |
+| any other key name or key code | [`Actionify.keyboard.down()`](./KEYBOARD.md#11-simulate-keyboard-events) | [`Actionify.keyboard.up()`](./KEYBOARD.md#11-simulate-keyboard-events) |
 
-> Note: `"move"` cannot be pressed and throws an error.
+> Note: `"move"` cannot be pressed or released and throws an error.
 
 > See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🪟 Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [🐧 Linux Key Symbols](https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/include/X11/keysymdef.h)
 
