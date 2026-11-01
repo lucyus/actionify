@@ -48,6 +48,8 @@ You are now ready to use Actionify! 🎉
     * [2.4. Stop an input recorder](./docs/INPUT.md#24-stop-an-input-recorder)
   * [3. Input Replay](./docs/INPUT.md#3-input-replay)
     * [3.1. Replay recorded inputs](./docs/INPUT.md#31-replay-recorded-inputs)
+  * [4. Input Event Simulation](./docs/INPUT.md#4-input-event-simulation)
+    * [4.1. Simulate input events](./docs/INPUT.md#41-simulate-input-events)
 * [**II. Mouse Manager**](./docs/MOUSE.md)
   * [1. Mouse Event Simulation](./docs/MOUSE.md#1-mouse-event-simulation)
     * [1.1. Simulate mouse movements](./docs/MOUSE.md#11-simulate-mouse-movements)
