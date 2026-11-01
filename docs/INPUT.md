@@ -371,21 +371,47 @@ await Actionify.input.up("left", { delay: 1000 });
 Actionify.input.up("wheel");
 // Scroll the mouse wheel up by one scroll in 1 second
 await Actionify.input.up("wheel", { delay: 1000 });
+
+
+// Tap [A] key immediately
+Actionify.input.tap("a");
+// Tap [A] key over 1 second
+await Actionify.input.tap("a", { delay: 1000 });
+
+// Tap [A] key immediately using its Windows virtual key code
+Actionify.input.tap(0x41);
+// Tap [A] key over 1 second using its Windows virtual key code
+await Actionify.input.tap(0x41, { delay: 1000 });
+
+// Tap [A] key immediately using its Linux key symbol
+Actionify.input.tap(0x61);
+// Tap [A] key over 1 second using its Linux key symbol
+await Actionify.input.tap(0x61, { delay: 1000 });
+
+// Tap [Left Mouse Button] immediately
+Actionify.input.tap("left");
+// Tap [Left Mouse Button] over 1 second
+await Actionify.input.tap("left", { delay: 1000 });
+
+// Scroll the mouse wheel down then up by one scroll immediately
+Actionify.input.tap("wheel");
+// Scroll the mouse wheel down then up by one scroll over 1 second
+await Actionify.input.tap("wheel", { delay: 1000 });
 ```
 
 Inputs are forwarded to their dedicated manager:
 
-| Input | `down()` equivalent | `up()` equivalent |
-| --- | --- | --- |
-| `"left"` | [`Actionify.mouse.left.down()`](./MOUSE.md#12-simulate-mouse-left-button-events) | [`Actionify.mouse.left.up()`](./MOUSE.md#12-simulate-mouse-left-button-events) |
-| `"middle"` | [`Actionify.mouse.middle.down()`](./MOUSE.md#13-simulate-mouse-middle-button-events) | [`Actionify.mouse.middle.up()`](./MOUSE.md#13-simulate-mouse-middle-button-events) |
-| `"right"` | [`Actionify.mouse.right.down()`](./MOUSE.md#14-simulate-mouse-right-button-events) | [`Actionify.mouse.right.up()`](./MOUSE.md#14-simulate-mouse-right-button-events) |
-| `"extraButton1"` | [`Actionify.mouse.extraButton(1).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(1).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
-| `"extraButton2"` | [`Actionify.mouse.extraButton(2).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(2).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
-| `"wheel"` | [`Actionify.mouse.scroll.down()`](./MOUSE.md#151-simulate-mouse-scroll-down-events) | [`Actionify.mouse.scroll.up()`](./MOUSE.md#152-simulate-mouse-scroll-up-events) |
-| any other key name or key code | [`Actionify.keyboard.down()`](./KEYBOARD.md#11-simulate-keyboard-events) | [`Actionify.keyboard.up()`](./KEYBOARD.md#11-simulate-keyboard-events) |
+| Input | `down()` equivalent | `up()` equivalent | `tap()` equivalent |
+| --- | --- | --- | --- |
+| `"left"` | [`Actionify.mouse.left.down()`](./MOUSE.md#12-simulate-mouse-left-button-events) | [`Actionify.mouse.left.up()`](./MOUSE.md#12-simulate-mouse-left-button-events) | [`Actionify.mouse.left.click()`](./MOUSE.md#12-simulate-mouse-left-button-events) |
+| `"middle"` | [`Actionify.mouse.middle.down()`](./MOUSE.md#13-simulate-mouse-middle-button-events) | [`Actionify.mouse.middle.up()`](./MOUSE.md#13-simulate-mouse-middle-button-events) | [`Actionify.mouse.middle.click()`](./MOUSE.md#13-simulate-mouse-middle-button-events) |
+| `"right"` | [`Actionify.mouse.right.down()`](./MOUSE.md#14-simulate-mouse-right-button-events) | [`Actionify.mouse.right.up()`](./MOUSE.md#14-simulate-mouse-right-button-events) | [`Actionify.mouse.right.click()`](./MOUSE.md#14-simulate-mouse-right-button-events) |
+| `"extraButton1"` | [`Actionify.mouse.extraButton(1).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(1).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(1).click()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"extraButton2"` | [`Actionify.mouse.extraButton(2).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(2).up()`](./MOUSE.md#16-simulate-mouse-extra-button-events) | [`Actionify.mouse.extraButton(2).click()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"wheel"` | [`Actionify.mouse.scroll.down()`](./MOUSE.md#151-simulate-mouse-scroll-down-events) | [`Actionify.mouse.scroll.up()`](./MOUSE.md#152-simulate-mouse-scroll-up-events) | [`Actionify.mouse.scroll.down()`](./MOUSE.md#151-simulate-mouse-scroll-down-events) then [`Actionify.mouse.scroll.up()`](./MOUSE.md#152-simulate-mouse-scroll-up-events) |
+| any other key name or key code | [`Actionify.keyboard.down()`](./KEYBOARD.md#11-simulate-keyboard-events) | [`Actionify.keyboard.up()`](./KEYBOARD.md#11-simulate-keyboard-events) | [`Actionify.keyboard.tap()`](./KEYBOARD.md#11-simulate-keyboard-events) |
 
-> Note: `"move"` cannot be pressed or released and throws an error.
+> Note: `"move"` cannot be pressed, released or tapped and throws an error.
 
 > See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🪟 Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [🐧 Linux Key Symbols](https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/include/X11/keysymdef.h)
 
