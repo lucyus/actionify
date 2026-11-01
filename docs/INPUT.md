@@ -312,6 +312,47 @@ await Actionify.input.track.replay("/path/to/input-record.act", { speed: 2 });
 await Actionify.input.track.replay("/path/to/input-record.act", { speed: 0.5 });
 ```
 
+## 4. Input Event Simulation
+
+> The Input Event Simulation lets you trigger keyboard and mouse inputs through a single, unified entry point, without having to pick the right manager yourself.
+
+### 4.1. Press an input
+
+```js
+const { Actionify } = require("@lucyus/actionify");
+
+// Press [A] immediately
+Actionify.input.down("a");
+
+// Press [A] immediately using its Windows virtual key code
+Actionify.input.down(0x41);
+
+// Press [A] immediately using its Linux key symbol
+Actionify.input.down(0x61);
+
+// Press [Left Mouse Button] in 1 second
+await Actionify.input.down("left", { delay: 1000 });
+
+// Scroll the mouse wheel down by one scroll
+Actionify.input.down("wheel");
+```
+
+Mouse inputs are forwarded to their dedicated manager:
+
+| Input | Equivalent |
+| --- | --- |
+| `"left"` | [`Actionify.mouse.left.down()`](./MOUSE.md#12-simulate-mouse-left-button-events) |
+| `"middle"` | [`Actionify.mouse.middle.down()`](./MOUSE.md#13-simulate-mouse-middle-button-events) |
+| `"right"` | [`Actionify.mouse.right.down()`](./MOUSE.md#14-simulate-mouse-right-button-events) |
+| `"extraButton1"` | [`Actionify.mouse.extraButton(1).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"extraButton2"` | [`Actionify.mouse.extraButton(2).down()`](./MOUSE.md#16-simulate-mouse-extra-button-events) |
+| `"wheel"` | [`Actionify.mouse.scroll.down()`](./MOUSE.md#15-simulate-mouse-scroll-events) |
+| any other key name or key code | [`Actionify.keyboard.down()`](./KEYBOARD.md#11-simulate-keyboard-events) |
+
+> Note: `"move"` cannot be pressed and throws an error.
+
+> See also: [MouseInput](../src/core/types/event/mouse/mouse-input/mouse-input.type.ts), [🪟 Windows Keys](../src/core/data/key-to-virtual-key-code/key-to-virtual-key-code.map.ts), [🪟 Windows Virtual-Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes), [🐧 Linux Keys](../src/core/data/key-to-key-sym-code/key-to-key-sym-code.map.ts), [🐧 Linux Key Symbols](https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/include/X11/keysymdef.h)
+
 ---
 
 [← Home](../README.md#features)
