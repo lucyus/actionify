@@ -3,6 +3,7 @@ export * from './event';
 export * from './ignore-whitespace';
 export * from './key';
 export * from './key-code';
+export * from './lifecycle';
 export * from './match-region';
 export * from './optional';
 export * from './position';
