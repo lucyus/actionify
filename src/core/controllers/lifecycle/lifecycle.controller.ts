@@ -56,7 +56,7 @@ export class LifecycleController {
    * Actionify.restart();
    */
   public restart() {
-    const child = spawn(process.argv[0], process.argv.slice(1), { stdio: "inherit", detached: true });
+    const child = spawn(process.argv[0], process.argv.slice(1), { stdio: "ignore", detached: true });
     child.unref();
     process.exit(0);
   }
