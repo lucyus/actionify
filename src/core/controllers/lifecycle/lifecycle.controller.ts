@@ -1,7 +1,10 @@
 import { spawn } from "child_process";
+import fs from "fs";
+import path from "path";
 import {
   cleanResources,
 } from "../../../addon";
+import type { RestartOptions } from "../../../core/types";
 import { Inspectable } from "../../../core/utilities";
 
 export class LifecycleController {
@@ -49,15 +52,36 @@ export class LifecycleController {
 
   /**
    * @description Restart the process in a new detached process.
+   * Standard streams are ignored unless redirected to files with `options.stdio`.
+   *
+   * @param options Restart options (see {@link RestartOptions}).
    *
    * ---
    * @example
    * // Restart the process
    * Actionify.restart();
+   *
+   * // Restart the process and keep its logs in files
+   * Actionify.restart({ stdio: { out: "out.log", err: "err.log" } });
    */
-  public restart() {
-    const child = spawn(process.argv[0], process.argv.slice(1), { stdio: "ignore", detached: true });
-    child.unref();
+  public restart(options?: RestartOptions) {
+    const openedDescriptors: number[] = [];
+    try {
+      const stdio = (["in", "out", "err"] as const).map((inOrOutOrErr) => {
+        const filePath = options?.stdio?.[inOrOutOrErr];
+        if (filePath === undefined) return "ignore";
+        const absoluteFilePath = path.resolve(filePath);
+        if (inOrOutOrErr !== "in") fs.mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
+        const descriptor = fs.openSync(absoluteFilePath, inOrOutOrErr === "in" ? "r" : "a");
+        openedDescriptors.push(descriptor);
+        return descriptor;
+      });
+      const child = spawn(process.argv[0], process.argv.slice(1), { stdio, detached: true });
+      child.unref();
+    }
+    finally {
+      openedDescriptors.forEach((descriptor) => fs.closeSync(descriptor));
+    }
     process.exit(0);
   }
 

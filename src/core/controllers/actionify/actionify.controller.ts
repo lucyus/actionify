@@ -12,6 +12,7 @@ import {
   TimeController,
   WindowController
 } from "../../../core/controllers";
+import type { RestartOptions } from "../../../core/types";
 import { Inspectable } from "../../../core/utilities";
 
 /**
@@ -198,14 +199,20 @@ export class ActionifyController {
 
   /**
    * @description Restart the process in a new detached process.
+   * Standard streams are ignored unless redirected to files with `options.stdio`.
+   *
+   * @param options Restart options (see {@link RestartOptions}).
    *
    * ---
    * @example
    * // Restart the process
    * this.restart();
+   *
+   * // Restart the process and keep its logs in files
+   * this.restart({ stdio: { out: "logs/out.log", err: "logs/err.log" } });
    */
-  public restart(): void {
-    return this.#lifecycleController.restart();
+  public restart(options?: RestartOptions): void {
+    return this.#lifecycleController.restart(options);
   }
 
   /**
