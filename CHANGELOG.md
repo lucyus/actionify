@@ -1,3 +1,22 @@
+## [0.21.0](https://github.com/lucyus/actionify/compare/v0.20.0...v0.21.0) (2026-11-05)
+
+### ⚠ BREAKING CHANGES
+
+* **@core/controllers:** the restarted process no longer shares the parent's
+stdio, so its console output is discarded.
+
+### Features
+
+* **@core/controllers:** add 'stdio' option to 'Actionify.restart()' ([a4e43f8](https://github.com/lucyus/actionify/commit/a4e43f81e4b31e4fbcd8831a45556f3daafd6180))
+* **@core/types:** add 'RestartOptions' type ([e590d32](https://github.com/lucyus/actionify/commit/e590d32c1c69f0071f0b962d4e32401cbca7afd8))
+
+### Bug Fixes
+
+* **@core/controllers:** ignore stdio when restarting the process with 'Actionify.restart()' ([881e1e1](https://github.com/lucyus/actionify/commit/881e1e116aeeeb8400b9e9c86aa1f21802bfb9b2))
+
+### Documentation
+
+* **@docs/lifecycle:** specify 'stdio' option usage of 'Actionify.restart()' ([65f474d](https://github.com/lucyus/actionify/commit/65f474d26420160f96ff37833409e19bf8402dcd))
 ## [0.20.0](https://github.com/lucyus/actionify/compare/v0.19.2...v0.20.0) (2026-11-01)
 
 ### Features
