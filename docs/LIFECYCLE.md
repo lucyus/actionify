@@ -50,7 +50,20 @@ const { Actionify } = require("@lucyus/actionify");
 
 // Synchronously stops and restarts the program in detached mode
 Actionify.restart();
+
+// Synchronously stops and restarts the program in
+// detached mode and redirect the restarted program's
+// standard streams to files (any stream left
+// unspecified is ignored)
+Actionify.restart({
+  stdio: {
+    out: "/path/to/output.log",
+    err: "/path/to/error.log",
+  },
+});
 ```
+
+> Note: By default, the restarted program's standard streams are ignored, so its `console.log` output is discarded. Use `stdio` to keep it.
 
 > Hint: `Actionify.restart()` can be used as a hot reloader when combined with [Input Listeners](./INPUT.md#211-start-an-input-listener), [File Watchers](./FILESYSTEM.md#16-watch-a-file-or-directory) or [System Tray Icons](./SYSTEM_TRAY.md#11-create-a-tray-icon).
 
